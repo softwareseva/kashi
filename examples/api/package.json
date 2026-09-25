@@ -8,19 +8,23 @@
     "build": "wrangler deploy --dry-run --outdir dist",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:migrate:local": "wrangler d1 migrations apply kashi-example --local"
+    "db:migrate:local": "wrangler d1 migrations apply kashi-example --local",
+    "kashi": "kashi"
   },
   "dependencies": {
     "@kashi/core": "workspace:*",
     "@kashi/list": "workspace:*",
     "hono": "^4.13.9",
-    "zod": "^4.6.0"
+    "zod": "^4.6.0",
+    "@kashi/auth": "workspace:*",
+    "@simplewebauthn/server": "^14.0.2"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.2.7",
     "@cloudflare/workers-types": "^5.0.0",
     "typescript": "^5.9.0",
     "vitest": "^4.1.0",
-    "wrangler": "^4.140.0"
+    "wrangler": "^4.140.0",
+    "@kashi/cli": "workspace:*"
   }
 }

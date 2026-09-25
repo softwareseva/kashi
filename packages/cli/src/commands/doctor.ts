@@ -12,10 +12,17 @@ export function doctor(cwd: string): number {
   let problems = 0;
   const fail = (msg: string) => { log.warn(msg); problems += 1; };
 
-  // 1. gitignore
-  const gitignore = existsSync(join(cwd, ".gitignore")) ? readFileSync(join(cwd, ".gitignore"), "utf8").split(/\r?\n/).map((l) => l.trim()) : [];
-  const uncovered = SECRET_GLOBS.filter((g) => !gitignore.includes(g) && !gitignore.includes(`/${g}`) && !(g.startsWith(".env") && gitignore.includes(".env.*") && g !== ".env"));
-  uncovered.length ? fail(`.gitignore is missing: ${uncovered.join(", ")} (run: kashi secrets)`) : log.ok(".gitignore covers secret files");
+  // 1. gitignore (ask git so parent and global ignore files count; fall back to reading .gitignore)
+  const sample = (g: string) => (g.startsWith("*") ? `kashi-doctor-sample${g.slice(1)}` : g);
+  let uncovered: string[];
+  try {
+    execSync("git rev-parse --is-inside-work-tree", { cwd, stdio: "ignore" });
+    uncovered = SECRET_GLOBS.filter((g) => { try { execSync(`git check-ignore -q "${sample(g)}"`, { cwd, stdio: "ignore" }); return false; } catch { return true; } });
+  } catch {
+    const lines = existsSync(join(cwd, ".gitignore")) ? readFileSync(join(cwd, ".gitignore"), "utf8").split(/\r?\n/).map((l) => l.trim()) : [];
+    uncovered = SECRET_GLOBS.filter((g) => !lines.includes(g) && !lines.includes(`/${g}`) && !(g.startsWith(".env.") && lines.includes(".env.*")));
+  }
+  uncovered.length ? fail(`.gitignore does not cover: ${uncovered.join(", ")} (run: kashi secrets)`) : log.ok(".gitignore covers secret files");
 
   // 2. tracked secret files
   try {
@@ -25,7 +32,10 @@ export function doctor(cwd: string): number {
   } catch { log.info("not a git repository; skipped tracked-file check"); }
 
   // 3. required secrets present locally
-  const required = collectSecrets(cwd).filter(({ entry }) => !entry.optional);
+  const declared = collectSecrets(cwd);
+  const required = declared.filter(({ entry }) => !entry.optional && !entry.when);
+  const conditional = declared.filter(({ entry }) => !entry.optional && entry.when);
+  if (conditional.length) log.info(`conditional secrets (needed only when the feature is on): ${conditional.map((s) => `${s.entry.name} [${s.entry.when}]`).join(", ")}`);
   if (required.length) {
     const devVars = existsSync(join(cwd, ".dev.vars")) ? readFileSync(join(cwd, ".dev.vars"), "utf8") : "";
     const missing = required.filter(({ entry }) => entry.store.includes("dev-vars") && !new RegExp(`^${entry.name}=.+`, "m").test(devVars));

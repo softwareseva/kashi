@@ -13,7 +13,7 @@ Each feature ships as a package that bundles every layer, so one version bump up
 | Design system: tokens, primitives (light + dark) | `@kashi/ui` | `kashi_ui` | `kashi-ui-web`, `kashi-ui-flutter` |
 | Deploy: fastlane (iOS/Android), Cloudflare | `@kashi/cli` templates | | `deploy-flutter-fastlane`, `deploy-cloudflare` |
 
-Status: **Phase 1** done (design system, core, list server helpers, CLI, and their skills). Roadmap in `skills/kashi/references/roadmap.md`.
+Status: **Phase 2** done (design system, core, list server helpers, auth for server and React, CLI, and their skills). Roadmap in `skills/kashi/references/roadmap.md`.
 
 ## Use the skills
 

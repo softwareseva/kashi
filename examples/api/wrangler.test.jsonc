@@ -4,6 +4,6 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
-  "vars": { "ENVIRONMENT": "test", "WEB_ORIGIN": "http://localhost:5173" },
+  "vars": { "ENVIRONMENT": "test", "WEB_ORIGIN": "http://localhost:5173", "JWT_SECRET": "test-jwt-secret-that-is-long-enough", "OTP_PEPPER": "test-pepper", "RP_ID": "localhost", "RP_NAME": "kashi test" },
   "d1_databases": [{ "binding": "DB", "database_name": "kashi-example-test", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }]
 }

@@ -1,4 +1,4 @@
-/** Worker bindings and per-request variables. Every route, service and repository imports AppEnv from here. */
+/** Bindings and variables: add AuthVariables so c.get("user") is typed on guarded routes. */
 import type { AuthVariables } from "@kashi/auth/server";
 import type { CoreVariables } from "@kashi/core/server";
 
@@ -7,8 +7,7 @@ export interface Bindings {
   ENVIRONMENT: string;
   WEB_ORIGIN: string;
   JWT_SECRET: string;
-  OTP_PEPPER: string;
-  RP_ID?: string;
+  OTP_PEPPER?: string;
 }
 
 export type AppEnv = { Bindings: Bindings; Variables: CoreVariables & Partial<AuthVariables> };

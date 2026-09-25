@@ -4,7 +4,7 @@ description: Index and conventions for the kashi toolkit (Cloudflare Workers + D
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/core@0.1 @kashi/list@0.1 @kashi/cli@0.1 @kashi/ui@0.1 kashi_ui@0.1"
+  packages: "@kashi/core@0.1 @kashi/list@0.1 @kashi/auth@0.1 @kashi/cli@0.1 @kashi/ui@0.1 kashi_ui@0.1"
 ---
 
 # kashi

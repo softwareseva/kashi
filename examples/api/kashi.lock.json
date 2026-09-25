@@ -1,5 +1,7 @@
 {
   "migrations": {
-    "@kashi/core/core_0001_rate_limits.sql": "0001_core_0001_rate_limits.sql"
+    "@kashi/core/core_0001_rate_limits.sql": "0001_core_0001_rate_limits.sql",
+    "@kashi/auth/auth_0001_users_sessions.sql": "0003_auth_0001_users_sessions.sql",
+    "@kashi/auth/auth_0002_otp_passkeys.sql": "0004_auth_0002_otp_passkeys.sql"
   }
 }
