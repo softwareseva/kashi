@@ -13,7 +13,7 @@ Each feature ships as a package that bundles every layer, so one version bump up
 | Design system: tokens, primitives (light + dark) | `@kashi/ui` | `kashi_ui` | `kashi-ui-web`, `kashi-ui-flutter` |
 | Deploy: fastlane (iOS/Android), Cloudflare | `@kashi/cli` templates | | `deploy-flutter-fastlane`, `deploy-cloudflare` |
 
-Status: **Phase 5** done: design system, core, lists, auth and offline sync for server, React and Flutter, the CLI, example API, web and Flutter apps, and their skills. Next: deploy modules. Roadmap in `skills/kashi/references/roadmap.md`.
+Status: all six build phases are done (18 skills, 6 npm packages, 5 Flutter packages, example API, web and Flutter apps). Not yet published to npm or pub.dev. Roadmap in `skills/kashi/references/roadmap.md`.
 
 ## Use the skills
 
@@ -29,8 +29,11 @@ This symlinks every skill into `~/.claude/skills`, `~/.agents/skills` (Codex, Ch
 ```bash
 npx kashi init            # AGENTS.md, pointers, .gitignore, renovate
 npx kashi add auth        # installs @kashi/auth, mounts routes, copies migrations, prints the secrets checklist
-npx kashi update          # bumps every @kashi/* and kashi_* package, copies new migrations, reports template drift
-npx kashi doctor          # checks secrets, gitignore, and deployment config
+npx kashi add deploy-cloudflare   # CI deploy of the Worker (and web app) with D1 migrations, staging and production
+npx kashi add deploy-fastlane     # TestFlight / App Store and Google Play lanes plus a release workflow
+npx kashi secrets         # every secret your packages and modules need: how to create it, where to store it
+npx kashi update          # bumps @kashi/* packages, copies new migrations, refreshes module files you have not edited
+npx kashi doctor          # checks gitignore, tracked secret files, local, Worker and GitHub secrets, pending migrations
 ```
 
 ## Repo layout

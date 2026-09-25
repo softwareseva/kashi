@@ -1,15 +1,19 @@
 /** `kashi secrets`: checklist of every secret installed packages need, plus .dev.vars.example and .gitignore upkeep. */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { ensureLines, installedPackages, log, type SecretEntry } from "../util.js";
+import { ensureLines, installedPackages, log, readJson, type SecretEntry } from "../util.js";
+import { moduleSecrets, type Lock } from "../modules.js";
 
 export function collectSecrets(cwd: string): { pkg: string; entry: SecretEntry }[] {
-  return installedPackages(cwd).flatMap((pkg) => (pkg.secrets?.secrets ?? []).map((entry) => ({ pkg: pkg.name, entry })));
+  const fromPackages = installedPackages(cwd).flatMap((pkg) => (pkg.secrets?.secrets ?? []).map((entry) => ({ pkg: pkg.name, entry })));
+  const modules = Object.keys(readJson<Lock>(join(cwd, "kashi.lock.json"))?.modules ?? {});
+  const fromModules = modules.flatMap((m) => (moduleSecrets(m)?.secrets ?? []).map((entry) => ({ pkg: m, entry })));
+  return [...fromPackages, ...fromModules];
 }
 
-export function secrets(cwd: string, options: { write?: boolean }) {
+export function secrets(cwd: string, options: { write?: boolean; only?: string }) {
   log.title("kashi secrets");
-  const all = collectSecrets(cwd);
+  const all = collectSecrets(cwd).filter(({ pkg }) => !options.only || pkg === options.only);
   if (!all.length) { log.info("no installed @kashi package declares secrets"); return; }
   for (const { pkg, entry } of all) {
     console.log(`\n  ${entry.name}${entry.optional ? " (optional)" : ""}  [${pkg}${entry.usedBy ? ` ${entry.usedBy}` : ""}]`);
@@ -20,11 +24,11 @@ export function secrets(cwd: string, options: { write?: boolean }) {
     if (entry.when) console.log(`    when:     ${entry.when}`);
   }
   if (options.write !== false) {
-    const names = [...new Set(all.map(({ entry }) => entry.name))];
+    const names = [...new Set(all.filter(({ entry }) => entry.store.includes("dev-vars")).map(({ entry }) => entry.name))];
     const examplePath = join(cwd, ".dev.vars.example");
     const existing = existsSync(examplePath) ? readFileSync(examplePath, "utf8") : "";
     const missing = names.filter((n) => !new RegExp(`^${n}=`, "m").test(existing));
-    if (missing.length) {
+    if (missing.length && names.length) {
       writeFileSync(examplePath, `${existing.trimEnd()}${existing ? "\n" : ""}${missing.map((n) => `${n}=`).join("\n")}\n`);
       log.ok(`added ${missing.length} placeholder(s) to .dev.vars.example`);
     }

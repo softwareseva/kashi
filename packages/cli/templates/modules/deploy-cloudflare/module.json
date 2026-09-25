@@ -1,0 +1,21 @@
+{
+  "name": "deploy-cloudflare",
+  "description": "GitHub Actions that test, apply D1 migrations and deploy the Worker API (and optionally a static web app) to staging on every push to main and to production on a release.",
+  "vars": {
+    "API_DIR": { "detect": "wranglerDir", "default": ".", "help": "directory with the Worker's wrangler.jsonc, relative to the repo root" },
+    "WEB_DIR": { "default": "", "help": "directory of a Vite web app to deploy with Workers static assets; empty to skip" },
+    "NODE_VERSION": { "default": "22" }
+  },
+  "files": [
+    { "from": "deploy-api.yml", "to": ".github/workflows/deploy-api.yml" },
+    { "from": "deploy-web.yml", "to": ".github/workflows/deploy-web.yml", "when": "WEB_DIR" },
+    { "from": "web-wrangler.jsonc", "to": "{{WEB_DIR}}/wrangler.jsonc", "when": "WEB_DIR", "ifMissing": true }
+  ],
+  "next": [
+    "Add \"env\": { \"staging\": {...}, \"production\": {...} } to {{API_DIR}}/wrangler.jsonc with one D1 database per environment (see the deploy-cloudflare skill).",
+    "Create the databases: wrangler d1 create <name>-staging and wrangler d1 create <name>-production; paste their ids into the env sections.",
+    "Set repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (gh secret set NAME).",
+    "Create GitHub environments 'staging' and 'production'; add required reviewers to production.",
+    "Set each Worker secret per environment: wrangler secret put NAME --env staging (and --env production)."
+  ]
+}

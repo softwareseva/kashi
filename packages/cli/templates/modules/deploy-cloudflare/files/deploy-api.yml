@@ -1,0 +1,45 @@
+name: deploy-api
+
+# Staging on every push to main; production when a GitHub release is published (or run manually).
+on:
+  push:
+    branches: [main]
+    paths: ["{{API_DIR}}/**", ".github/workflows/deploy-api.yml"]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [staging, production]
+        default: staging
+
+concurrency:
+  group: deploy-api-${{ github.event_name == 'release' && 'production' || inputs.environment || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'release' && 'production' || inputs.environment || 'staging' }}
+    env:
+      TARGET: ${{ github.event_name == 'release' && 'production' || inputs.environment || 'staging' }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    defaults:
+      run:
+        working-directory: {{API_DIR}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: {{NODE_VERSION}}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run test
+      # Migrations run before the new code so the code never sees an older schema.
+      - run: pnpm exec wrangler d1 migrations apply DB --remote --env "$TARGET"
+      - run: pnpm exec wrangler deploy --env "$TARGET"

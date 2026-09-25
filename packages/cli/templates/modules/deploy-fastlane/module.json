@@ -1,0 +1,29 @@
+{
+  "name": "deploy-fastlane",
+  "description": "fastlane lanes and a GitHub Actions workflow that build a Flutter app and upload it to TestFlight / the App Store and Google Play, with certificates from fastlane match and an App Store Connect API key.",
+  "vars": {
+    "APP_DIR": { "detect": "flutterDir", "default": ".", "help": "Flutter project directory relative to the repo root" },
+    "BUNDLE_ID": { "detect": "iosBundleId", "default": "com.example.app" },
+    "PACKAGE_NAME": { "detect": "androidPackage", "default": "com.example.app" },
+    "APPLE_TEAM_ID": { "default": "ABCDE12345", "help": "10-character Apple team id" },
+    "FLUTTER_VERSION": { "default": "stable" }
+  },
+  "files": [
+    { "from": "Gemfile", "to": "{{APP_DIR}}/Gemfile" },
+    { "from": "ios/Fastfile", "to": "{{APP_DIR}}/ios/fastlane/Fastfile" },
+    { "from": "ios/Appfile", "to": "{{APP_DIR}}/ios/fastlane/Appfile" },
+    { "from": "ios/Matchfile", "to": "{{APP_DIR}}/ios/fastlane/Matchfile" },
+    { "from": "ios/ExportOptions.plist", "to": "{{APP_DIR}}/ios/ExportOptions.plist" },
+    { "from": "android/Fastfile", "to": "{{APP_DIR}}/android/fastlane/Fastfile" },
+    { "from": "android/Appfile", "to": "{{APP_DIR}}/android/fastlane/Appfile" },
+    { "from": "android/key.properties.example", "to": "{{APP_DIR}}/android/key.properties.example" },
+    { "from": "mobile-release.yml", "to": ".github/workflows/mobile-release.yml" }
+  ],
+  "next": [
+    "Android signing: add the key.properties block from the deploy-flutter-fastlane skill (references/android-signing.md) to {{APP_DIR}}/android/app/build.gradle.kts.",
+    "Create the upload keystore once: keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload (keep it out of git; back it up in a password manager).",
+    "Create a private git repo for match certificates, then from {{APP_DIR}}/ios run: bundle install && bundle exec fastlane certificates",
+    "Upload the first Android build to Google Play by hand (Play Console requires it before the API can upload).",
+    "Set the repository secrets listed by: npx kashi secrets"
+  ]
+}

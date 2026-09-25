@@ -6,5 +6,17 @@
   "compatibility_flags": ["nodejs_compat"],
   "vars": { "ENVIRONMENT": "development", "WEB_ORIGIN": "http://localhost:5173", "RP_ID": "localhost", "RP_NAME": "kashi example" },
   "d1_databases": [{ "binding": "DB", "database_name": "kashi-example", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Deployed environments. Each has its own D1 database; create them with `wrangler d1 create`.
+  // Secrets are per environment: wrangler secret put JWT_SECRET --env staging
+  "env": {
+    "staging": {
+      "vars": { "ENVIRONMENT": "staging", "WEB_ORIGIN": "https://staging.example.com", "RP_ID": "staging.example.com", "RP_NAME": "kashi example" },
+      "d1_databases": [{ "binding": "DB", "database_name": "kashi-example-staging", "database_id": "00000000-0000-0000-0000-00000000000a", "migrations_dir": "migrations" }]
+    },
+    "production": {
+      "vars": { "ENVIRONMENT": "production", "WEB_ORIGIN": "https://app.example.com", "RP_ID": "example.com", "RP_NAME": "kashi example" },
+      "d1_databases": [{ "binding": "DB", "database_name": "kashi-example-production", "database_id": "00000000-0000-0000-0000-00000000000b", "migrations_dir": "migrations" }]
+    }
+  }
 }

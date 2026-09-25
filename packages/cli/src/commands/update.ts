@@ -4,8 +4,9 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { installedPackages, log, packageManager } from "../util.js";
 import { migrate } from "./migrate.js";
+import { updateModules } from "./modules.js";
 
-export function update(cwd: string, options: { install?: boolean }) {
+export function update(cwd: string, options: { install?: boolean }, cliVersion = "0.0.0") {
   log.title("kashi update");
   const pm = packageManager(cwd);
   if (options.install !== false) {
@@ -15,12 +16,14 @@ export function update(cwd: string, options: { install?: boolean }) {
   }
   for (const pkg of installedPackages(cwd)) log.ok(`${pkg.name}@${pkg.version}`);
   migrate(cwd, {});
-  reportDrift(cwd);
+  updateModules(cwd, cliVersion);
+  reportDrift(cwd, cliVersion);
 }
 
 /** Files copied by `kashi add` carry `kashi:<package>@<version>`; flag those behind the installed version. */
-function reportDrift(cwd: string) {
+function reportDrift(cwd: string, cliVersion: string) {
   const versions = new Map(installedPackages(cwd).map((p) => [p.name, p.version]));
+  versions.set("@kashi/cli", cliVersion);
   const stale: string[] = [];
   walk(cwd, (file) => {
     let head = "";

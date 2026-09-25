@@ -47,7 +47,17 @@ export function doctor(cwd: string): number {
     }
   } else log.info("no required secrets declared by installed packages");
 
-  // 4. pending migrations
+  // 4. CI secrets (GitHub) for declared ci-secret entries
+  const ciRequired = collectSecrets(cwd).filter(({ entry }) => entry.store.includes("ci-secret") && !entry.optional && !entry.when);
+  if (ciRequired.length) {
+    const names = ghSecretNames(cwd);
+    if (names) {
+      const missingCi = [...new Set(ciRequired.map((s) => s.entry.name))].filter((n) => !names.has(n));
+      missingCi.length ? fail(`GitHub is missing repository secrets: ${missingCi.join(", ")} (gh secret set NAME)`) : log.ok("GitHub has every required CI secret");
+    }
+  }
+
+  // 5. pending migrations
   const lock = readJson<{ migrations: Record<string, string> }>(join(cwd, "kashi.lock.json")) ?? { migrations: {} };
   const dir = migrationsDir(cwd);
   const present = existsSync(dir) ? readdirSync(dir) : [];
@@ -64,4 +74,11 @@ function wranglerSecretNames(cwd: string): Set<string> | null {
     const out = execSync("wrangler secret list --format json 2>/dev/null", { cwd, encoding: "utf8", timeout: 20_000 });
     return new Set((JSON.parse(out) as { name: string }[]).map((s) => s.name));
   } catch { log.info("could not read deployed secrets (wrangler not logged in?); skipped"); return null; }
+}
+
+function ghSecretNames(cwd: string): Set<string> | null {
+  try {
+    const out = execSync("gh secret list --json name", { cwd, encoding: "utf8", timeout: 20_000, stdio: ["ignore", "pipe", "ignore"] });
+    return new Set((JSON.parse(out) as { name: string }[]).map((s) => s.name));
+  } catch { log.info("could not read GitHub secrets (gh not logged in or no remote); skipped"); return null; }
 }

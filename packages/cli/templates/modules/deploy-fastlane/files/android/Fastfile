@@ -1,0 +1,33 @@
+# Android lanes. Run from android/: bundle exec fastlane <lane>. Needs key.properties (see the skill) and PLAY_SERVICE_ACCOUNT_JSON.
+default_platform(:android)
+
+APP_ROOT = File.expand_path("../..", __dir__)
+AAB = File.join(APP_ROOT, "build/app/outputs/bundle/release/app-release.aab")
+
+platform :android do
+  def play_key
+    ENV.fetch("PLAY_SERVICE_ACCOUNT_JSON")
+  end
+
+  def build_aab(track)
+    build_number = ENV["BUILD_NUMBER"] || begin
+      codes = google_play_track_version_codes(track: track, json_key_data: play_key) rescue [0]
+      (codes.map(&:to_i).max.to_i + 1).to_s
+    end
+    Dir.chdir(APP_ROOT) do
+      sh("flutter", "build", "appbundle", "--release", "--build-number=#{build_number}")
+    end
+    UI.user_error!("No .aab produced at #{AAB}") unless File.exist?(AAB)
+    AAB
+  end
+
+  desc "Build and upload to the internal testing track"
+  lane :beta do
+    upload_to_play_store(track: "internal", aab: build_aab("internal"), json_key_data: play_key, release_status: ENV.fetch("PLAY_RELEASE_STATUS", "completed"), skip_upload_metadata: true, skip_upload_images: true, skip_upload_screenshots: true)
+  end
+
+  desc "Promote the latest internal build to production (staged rollout)"
+  lane :release do
+    upload_to_play_store(track: "internal", track_promote_to: "production", rollout: ENV.fetch("PLAY_ROLLOUT", "0.2"), json_key_data: play_key, skip_upload_changelogs: true, skip_upload_metadata: true, skip_upload_images: true, skip_upload_screenshots: true, skip_upload_aab: true)
+  end
+end

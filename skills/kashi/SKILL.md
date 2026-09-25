@@ -4,7 +4,7 @@ description: Index and conventions for the kashi toolkit (Cloudflare Workers + D
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/core@0.1 @kashi/list@0.1 @kashi/auth@0.1 @kashi/cli@0.1 @kashi/ui@0.1 kashi_ui@0.1 kashi_core@0.1 kashi_auth@0.1 kashi_list@0.1 @kashi/sync@0.1 kashi_sync@0.1"
+  packages: "@kashi/cli@0.1 @kashi/core@0.1 @kashi/list@0.1 @kashi/auth@0.1 @kashi/ui@0.1 kashi_ui@0.1 kashi_core@0.1 kashi_auth@0.1 kashi_list@0.1 @kashi/sync@0.1 kashi_sync@0.1"
 ---
 
 # kashi
@@ -33,7 +33,7 @@ kashi is a set of packages that each bundle a whole feature (API routes, React c
 | Ship a Flutter app to TestFlight / Play | `deploy-flutter-fastlane` | `@kashi/cli` templates |
 | Deploy a Worker with D1 migrations in CI | `deploy-cloudflare` | `@kashi/cli` templates |
 
-Skills marked in `references/roadmap.md` as planned are not installed yet; follow the conventions below in the meantime.
+Every skill above is available. `references/roadmap.md` records what shipped in which phase.
 
 ## Set up a project
 
@@ -61,4 +61,4 @@ Full text: `references/conventions.md`.
 
 ## Update packages
 
-`npx kashi update` bumps every `@kashi/*` and `kashi_*` dependency, copies any new package migrations into the project, and lists app-side template files whose upstream version changed. For Flutter packages run `flutter pub upgrade --major-versions`.
+`npx kashi update` bumps every `@kashi/*` package, copies new package migrations into the project, and refreshes files written by template modules (deploy workflows, fastlane lanes): files you have not edited are updated in place, edited ones get the new version beside them as `<file>.kashi-new`. For Flutter packages run `flutter pub upgrade --major-versions`.
