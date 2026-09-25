@@ -5,8 +5,8 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "build": "pnpm -r --filter './packages/*' run build",
-    "typecheck": "pnpm -r --filter './packages/*' run typecheck",
-    "test": "pnpm -r --filter './packages/*' run test",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
     "check:tokens": "node packages/tokens/check-tokens.mjs",
     "check:skills": "bash scripts/validate.sh",
     "check": "pnpm run build && pnpm run typecheck && pnpm run check:tokens && pnpm run check:skills",

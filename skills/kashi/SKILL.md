@@ -4,7 +4,7 @@ description: Index and conventions for the kashi toolkit (Cloudflare Workers + D
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/ui@0.1 kashi_ui@0.1"
+  packages: "@kashi/core@0.1 @kashi/list@0.1 @kashi/cli@0.1 @kashi/ui@0.1 kashi_ui@0.1"
 ---
 
 # kashi
@@ -61,4 +61,4 @@ Full text: `references/conventions.md`.
 
 ## Update packages
 
-`npx kashi update` (Phase 1 onward) bumps every `@kashi/*` and `kashi_*` dependency, copies any new package migrations into the project, and lists app-side template files whose upstream version changed. Until the CLI ships: `pnpm up "@kashi/*" --latest`, `flutter pub upgrade --major-versions`, then diff the package `migrations/` folder against the project's.
+`npx kashi update` bumps every `@kashi/*` and `kashi_*` dependency, copies any new package migrations into the project, and lists app-side template files whose upstream version changed. For Flutter packages run `flutter pub upgrade --major-versions`.

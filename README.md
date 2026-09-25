@@ -13,7 +13,7 @@ Each feature ships as a package that bundles every layer, so one version bump up
 | Design system: tokens, primitives (light + dark) | `@kashi/ui` | `kashi_ui` | `kashi-ui-web`, `kashi-ui-flutter` |
 | Deploy: fastlane (iOS/Android), Cloudflare | `@kashi/cli` templates | | `deploy-flutter-fastlane`, `deploy-cloudflare` |
 
-Status: **Phase 0** (design system packages and the index skill). See `skills/kashi/SKILL.md` for the roadmap.
+Status: **Phase 1** done (design system, core, list server helpers, CLI, and their skills). Roadmap in `skills/kashi/references/roadmap.md`.
 
 ## Use the skills
 
@@ -32,8 +32,6 @@ npx kashi add auth        # installs @kashi/auth, mounts routes, copies migratio
 npx kashi update          # bumps every @kashi/* and kashi_* package, copies new migrations, reports template drift
 npx kashi doctor          # checks secrets, gitignore, and deployment config
 ```
-
-(The CLI lands in Phase 1.)
 
 ## Repo layout
 

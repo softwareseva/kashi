@@ -1,0 +1,23 @@
+{
+  "name": "@kashi/cli",
+  "version": "0.1.0",
+  "description": "kashi command line: init a project, copy package migrations, print the secrets checklist, check gitignore and secrets, update every @kashi package.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/softwareseva/kashi", "directory": "packages/cli" },
+  "type": "module",
+  "bin": { "kashi": "./dist/bin.js" },
+  "files": ["dist", "templates", "secrets.schema.json", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/bin.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.0"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "migrations": {
+    "@kashi/core/core_0001_rate_limits.sql": "0001_core_0001_rate_limits.sql"
+  }
+}

@@ -3,12 +3,12 @@
 ## New Worker API
 
 ```bash
-pnpm add hono zod @kashi/core          # Phase 1
+pnpm add hono zod @kashi/core
 npx kashi init                          # AGENTS.md, CLAUDE.md, GEMINI.md, .gitignore, renovate.json
 npx kashi add auth                      # installs @kashi/auth, mounts /v1/auth, copies migrations, prints secrets
 ```
 
-Until the CLI ships, do the steps by hand:
+What the CLI does, if you prefer to do it by hand:
 
 1. Copy `templates/AGENTS.md`, `templates/CLAUDE.md`, `templates/GEMINI.md` into the repo root. Fill the product summary and repository map in `AGENTS.md`. List the kashi skills that apply to the project so agents know which to load.
 2. Append `templates/gitignore` to `.gitignore`.

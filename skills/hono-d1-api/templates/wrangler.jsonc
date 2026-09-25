@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": { "ENVIRONMENT": "production", "WEB_ORIGIN": "https://app.example.com" },
+  "d1_databases": [{ "binding": "DB", "database_name": "my-api", "database_id": "<from: wrangler d1 create my-api>", "migrations_dir": "migrations" }],
+  "observability": { "enabled": true }
+}

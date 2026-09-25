@@ -1,0 +1,26 @@
+{
+  "name": "kashi-example-api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:migrate:local": "wrangler d1 migrations apply kashi-example --local"
+  },
+  "dependencies": {
+    "@kashi/core": "workspace:*",
+    "@kashi/list": "workspace:*",
+    "hono": "^4.13.9",
+    "zod": "^4.6.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.2.7",
+    "@cloudflare/workers-types": "^5.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.140.0"
+  }
+}
