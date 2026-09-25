@@ -1,7 +1,7 @@
 /** GET /v1/notes?q=&sort=&direction=&limit=&cursor= */
 import { Hono } from "hono";
-import { ok } from "@kashi/core/server";
-import { listQuerySchema } from "@kashi/list/server";
+import { ok } from "@softwareseva/core/server";
+import { listQuerySchema } from "@softwareseva/list/server";
 import { NotesRepository } from "../repositories/notes-repository";
 import type { AppEnv } from "../types";
 

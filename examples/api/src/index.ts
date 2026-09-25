@@ -1,6 +1,6 @@
-/** Composition root: builds the app from @kashi/core and mounts auth and the resource routers. */
-import { authRouter } from "@kashi/auth/server";
-import { createApp } from "@kashi/core/server";
+/** Composition root: builds the app from @softwareseva/core and mounts auth and the resource routers. */
+import { authRouter } from "@softwareseva/auth/server";
+import { createApp } from "@softwareseva/core/server";
 import { authConfig } from "./auth";
 import { notesRoutes } from "./routes/notes";
 import { meRoutes } from "./routes/me";

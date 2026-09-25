@@ -1,6 +1,6 @@
 /** Find-or-create helpers shared by the providers. */
 import type { Context } from "hono";
-import { ApiError } from "@kashi/core/server";
+import { ApiError } from "@softwareseva/core/server";
 import { AuthStore } from "./store";
 import type { AuthConfig, AuthEnv, AuthUser } from "./types";
 

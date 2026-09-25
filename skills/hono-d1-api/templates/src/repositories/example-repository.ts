@@ -1,5 +1,5 @@
 /** All SQL for the example table. Rows are aliased to camelCase so they match the contract. */
-import { newId, nowIso } from "@kashi/core/server";
+import { newId, nowIso } from "@softwareseva/core/server";
 
 export type ExampleRow = { id: string; title: string; createdAt: string; updatedAt: string };
 const columns = "id, title, created_at AS createdAt, updated_at AS updatedAt";

@@ -1,4 +1,4 @@
-/** @kashi/auth/contracts — request and response shapes shared by the server, React and Flutter clients. */
+/** @softwareseva/auth/contracts — request and response shapes shared by the server, React and Flutter clients. */
 import { z } from "zod";
 
 export const authUserSchema = z.object({

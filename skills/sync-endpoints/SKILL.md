@@ -1,15 +1,15 @@
 ---
 name: sync-endpoints
-description: Server side of offline-first sync on Cloudflare Workers + D1 with @kashi/sync, covering idempotent batched push of client operations with replay, a change log with a monotonic cursor for pull, per-user or per-organisation scopes, soft deletes, and logging changes from ordinary web routes so every device converges. Use when a mobile app must work offline, when adding a synced entity or operation, or when debugging duplicate or missing synced data.
+description: Server side of offline-first sync on Cloudflare Workers + D1 with @softwareseva/sync, covering idempotent batched push of client operations with replay, a change log with a monotonic cursor for pull, per-user or per-organisation scopes, soft deletes, and logging changes from ordinary web routes so every device converges. Use when a mobile app must work offline, when adding a synced entity or operation, or when debugging duplicate or missing synced data.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/sync@0.1 @kashi/auth@0.1"
+  packages: "@softwareseva/sync@0.1 @softwareseva/auth@0.1"
 ---
 
 # Sync endpoints
 
-Clients keep a local database and an outbox of operations. `@kashi/sync` gives them two endpoints:
+Clients keep a local database and an outbox of operations. `@softwareseva/sync` gives them two endpoints:
 
 - `POST /v1/sync/push { ops: [{ opId, type, payload }] }` runs each op's handler **once**. The result is stored by `(user, opId)`; a retried batch gets `replayed` with the original result. Failures carry `retryable` so clients back off or park the op.
 - `GET /v1/sync/pull?since=<seq>&limit=` returns `{ changes: { <entity>: { upserts, deletes } }, next, hasMore, reset }` from the `sync_changes` log for the user's scopes.
@@ -18,7 +18,7 @@ The Flutter half is the `flutter-drift-sync` skill.
 
 ## Install
 
-1. `pnpm add @kashi/sync`, then `npx kashi migrate` (copies `sync_0001_ops_changes.sql`), apply locally.
+1. `pnpm add @softwareseva/sync`, then `npx @softwareseva/cli migrate` (copies `sync_0001_ops_changes.sql`), apply locally.
 2. Copy `templates/sync.ts` to `src/sync.ts`, mount: `app.route("/v1/sync", syncRoutes)`.
 3. Synced tables need `id TEXT PRIMARY KEY` (client-generated ids are fine, e.g. `newId("note")`), `updated_at`, and `deleted_at` (soft delete).
 

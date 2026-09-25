@@ -5,5 +5,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["kashi-monorepo", "@kashi/tokens", "kashi-example-*"]
+  "ignore": ["kashi-monorepo", "@softwareseva/tokens", "kashi-example-*"]
 }

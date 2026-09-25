@@ -1,7 +1,7 @@
 /* App styles: kashi fonts, Tailwind, kashi tokens, and the kashi packages Tailwind must scan. */
-@import "@kashi/ui/fonts.css";
+@import "@softwareseva/ui/fonts.css";
 @import "tailwindcss";
-@import "@kashi/ui/kashi.css";
-@source "../node_modules/@kashi/ui/dist";
-@source "../node_modules/@kashi/list/dist/react";
-@source "../node_modules/@kashi/auth/dist/react";
+@import "@softwareseva/ui/kashi.css";
+@source "../node_modules/@softwareseva/ui/dist";
+@source "../node_modules/@softwareseva/list/dist/react";
+@source "../node_modules/@softwareseva/auth/dist/react";

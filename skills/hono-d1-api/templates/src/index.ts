@@ -1,5 +1,5 @@
-/** Composition root: builds the app from @kashi/core and mounts the feature routers. */
-import { createApp } from "@kashi/core/server";
+/** Composition root: builds the app from @softwareseva/core and mounts the feature routers. */
+import { createApp } from "@softwareseva/core/server";
 import { exampleRoutes } from "./routes/example";
 import type { AppEnv } from "./types";
 

@@ -1,7 +1,7 @@
 /** WebAuthn passkeys on @simplewebauthn/server: registration for signed-in users, discoverable sign-in for everyone. */
 import type { Context } from "hono";
 import { z } from "zod";
-import { ApiError, base64UrlToBytes, bytesToBase64Url, clientIp, consumeRateLimit, sha256 } from "@kashi/core/server";
+import { ApiError, base64UrlToBytes, bytesToBase64Url, clientIp, consumeRateLimit, sha256 } from "@softwareseva/core/server";
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/server";
 import { AuthStore } from "../store";
 import type { AuthConfig, AuthEnv, AuthUser } from "../types";
@@ -11,10 +11,10 @@ export const passkeyAuthVerifySchema = z.object({ challengeId: z.string().min(1)
 export const passkeyRenameSchema = z.object({ deviceName: z.string().trim().min(1).max(80) });
 
 async function lib() {
-  try { return await import("@simplewebauthn/server"); } catch { throw new Error("@kashi/auth: install @simplewebauthn/server to enable passkeys."); }
+  try { return await import("@simplewebauthn/server"); } catch { throw new Error("@softwareseva/auth: install @simplewebauthn/server to enable passkeys."); }
 }
 const rp = (env: AuthEnv, config: AuthConfig) => {
-  if (!env.rpId) throw new Error("@kashi/auth: RP_ID is not set (the site's registrable domain).");
+  if (!env.rpId) throw new Error("@softwareseva/auth: RP_ID is not set (the site's registrable domain).");
   return { rpID: env.rpId, rpName: env.rpName ?? "App", origins: [...env.origins, ...(config.providers.passkeys?.extraOrigins ?? [])] };
 };
 

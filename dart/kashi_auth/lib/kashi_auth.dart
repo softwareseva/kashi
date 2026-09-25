@@ -1,4 +1,4 @@
-/// Flutter sign-in for @kashi/auth: API calls, sign-in screen, passkey settings, biometric lock, adapter seams.
+/// Flutter sign-in for @softwareseva/auth: API calls, sign-in screen, passkey settings, biometric lock, adapter seams.
 library;
 
 export 'src/adapters.dart';

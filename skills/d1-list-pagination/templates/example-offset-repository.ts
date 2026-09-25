@@ -1,6 +1,6 @@
 /** Offset list for a small admin table that wants a total. */
-import { likeAny, likePattern } from "@kashi/core/server";
-import { listOffset, type OffsetPage } from "@kashi/list/server";
+import { likeAny, likePattern } from "@softwareseva/core/server";
+import { listOffset, type OffsetPage } from "@softwareseva/list/server";
 
 export type UserRow = { id: string; email: string; createdAt: string };
 

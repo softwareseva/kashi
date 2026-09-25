@@ -1,4 +1,4 @@
-/// Calls to the `@kashi/auth` router with the token transport.
+/// Calls to the `@softwareseva/auth` router with the token transport.
 library;
 
 import 'package:flutter/foundation.dart';

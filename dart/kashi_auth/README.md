@@ -1,6 +1,6 @@
 # kashi_auth
 
-Flutter half of `@kashi/auth`. Depends only on `kashi_core` and `kashi_ui`; native plugins (Google, Apple, passkeys, biometrics) plug in through small adapters the app owns, so apps that use only one-time codes do not inherit other plugins' platform requirements.
+Flutter half of `@softwareseva/auth`. Depends only on `kashi_core` and `kashi_ui`; native plugins (Google, Apple, passkeys, biometrics) plug in through small adapters the app owns, so apps that use only one-time codes do not inherit other plugins' platform requirements.
 
 ```dart
 KSignIn(

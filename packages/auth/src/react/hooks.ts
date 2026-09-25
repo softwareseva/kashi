@@ -1,6 +1,6 @@
 /** Sign-in actions as hooks. Each returns `{ run, pending, error }` and stores the session on success. */
 import { useCallback, useState } from "react";
-import { ApiError } from "@kashi/core/client";
+import { ApiError } from "@softwareseva/core/client";
 import type { SessionResponse } from "../contracts/index";
 import { useAuth } from "./context";
 

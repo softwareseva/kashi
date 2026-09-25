@@ -9,7 +9,7 @@ metadata:
 
 # kashi UI in Flutter
 
-`kashi_ui` is the Cupertino twin of `@kashi/ui`: the same tokens (from `tokens.json`), light and dark, and the same component set, so a screen looks the same on web, iOS and Android.
+`kashi_ui` is the Cupertino twin of `@softwareseva/ui`: the same tokens (from `tokens.json`), light and dark, and the same component set, so a screen looks the same on web, iOS and Android.
 
 ## Install
 

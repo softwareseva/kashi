@@ -1,8 +1,8 @@
 /** Notes directory: search, sort, page size and cursor paging, all kept in the URL. */
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router";
-import { CursorPagination, DataTable, DirectoryToolbar, useDirectory, type DataColumn } from "@kashi/list/react";
-import { Alert, Button, Field, Input } from "@kashi/ui";
+import { CursorPagination, DataTable, DirectoryToolbar, useDirectory, type DataColumn } from "@softwareseva/list/react";
+import { Alert, Button, Field, Input } from "@softwareseva/ui";
 import { useCreateNote, useNotes, type Note, type NoteSort } from "../hooks/use-notes";
 
 const defaults = { sort: "updatedAt", direction: "desc", sortKeys: ["updatedAt", "title"] } as const satisfies { sort: NoteSort; direction: "desc"; sortKeys: readonly NoteSort[] };

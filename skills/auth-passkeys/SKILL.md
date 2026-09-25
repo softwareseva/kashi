@@ -1,15 +1,15 @@
 ---
 name: auth-passkeys
-description: Passkeys (WebAuthn) with @kashi/auth and @simplewebauthn/server 14, covering registration for signed-in users, discoverable usernameless sign-in, credential listing, renaming and removal, RP ID and origin rules for web, iOS and Android. Use when adding passkey sign-in, a "manage passkeys" screen, fixing "RP ID mismatch" or origin errors, or supporting passkeys in a Flutter app.
+description: Passkeys (WebAuthn) with @softwareseva/auth and @simplewebauthn/server 14, covering registration for signed-in users, discoverable usernameless sign-in, credential listing, renaming and removal, RP ID and origin rules for web, iOS and Android. Use when adding passkey sign-in, a "manage passkeys" screen, fixing "RP ID mismatch" or origin errors, or supporting passkeys in a Flutter app.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/auth@0.1 @simplewebauthn/server@14 @simplewebauthn/browser@14"
+  packages: "@softwareseva/auth@0.1 @simplewebauthn/server@14 @simplewebauthn/browser@14"
 ---
 
 # Passkeys
 
-Passkeys replace passwords with a key pair held by the user's device or password manager. `@kashi/auth` handles challenges (stored in D1, single use, 5 minutes), verification, counters and storage. Sign-in is **discoverable**: the browser shows the passkeys it holds for your site, so no username is sent first and nothing about accounts leaks.
+Passkeys replace passwords with a key pair held by the user's device or password manager. `@softwareseva/auth` handles challenges (stored in D1, single use, 5 minutes), verification, counters and storage. Sign-in is **discoverable**: the browser shows the passkeys it holds for your site, so no username is sent first and nothing about accounts leaks.
 
 ## Enable
 

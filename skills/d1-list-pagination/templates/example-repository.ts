@@ -1,6 +1,6 @@
 /** Keyset list with escaped search and an allowlisted sort map. */
-import { likeAny, likePattern } from "@kashi/core/server";
-import { listKeyset, type ListQuery, type Page } from "@kashi/list/server";
+import { likeAny, likePattern } from "@softwareseva/core/server";
+import { listKeyset, type ListQuery, type Page } from "@softwareseva/list/server";
 
 export type NoteRow = { id: string; title: string; updatedAt: string };
 export type NoteSort = "title" | "updatedAt";

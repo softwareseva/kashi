@@ -3,9 +3,9 @@
 ## New Worker API
 
 ```bash
-pnpm add hono zod @kashi/core
-npx kashi init                          # AGENTS.md, CLAUDE.md, GEMINI.md, .gitignore, renovate.json
-npx kashi add auth                      # installs @kashi/auth, mounts /v1/auth, copies migrations, prints secrets
+pnpm add hono zod @softwareseva/core
+npx @softwareseva/cli init                          # AGENTS.md, CLAUDE.md, GEMINI.md, .gitignore, renovate.json
+npx @softwareseva/cli add auth                      # installs @softwareseva/auth, mounts /v1/auth, copies migrations, prints secrets
 ```
 
 What the CLI does, if you prefer to do it by hand:
@@ -16,7 +16,7 @@ What the CLI does, if you prefer to do it by hand:
 
 ```ts
 import { Hono } from "hono";
-import { authRouter } from "@kashi/auth/server";
+import { authRouter } from "@softwareseva/auth/server";
 const app = new Hono<AppEnv>();
 app.route("/v1/auth", authRouter({ providers: ["otp", "google"], /* ... */ }));
 ```
@@ -26,8 +26,8 @@ app.route("/v1/auth", authRouter({ providers: ["otp", "google"], /* ... */ }));
 
 ## New React app
 
-1. Install `@kashi/ui` and its peers; add the three CSS lines from the package README (`@import "tailwindcss"`, `@import "@kashi/ui/kashi.css"`, `@source ...`).
-2. Install `@kashi/core` for the API client and `@kashi/auth` for `AuthProvider` and sign-in components (Phase 2 onward).
+1. Install `@softwareseva/ui` and its peers; add the three CSS lines from the package README (`@import "tailwindcss"`, `@import "@softwareseva/ui/kashi.css"`, `@source ...`).
+2. Install `@softwareseva/core` for the API client and `@softwareseva/auth` for `AuthProvider` and sign-in components (Phase 2 onward).
 3. Keep `AGENTS.md` in the same repo if the API and web app share one; otherwise repeat step 1 of the API recipe.
 
 ## New Flutter app
@@ -38,7 +38,7 @@ app.route("/v1/auth", authRouter({ providers: ["otp", "google"], /* ... */ }));
 
 ## Keeping up to date
 
-- npm: `pnpm up "@kashi/*" --latest` (or `npx kashi update`). Read the CHANGELOG for majors.
+- npm: `pnpm up "@softwareseva/*" --latest` (or `npx @softwareseva/cli update`). Read the CHANGELOG for majors.
 - Flutter: `flutter pub upgrade --major-versions`.
 - After any bump, diff the package `migrations/` folder against the project's and copy new files.
 - App-side files copied from templates carry a header `# kashi:<skill>@<version>`. `kashi update` reports when the upstream template changed; the file stays project-owned.

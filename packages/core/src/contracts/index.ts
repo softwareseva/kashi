@@ -1,4 +1,4 @@
-/** @kashi/core/contracts — the response envelope every kashi API and client agrees on. */
+/** @softwareseva/core/contracts — the response envelope every kashi API and client agrees on. */
 import { z } from "zod";
 
 export const fieldErrorsSchema = z.record(z.string(), z.array(z.string()));

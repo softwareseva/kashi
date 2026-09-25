@@ -1,6 +1,6 @@
 /** Sign in with Apple: ES256 client secret, code exchange, ID-token verification against Apple's JWKS, and the native identityToken path. */
 import { verify } from "hono/jwt";
-import { base64UrlToBytes, bytesToBase64Url } from "@kashi/core/server";
+import { base64UrlToBytes, bytesToBase64Url } from "@softwareseva/core/server";
 import type { AuthEnv } from "../types";
 
 export type AppleProfile = { subject: string; email: string | null; emailVerified: boolean; isPrivateEmail: boolean; name: string | null };

@@ -1,6 +1,6 @@
-/** AuthProvider + useAuth: session state for React apps talking to @kashi/auth/server over cookies. */
+/** AuthProvider + useAuth: session state for React apps talking to @softwareseva/auth/server over cookies. */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { ApiClient } from "@kashi/core/client";
+import type { ApiClient } from "@softwareseva/core/client";
 import type { AuthConfigResponse, AuthUser, SessionResponse } from "../contracts/index";
 
 export type AuthStatus = "loading" | "signed-out" | "signed-in";

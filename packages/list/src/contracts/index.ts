@@ -1,4 +1,4 @@
-/** @kashi/list/contracts — list query parameters and page shapes shared by server and clients. */
+/** @softwareseva/list/contracts — list query parameters and page shapes shared by server and clients. */
 import { z } from "zod";
 
 export const sortDirectionSchema = z.enum(["asc", "desc"]);

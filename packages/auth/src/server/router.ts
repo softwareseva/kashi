@@ -1,7 +1,7 @@
 /** authRouter(config): every sign-in method, session refresh and sign-out as one mountable Hono sub-app. */
 import { Hono, type Context } from "hono";
 import { z } from "zod";
-import { ApiError, ok } from "@kashi/core/server";
+import { ApiError, ok } from "@softwareseva/core/server";
 import { resolveEnv } from "./env";
 import { changePassword, passwordChangeSchema, passwordSignInSchema, authenticatePassword, normalizeIdentifier } from "./providers/password";
 import { otpRequestSchema, otpVerifySchema, requestOtp, verifyOtp } from "./providers/otp";
@@ -114,7 +114,7 @@ export function authRouter(config: AuthConfig): Hono<Env> {
     app.get("/google/start", async (c) => {
       const e = env(c);
       if (!googleConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "Google sign-in is not configured.");
-      if (!e.authUrl) throw new Error("@kashi/auth: AUTH_URL must be the public URL of this router, e.g. https://api.example.com/v1/auth");
+      if (!e.authUrl) throw new Error("@softwareseva/auth: AUTH_URL must be the public URL of this router, e.g. https://api.example.com/v1/auth");
       const state = await signOAuthState(e, { next: safeNext(c.req.query("next")), transport: "cookie" });
       return c.redirect(googleAuthorizeUrl(e, redirectUri(e), state));
     });
@@ -150,7 +150,7 @@ export function authRouter(config: AuthConfig): Hono<Env> {
     app.get("/apple/start", async (c) => {
       const e = env(c);
       if (!appleConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "Sign in with Apple is not configured.");
-      if (!e.authUrl) throw new Error("@kashi/auth: AUTH_URL must be the public URL of this router.");
+      if (!e.authUrl) throw new Error("@softwareseva/auth: AUTH_URL must be the public URL of this router.");
       const state = await signOAuthState(e, { next: safeNext(c.req.query("next")), transport: "cookie" });
       return c.redirect(appleAuthorizeUrl(e, redirectUri(e), state));
     });

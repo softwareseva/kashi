@@ -1,21 +1,21 @@
 ---
 name: hono-d1-api
-description: Build or extend a Hono API on Cloudflare Workers with a D1 database using @kashi/core. Use when creating a new Worker API, adding a route, service or repository, wiring the error envelope and request ids, adding a D1 migration, rate limiting an endpoint, validating environment bindings, or writing Worker integration tests with the Cloudflare Vitest plugin.
+description: Build or extend a Hono API on Cloudflare Workers with a D1 database using @softwareseva/core. Use when creating a new Worker API, adding a route, service or repository, wiring the error envelope and request ids, adding a D1 migration, rate limiting an endpoint, validating environment bindings, or writing Worker integration tests with the Cloudflare Vitest plugin.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/core@0.1"
+  packages: "@softwareseva/core@0.1"
 ---
 
 # Hono API on Workers + D1
 
-`@kashi/core/server` gives you the composition root, the error envelope, request ids, CORS, rate limiting and the crypto, password, id and phone helpers. You write bindings, routes, services, repositories and migrations. Keep that split: routes parse input and shape output, services decide, repositories hold every SQL statement.
+`@softwareseva/core/server` gives you the composition root, the error envelope, request ids, CORS, rate limiting and the crypto, password, id and phone helpers. You write bindings, routes, services, repositories and migrations. Keep that split: routes parse input and shape output, services decide, repositories hold every SQL statement.
 
 ## New API
 
-1. `pnpm add hono zod @kashi/core` and dev deps `wrangler @cloudflare/workers-types vitest @cloudflare/vitest-plugin typescript`.
+1. `pnpm add hono zod @softwareseva/core` and dev deps `wrangler @cloudflare/workers-types vitest @cloudflare/vitest-plugin typescript`.
 2. Copy `templates/wrangler.jsonc`, `templates/wrangler.test.jsonc`, `templates/tsconfig.json`, `templates/vitest.config.ts`, `templates/src/types.ts`, `templates/src/index.ts`, and `templates/test/` into the project. Rename the Worker and database. Leave `database_id` for `wrangler d1 create <name>` to fill.
-3. `npx kashi migrate` (or copy `node_modules/@kashi/core/migrations/core_0001_rate_limits.sql` into `migrations/0001_core_0001_rate_limits.sql`). Then add your own numbered migrations.
+3. `npx @softwareseva/cli migrate` (or copy `node_modules/@softwareseva/core/migrations/core_0001_rate_limits.sql` into `migrations/0001_core_0001_rate_limits.sql`). Then add your own numbered migrations.
 4. `wrangler d1 migrations apply <name> --local`, `pnpm dev`, and `curl localhost:8787/health`.
 
 ## Add a resource
@@ -40,7 +40,7 @@ Business rules that touch more than one repository or need a decision go in `src
 { "code": "INTERNAL_ERROR", "message": "...", "requestId": "..." } // anything else -> 500, logged with the id
 ```
 
-Never catch and re-wrap errors in routes; let them propagate. Never put stack traces or internal messages in responses. Codes are `UPPER_SNAKE`; the standard set is in `@kashi/core/contracts` (`ErrorCodes`). See `references/error-codes.md`.
+Never catch and re-wrap errors in routes; let them propagate. Never put stack traces or internal messages in responses. Codes are `UPPER_SNAKE`; the standard set is in `@softwareseva/core/contracts` (`ErrorCodes`). See `references/error-codes.md`.
 
 ## Helpers you should reach for
 

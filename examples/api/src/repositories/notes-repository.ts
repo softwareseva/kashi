@@ -1,7 +1,7 @@
 /** All SQL for notes. Sort keys are an allowlist; search is an escaped LIKE. */
-import { likeAny, likePattern, newId, nowIso } from "@kashi/core/server";
-import { listKeyset, type ListQuery, type Page } from "@kashi/list/server";
-import { changeStatement } from "@kashi/sync";
+import { likeAny, likePattern, newId, nowIso } from "@softwareseva/core/server";
+import { listKeyset, type ListQuery, type Page } from "@softwareseva/list/server";
+import { changeStatement } from "@softwareseva/sync";
 
 export type NoteRow = { id: string; title: string; body: string; createdAt: string; updatedAt: string };
 export type NoteSort = "title" | "updatedAt";

@@ -1,13 +1,13 @@
-# @kashi/auth
+# @softwareseva/auth
 
 One package for sign-in on the kashi stack. The server half mounts onto any Hono app on Cloudflare Workers + D1; the React half renders the screens; `kashi_auth` is the Flutter half. Bump the version and every layer updates together.
 
 - **Sessions**: HS256 access tokens (15 min) plus rotating refresh tokens grouped in families with reuse detection. Browsers use `__Host-` cookies with an origin check on mutations; native apps use a bearer token pair. The two transports never cross.
 - **Providers**: password, one-time codes over WhatsApp/SMS/email (you supply the `send` function), Google (web code flow + native ID token), Sign in with Apple (web `form_post` + native identity token), passkeys (`@simplewebauthn/server`, discoverable sign-in).
-- **Ships**: `migrations/` (copied by `npx kashi migrate`), `secrets.json` (read by `npx kashi secrets`), and typed contracts.
+- **Ships**: `migrations/` (copied by `npx @softwareseva/cli migrate`), `secrets.json` (read by `npx @softwareseva/cli secrets`), and typed contracts.
 
 ```ts
-import { authRouter, requireAuth, requireRole } from "@kashi/auth/server";
+import { authRouter, requireAuth, requireRole } from "@softwareseva/auth/server";
 
 const auth = { providers: { password: true, otp: { channel: "phone", send: sendWhatsApp }, google: {}, apple: {}, passkeys: {} } };
 app.route("/v1/auth", authRouter(auth));

@@ -1,5 +1,5 @@
 /** Record changes to the sync log. Call from sync handlers and from ordinary online routes alike. */
-import { nowIso } from "@kashi/core/server";
+import { nowIso } from "@softwareseva/core/server";
 
 export type ChangeOp = "upsert" | "delete";
 export type Change = { scope: string; entity: string; id: string; op?: ChangeOp };

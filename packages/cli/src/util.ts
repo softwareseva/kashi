@@ -31,9 +31,9 @@ export function writeIfAbsent(path: string, content: string, force = false): boo
   return true;
 }
 
-/** Every installed `@kashi/*` package (excluding the CLI) with its shipped migrations and secrets. */
+/** Every installed `@softwareseva/*` package (excluding the CLI) with its shipped migrations and secrets. */
 export function installedPackages(cwd: string): InstalledPackage[] {
-  const scopeDir = join(cwd, "node_modules", "@kashi");
+  const scopeDir = join(cwd, "node_modules", "@softwareseva");
   if (!existsSync(scopeDir)) return [];
   return readdirSync(scopeDir)
     .filter((name) => name !== "cli" && statSync(join(scopeDir, name)).isDirectory())
@@ -42,7 +42,7 @@ export function installedPackages(cwd: string): InstalledPackage[] {
       const pkg = readJson<{ name: string; version: string }>(join(dir, "package.json"));
       const migrationsDir = join(dir, "migrations");
       const migrations = existsSync(migrationsDir) ? readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort() : [];
-      return { name: pkg?.name ?? `@kashi/${name}`, version: pkg?.version ?? "0.0.0", dir, migrations, secrets: readJson<SecretsManifest>(join(dir, "secrets.json")) };
+      return { name: pkg?.name ?? `@softwareseva/${name}`, version: pkg?.version ?? "0.0.0", dir, migrations, secrets: readJson<SecretsManifest>(join(dir, "secrets.json")) };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 }

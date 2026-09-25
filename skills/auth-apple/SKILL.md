@@ -1,15 +1,15 @@
 ---
 name: auth-apple
-description: Sign in with Apple for web and iOS with @kashi/auth, including the ES256 client secret, form_post callback, ID-token verification against Apple's keys, private relay emails and first-login names. Use when adding "Sign in with Apple", configuring the Services ID and key in Apple Developer, verifying identity tokens from sign_in_with_apple in Flutter, or debugging Apple callback errors.
+description: Sign in with Apple for web and iOS with @softwareseva/auth, including the ES256 client secret, form_post callback, ID-token verification against Apple's keys, private relay emails and first-login names. Use when adding "Sign in with Apple", configuring the Services ID and key in Apple Developer, verifying identity tokens from sign_in_with_apple in Flutter, or debugging Apple callback errors.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/auth@0.1"
+  packages: "@softwareseva/auth@0.1"
 ---
 
 # Sign in with Apple
 
-Apple is required by App Store review when an iOS app offers any other third-party sign-in. `@kashi/auth` implements it without SDKs:
+Apple is required by App Store review when an iOS app offers any other third-party sign-in. `@softwareseva/auth` implements it without SDKs:
 
 - **Web**: `GET /v1/auth/apple/start?next=/` redirects to Apple with `response_mode=form_post`. Apple POSTs a form to `/v1/auth/apple/callback`; the router exchanges the code (with a freshly minted ES256 client secret), verifies the ID token against `https://appleid.apple.com/auth/keys`, signs in with cookies and redirects to `APP_ORIGIN + next`.
 - **Native**: the app gets an `identityToken` from `sign_in_with_apple` and posts `POST /v1/auth/apple/token { idToken, name?, transport: "token" }`.

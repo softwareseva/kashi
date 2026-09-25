@@ -1,7 +1,7 @@
 # D1 migrations
 
 - Directory: `migrations/` (or `migrations_dir` in `wrangler.jsonc`). Files `NNNN_name.sql`, four-digit zero-padded, applied in order by `wrangler d1 migrations apply <db> [--local|--remote]`.
-- Package migrations are copied in by `npx kashi migrate` as `NNNN_<pkg>_<orig>.sql` and recorded in `kashi.lock.json`. Never rename them.
+- Package migrations are copied in by `npx @softwareseva/cli migrate` as `NNNN_<pkg>_<orig>.sql` and recorded in `kashi.lock.json`. Never rename them.
 - Never edit an applied file. Fix forward with the next number.
 - Every table: `id TEXT PRIMARY KEY`, `created_at TEXT NOT NULL`, `updated_at TEXT NOT NULL`, `deleted_at TEXT NULL` for soft delete. ISO-8601 UTC strings sort correctly.
 - One composite index per sort key used by a list endpoint, ending in `id`: `CREATE INDEX t_col_id ON t(col, id)`. Filtered lists want the filter column first: `ON t(owner_id, col, id)`.

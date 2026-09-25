@@ -1,5 +1,5 @@
-/** AiSensy WhatsApp sender for @kashi/auth OTP. Secrets: AISENSY_API_KEY; vars: AISENSY_OTP_CAMPAIGN, AISENSY_SENDER_NAME. */
-import type { AuthEnv } from "@kashi/auth/server";
+/** AiSensy WhatsApp sender for @softwareseva/auth OTP. Secrets: AISENSY_API_KEY; vars: AISENSY_OTP_CAMPAIGN, AISENSY_SENDER_NAME. */
+import type { AuthEnv } from "@softwareseva/auth/server";
 import type { Context } from "hono";
 
 type AiSensyBindings = { AISENSY_API_KEY: string; AISENSY_OTP_CAMPAIGN: string; AISENSY_SENDER_NAME?: string };

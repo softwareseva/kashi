@@ -28,4 +28,4 @@
 - `vars`, `d1_databases`, `kv_namespaces`, `r2_buckets`, `routes` and `triggers` are **not inherited**; list them in every environment.
 - The deployed Worker is named `<name>-<env>` unless the environment sets `name`.
 - Validate without deploying: `wrangler deploy --dry-run --env staging --outdir /tmp/dry`.
-- `ENVIRONMENT` other than `development`/`test` turns on `Secure` `__Host-` cookies in `@kashi/auth`.
+- `ENVIRONMENT` other than `development`/`test` turns on `Secure` `__Host-` cookies in `@softwareseva/auth`.

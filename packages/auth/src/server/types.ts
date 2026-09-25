@@ -1,4 +1,4 @@
-/** Configuration, environment and user types for @kashi/auth. */
+/** Configuration, environment and user types for @softwareseva/auth. */
 import type { Context } from "hono";
 
 export type Transport = "cookie" | "token";

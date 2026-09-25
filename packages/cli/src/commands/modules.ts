@@ -39,7 +39,7 @@ export function addModule(cwd: string, name: string, version: string, options: {
   writeLock(cwd, lock);
   const next = renderNext(spec, vars);
   if (next.length) { log.title("next steps:"); next.forEach((n, i) => console.log(`  ${i + 1}. ${n}`)); }
-  log.info("secrets for this module: npx kashi secrets");
+  log.info("secrets for this module: npx @softwareseva/cli secrets");
   return 0;
 }
 
@@ -52,7 +52,7 @@ export function updateModules(cwd: string, version: string): { updated: string[]
   const updated: string[] = []; const conflicts: string[] = [];
   for (const [name, installed] of Object.entries(lock.modules ?? {})) {
     const spec = loadModule(name);
-    if (!spec) { log.warn(`module ${name} is no longer shipped by @kashi/cli; left as is`); continue; }
+    if (!spec) { log.warn(`module ${name} is no longer shipped by @softwareseva/cli; left as is`); continue; }
     const vars = resolveVars(spec, cwd, {}, installed.vars);
     for (const file of renderModule(spec, vars)) {
       const path = join(cwd, file.dest);

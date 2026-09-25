@@ -1,7 +1,7 @@
 /** Example protected routes: any signed-in user, and admins only. */
 import { Hono } from "hono";
-import { ok } from "@kashi/core/server";
-import { requireAuth, requireRole, type AuthVariables } from "@kashi/auth/server";
+import { ok } from "@softwareseva/core/server";
+import { requireAuth, requireRole, type AuthVariables } from "@softwareseva/auth/server";
 import { authConfig } from "../auth";
 import type { Bindings } from "../types";
 

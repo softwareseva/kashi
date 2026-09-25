@@ -1,8 +1,8 @@
 /** Notes routes: validate with zod, delegate to the repository, answer with the envelope. */
 import { Hono } from "hono";
 import { z } from "zod";
-import { ApiError, ok, rateLimit } from "@kashi/core/server";
-import { listQuerySchema } from "@kashi/list/server";
+import { ApiError, ok, rateLimit } from "@softwareseva/core/server";
+import { listQuerySchema } from "@softwareseva/list/server";
 import { NotesRepository } from "../repositories/notes-repository";
 import type { AppEnv } from "../types";
 

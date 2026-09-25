@@ -1,4 +1,4 @@
-/// Outbox + pull engine for @kashi/sync. Push drains local operations; pull applies server changes after a cursor.
+/// Outbox + pull engine for @softwareseva/sync. Push drains local operations; pull applies server changes after a cursor.
 library;
 
 import 'dart:async';

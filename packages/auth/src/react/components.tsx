@@ -1,6 +1,6 @@
-/** Ready-made sign-in UI on @kashi/ui primitives. Compose these or use <SignIn /> for the default card. */
+/** Ready-made sign-in UI on @softwareseva/ui primitives. Compose these or use <SignIn /> for the default card. */
 import { useState, type FormEvent } from "react";
-import { Alert, Button, Card, CardContent, CardHeader, CardTitle, Field, Input } from "@kashi/ui";
+import { Alert, Button, Card, CardContent, CardHeader, CardTitle, Field, Input } from "@softwareseva/ui";
 import { useAuth } from "./context";
 import { oauthErrorFromLocation, useOAuthUrl, useOtp, usePasskeySignIn, usePasswordSignIn } from "./hooks";
 

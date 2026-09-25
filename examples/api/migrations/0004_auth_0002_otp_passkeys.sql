@@ -1,4 +1,4 @@
--- @kashi/auth: one-time codes, WebAuthn credentials and challenges.
+-- @softwareseva/auth: one-time codes, WebAuthn credentials and challenges.
 CREATE TABLE IF NOT EXISTS auth_otp_codes (
   id TEXT PRIMARY KEY,
   destination TEXT NOT NULL,

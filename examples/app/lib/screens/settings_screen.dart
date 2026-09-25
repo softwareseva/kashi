@@ -41,7 +41,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: KSpace.s2),
             Text(
-              'Signed in with @kashi/auth',
+              'Signed in with @softwareseva/auth',
               style: KText.bodySm.copyWith(color: c.inkMuted),
               textAlign: TextAlign.center,
             ),

@@ -1,6 +1,6 @@
 /** Auth configuration for this app: providers, the OTP sender, and hooks. Shared by the router and route guards. */
-import type { AuthConfig, AuthEnv } from "@kashi/auth/server";
-import { nowIso } from "@kashi/core/server";
+import type { AuthConfig, AuthEnv } from "@softwareseva/auth/server";
+import { nowIso } from "@softwareseva/core/server";
 import type { Context } from "hono";
 
 /** Outside production, codes go to the dev_outbox table instead of a messaging provider. */

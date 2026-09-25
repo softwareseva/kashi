@@ -14,7 +14,7 @@ export function init(cwd: string, options: { force?: boolean; renovate?: boolean
   added.length ? log.ok(`added ${added.length} .gitignore lines`) : log.info(".gitignore already covers kashi secrets");
   if (options.renovate !== false) {
     const written = writeIfAbsent(join(cwd, "renovate.json"), readFileSync(join(templatesDir, "renovate.json"), "utf8"), options.force);
-    written ? log.ok("wrote renovate.json (groups @kashi/* and kashi_* bumps)") : log.info("renovate.json exists");
+    written ? log.ok("wrote renovate.json (groups @softwareseva/* and kashi_* bumps)") : log.info("renovate.json exists");
   }
-  log.info("next: fill the product and repository-map sections of AGENTS.md, then `npx kashi add <feature>`");
+  log.info("next: fill the product and repository-map sections of AGENTS.md, then `npx @softwareseva/cli add <feature>`");
 }

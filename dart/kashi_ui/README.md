@@ -15,4 +15,4 @@ CupertinoApp(theme: kashiCupertinoTheme(), home: ...);
 
 Read colours with `KColors.of(context)`, spacing from `KSpace`, radii from `KRadius`, text styles from `KText` (apply a colour with `.copyWith`). Widgets: `KButton`, `KIconButton`, `showKActionMenu`, `KTextField`, `KSelect`, `KRadioGroup`, `KCheckbox`, `KSwitch`, `KCard`, `KBadge`, `KAlert`.
 
-The same tokens back `@kashi/ui` on the web, so screens match across platforms. See the `kashi-ui-flutter` skill for usage rules.
+The same tokens back `@softwareseva/ui` on the web, so screens match across platforms. See the `kashi-ui-flutter` skill for usage rules.

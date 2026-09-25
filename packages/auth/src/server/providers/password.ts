@@ -1,7 +1,7 @@
 /** Password sign-in and password changes. Enumeration-safe: unknown users and wrong passwords answer alike. */
 import type { Context } from "hono";
 import { z } from "zod";
-import { ApiError, consumeRateLimit, clientIp, hashPassword, normalizeEmail, normalizePhone, passwordProblem, sha256, verifyPassword } from "@kashi/core/server";
+import { ApiError, consumeRateLimit, clientIp, hashPassword, normalizeEmail, normalizePhone, passwordProblem, sha256, verifyPassword } from "@softwareseva/core/server";
 import { AuthStore } from "../store";
 import type { AuthConfig, AuthEnv, AuthUser } from "../types";
 

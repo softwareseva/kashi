@@ -1,4 +1,4 @@
-/** @kashi/core/client — fetch wrapper that unwraps the envelope, throws ApiError and refreshes a session once on 401. */
+/** @softwareseva/core/client — fetch wrapper that unwraps the envelope, throws ApiError and refreshes a session once on 401. */
 
 export class ApiError extends Error {
   constructor(

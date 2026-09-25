@@ -1,8 +1,8 @@
 /** Routes and layout. */
 import type { ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router";
-import { useAuth } from "@kashi/auth/react";
-import { Button } from "@kashi/ui";
+import { useAuth } from "@softwareseva/auth/react";
+import { Button } from "@softwareseva/ui";
 import { NotesPage } from "./pages/notes-page";
 import { SignInPage } from "./pages/sign-in-page";
 

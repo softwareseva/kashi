@@ -1,7 +1,7 @@
 /** Accessible, token-styled data table with sortable headers, loading and empty states, and an optional card layout on small screens. */
 import type { ReactNode } from "react";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
-import { Button, cn } from "@kashi/ui";
+import { Button, cn } from "@softwareseva/ui";
 
 export type DataColumn<T, K extends string = string> = {
   key: K;

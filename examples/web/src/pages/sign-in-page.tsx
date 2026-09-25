@@ -1,6 +1,6 @@
 /** Sign-in screen: every provider the API reports as enabled. */
 import { Navigate, useNavigate, useSearchParams } from "react-router";
-import { SignIn, useAuth } from "@kashi/auth/react";
+import { SignIn, useAuth } from "@softwareseva/auth/react";
 
 export function SignInPage() {
   const { status } = useAuth();

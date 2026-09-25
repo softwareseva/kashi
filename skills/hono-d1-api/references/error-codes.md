@@ -1,6 +1,6 @@
 # Error codes
 
-Standard codes emitted by kashi packages (`ErrorCodes` in `@kashi/core/contracts`):
+Standard codes emitted by kashi packages (`ErrorCodes` in `@softwareseva/core/contracts`):
 
 | Code | Status | When |
 |---|---|---|

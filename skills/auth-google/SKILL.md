@@ -1,10 +1,10 @@
 ---
 name: auth-google
-description: Google sign-in for web and mobile with @kashi/auth, with no Google SDK on the server. Use when adding "Continue with Google", configuring the Google Cloud OAuth client and redirect URIs, verifying ID tokens from the Flutter google_sign_in plugin, or linking Google accounts to existing users by email.
+description: Google sign-in for web and mobile with @softwareseva/auth, with no Google SDK on the server. Use when adding "Continue with Google", configuring the Google Cloud OAuth client and redirect URIs, verifying ID tokens from the Flutter google_sign_in plugin, or linking Google accounts to existing users by email.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/auth@0.1"
+  packages: "@softwareseva/auth@0.1"
 ---
 
 # Google sign-in
@@ -28,7 +28,7 @@ The provider looks up `auth_identities(provider='google', subject=sub)`. If none
 
 ## Web UI
 
-`<OAuthButton provider="google" next="/dashboard" />` from `@kashi/auth/react` renders a link to the start route. Show `?error=` codes with `authMessage(code)`. The start route must be reached by top-level navigation (a link or `window.location`), never `fetch`.
+`<OAuthButton provider="google" next="/dashboard" />` from `@softwareseva/auth/react` renders a link to the start route. Show `?error=` codes with `authMessage(code)`. The start route must be reached by top-level navigation (a link or `window.location`), never `fetch`.
 
 ## Pitfalls
 

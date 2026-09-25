@@ -2,6 +2,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "packageRules": [
-    { "groupName": "kashi", "matchPackageNames": ["/^@kashi\\//", "/^kashi_/"], "automerge": false, "schedule": ["before 6am on monday"] }
+    { "groupName": "kashi", "matchPackageNames": ["/^@softwareseva\\//", "/^kashi_/"], "automerge": false, "schedule": ["before 6am on monday"] }
   ]
 }

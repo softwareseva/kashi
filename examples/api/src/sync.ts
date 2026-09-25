@@ -1,8 +1,8 @@
 /** Sync configuration: note operations clients may push, and how pulled notes are loaded. */
 import { z } from "zod";
-import { ApiError, nowIso } from "@kashi/core/server";
-import { requireAuth, type AuthUser } from "@kashi/auth/server";
-import { syncRouter } from "@kashi/sync";
+import { ApiError, nowIso } from "@softwareseva/core/server";
+import { requireAuth, type AuthUser } from "@softwareseva/auth/server";
+import { syncRouter } from "@softwareseva/sync";
 import { authConfig } from "./auth";
 
 /** Notes are shared by everyone in this example; real apps scope per user or organisation. */

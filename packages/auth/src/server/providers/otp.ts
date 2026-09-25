@@ -1,7 +1,7 @@
 /** One-time codes over WhatsApp, SMS or email. Codes are stored as peppered HMACs; responses never reveal whether an account exists. */
 import type { Context } from "hono";
 import { z } from "zod";
-import { ApiError, clientIp, consumeRateLimit, futureIso, hmac, normalizeEmail, normalizePhone, nowIso, randomDigits, safeEqual, sha256 } from "@kashi/core/server";
+import { ApiError, clientIp, consumeRateLimit, futureIso, hmac, normalizeEmail, normalizePhone, nowIso, randomDigits, safeEqual, sha256 } from "@softwareseva/core/server";
 import { AuthStore } from "../store";
 import { createUser } from "../users";
 import type { AuthConfig, AuthEnv, AuthUser, OtpProviderConfig } from "../types";
@@ -13,7 +13,7 @@ function normalizeDestination(raw: string, otp: OtpProviderConfig): string | nul
   return otp.channel === "phone" ? normalizePhone(raw, { defaultCountry: otp.defaultCountry as never, mobileOnly: true }) : normalizeEmail(raw);
 }
 
-const pepper = (env: AuthEnv) => { if (!env.otpPepper) throw new Error("@kashi/auth: OTP_PEPPER is not set. See secrets.json."); return env.otpPepper; };
+const pepper = (env: AuthEnv) => { if (!env.otpPepper) throw new Error("@softwareseva/auth: OTP_PEPPER is not set. See secrets.json."); return env.otpPepper; };
 
 /** Generate, store and send a code. Silently succeeds for unusable destinations so callers cannot enumerate. */
 export async function requestOtp(c: Context, config: AuthConfig, env: AuthEnv, raw: string): Promise<void> {

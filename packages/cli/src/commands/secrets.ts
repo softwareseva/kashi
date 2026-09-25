@@ -14,7 +14,7 @@ export function collectSecrets(cwd: string): { pkg: string; entry: SecretEntry }
 export function secrets(cwd: string, options: { write?: boolean; only?: string }) {
   log.title("kashi secrets");
   const all = collectSecrets(cwd).filter(({ pkg }) => !options.only || pkg === options.only);
-  if (!all.length) { log.info("no installed @kashi package declares secrets"); return; }
+  if (!all.length) { log.info("no installed @softwareseva package declares secrets"); return; }
   for (const { pkg, entry } of all) {
     console.log(`\n  ${entry.name}${entry.optional ? " (optional)" : ""}  [${pkg}${entry.usedBy ? ` ${entry.usedBy}` : ""}]`);
     console.log(`    ${entry.description}`);

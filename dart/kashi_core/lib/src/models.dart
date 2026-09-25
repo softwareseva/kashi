@@ -1,4 +1,4 @@
-/// Shared models: the signed-in user and a session response from `@kashi/auth`.
+/// Shared models: the signed-in user and a session response from `@softwareseva/auth`.
 library;
 
 import 'package:flutter/foundation.dart';
@@ -79,7 +79,7 @@ class TokenSession {
   final int expiresIn;
 }
 
-/// Keyset page from `@kashi/list`: `{ items, next, previous }`.
+/// Keyset page from `@softwareseva/list`: `{ items, next, previous }`.
 @immutable
 class KPage<T> {
   const KPage({required this.items, this.next, this.previous});

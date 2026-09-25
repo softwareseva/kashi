@@ -1,5 +1,5 @@
 /** The one API client for this app. Cookie sessions; refresh once on 401; send the user to sign-in when that fails. */
-import { createApiClient } from "@kashi/core/client";
+import { createApiClient } from "@softwareseva/core/client";
 
 export const api = createApiClient({
   baseUrl: import.meta.env.VITE_API_URL ?? "/v1",

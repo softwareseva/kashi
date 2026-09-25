@@ -4,16 +4,16 @@ description: Deploy a Hono Worker with D1 (and optionally a Vite web app) to Clo
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/cli@0.1"
+  packages: "@softwareseva/cli@0.1"
 ---
 
 # Deploy to Cloudflare
 
-`npx kashi add deploy-cloudflare` writes GitHub Actions workflows and records them in `kashi.lock.json`, so `npx kashi update` refreshes them later unless you edited them.
+`npx @softwareseva/cli add deploy-cloudflare` writes GitHub Actions workflows and records them in `kashi.lock.json`, so `npx @softwareseva/cli update` refreshes them later unless you edited them.
 
 ```bash
-npx kashi add deploy-cloudflare                         # API only; detects the directory with wrangler.jsonc
-npx kashi add deploy-cloudflare --var WEB_DIR=apps/web  # also deploy a Vite app with Workers static assets
+npx @softwareseva/cli add deploy-cloudflare                         # API only; detects the directory with wrangler.jsonc
+npx @softwareseva/cli add deploy-cloudflare --var WEB_DIR=apps/web  # also deploy a Vite app with Workers static assets
 ```
 
 ## What the workflows do
@@ -32,12 +32,12 @@ Web job: build with `VITE_API_URL` from the GitHub environment variable, then `w
 
 1. Add `env.staging` and `env.production` to the API `wrangler.jsonc`, each with its own `vars` and `d1_databases` (`references/wrangler-envs.md`). Bindings are not inherited by environments, so repeat `d1_databases` in each.
 2. `wrangler d1 create <name>-staging` and `wrangler d1 create <name>-production`; paste the ids.
-3. Worker secrets per environment: `wrangler secret put JWT_SECRET --env staging` and again with `--env production` (`npx kashi secrets` lists them all).
-4. Repository secrets: `gh secret set CLOUDFLARE_API_TOKEN` and `gh secret set CLOUDFLARE_ACCOUNT_ID` (see `npx kashi secrets` for how to create the token with Workers and D1 edit rights).
+3. Worker secrets per environment: `wrangler secret put JWT_SECRET --env staging` and again with `--env production` (`npx @softwareseva/cli secrets` lists them all).
+4. Repository secrets: `gh secret set CLOUDFLARE_API_TOKEN` and `gh secret set CLOUDFLARE_ACCOUNT_ID` (see `npx @softwareseva/cli secrets` for how to create the token with Workers and D1 edit rights).
 5. GitHub > Settings > Environments: create `staging` and `production`; add required reviewers to `production`; set `VITE_API_URL` per environment for the web job.
 6. Custom domains: `routes: [{ "pattern": "api.example.com", "custom_domain": true }]` in the environment.
 
-`npx kashi doctor` then checks gitignore coverage, local secrets, deployed Worker secrets and GitHub secrets.
+`npx @softwareseva/cli doctor` then checks gitignore coverage, local secrets, deployed Worker secrets and GitHub secrets.
 
 ## Rules
 

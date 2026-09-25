@@ -4,7 +4,7 @@ description: Index and conventions for the kashi toolkit (Cloudflare Workers + D
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/cli@0.1 @kashi/core@0.1 @kashi/list@0.1 @kashi/auth@0.1 @kashi/ui@0.1 kashi_ui@0.1 kashi_core@0.1 kashi_auth@0.1 kashi_list@0.1 @kashi/sync@0.1 kashi_sync@0.1"
+  packages: "@softwareseva/cli@0.1 @softwareseva/core@0.1 @softwareseva/list@0.1 @softwareseva/auth@0.1 @softwareseva/ui@0.1 kashi_ui@0.1 kashi_core@0.1 kashi_auth@0.1 kashi_list@0.1 @softwareseva/sync@0.1 kashi_sync@0.1"
 ---
 
 # kashi
@@ -15,23 +15,23 @@ kashi is a set of packages that each bundle a whole feature (API routes, React c
 
 | Task | Skill | Package |
 |---|---|---|
-| New or existing Hono API on Workers + D1 | `hono-d1-api` | `@kashi/core` |
-| Sign in, sessions, refresh tokens, roles | `auth-sessions` | `@kashi/auth` |
-| Phone sign-in with a WhatsApp or SMS code | `auth-whatsapp-otp` | `@kashi/auth` |
-| Google sign-in (web and mobile) | `auth-google` | `@kashi/auth` |
-| Sign in with Apple (web and mobile) | `auth-apple` | `@kashi/auth` |
-| Passkeys / WebAuthn | `auth-passkeys` | `@kashi/auth` |
-| List endpoint with search, sort, paging on D1 | `d1-list-pagination` | `@kashi/list` |
-| Offline-first sync endpoints | `sync-endpoints` | `@kashi/sync` |
-| React app styling and primitives | `kashi-ui-web` | `@kashi/ui` |
-| Directory or admin table screen in React | `react-data-table` | `@kashi/list` |
-| Calling the API from React | `api-client-react` | `@kashi/core`, `@kashi/auth` |
+| New or existing Hono API on Workers + D1 | `hono-d1-api` | `@softwareseva/core` |
+| Sign in, sessions, refresh tokens, roles | `auth-sessions` | `@softwareseva/auth` |
+| Phone sign-in with a WhatsApp or SMS code | `auth-whatsapp-otp` | `@softwareseva/auth` |
+| Google sign-in (web and mobile) | `auth-google` | `@softwareseva/auth` |
+| Sign in with Apple (web and mobile) | `auth-apple` | `@softwareseva/auth` |
+| Passkeys / WebAuthn | `auth-passkeys` | `@softwareseva/auth` |
+| List endpoint with search, sort, paging on D1 | `d1-list-pagination` | `@softwareseva/list` |
+| Offline-first sync endpoints | `sync-endpoints` | `@softwareseva/sync` |
+| React app styling and primitives | `kashi-ui-web` | `@softwareseva/ui` |
+| Directory or admin table screen in React | `react-data-table` | `@softwareseva/list` |
+| Calling the API from React | `api-client-react` | `@softwareseva/core`, `@softwareseva/auth` |
 | Flutter app styling and widgets | `kashi-ui-flutter` | `kashi_ui` |
 | Calling the API from Flutter | `flutter-api-client` | `kashi_core` |
 | Sign-in flows in Flutter | `flutter-auth` | `kashi_auth` |
 | Offline data with Drift in Flutter | `flutter-drift-sync` | `kashi_sync` |
-| Ship a Flutter app to TestFlight / Play | `deploy-flutter-fastlane` | `@kashi/cli` templates |
-| Deploy a Worker with D1 migrations in CI | `deploy-cloudflare` | `@kashi/cli` templates |
+| Ship a Flutter app to TestFlight / Play | `deploy-flutter-fastlane` | `@softwareseva/cli` templates |
+| Deploy a Worker with D1 migrations in CI | `deploy-cloudflare` | `@softwareseva/cli` templates |
 
 Every skill above is available. `references/roadmap.md` records what shipped in which phase.
 
@@ -39,7 +39,7 @@ Every skill above is available. `references/roadmap.md` records what shipped in 
 
 1. Add `AGENTS.md` from `templates/AGENTS.md` and fill the product and repository-map sections. Add `CLAUDE.md` and `GEMINI.md` from the templates; they only point to `AGENTS.md`.
 2. Add the `.gitignore` lines from `templates/gitignore` (secrets, build output).
-3. For npm packages: `pnpm add @kashi/<name>`. For Flutter: add `kashi_<name>: ^x.y.z` to `pubspec.yaml`.
+3. For npm packages: `pnpm add @softwareseva/<name>`. For Flutter: add `kashi_<name>: ^x.y.z` to `pubspec.yaml`.
 4. When a package ships SQL, copy its `migrations/*.sql` into the project's migrations directory with the next sequence number. Never edit an applied migration.
 5. Read each installed package's `secrets.json`, generate the secrets it lists, store them where it says (`wrangler secret put`, `.dev.vars`, CI secrets), and confirm they are gitignored.
 
@@ -61,4 +61,4 @@ Full text: `references/conventions.md`.
 
 ## Update packages
 
-`npx kashi update` bumps every `@kashi/*` package, copies new package migrations into the project, and refreshes files written by template modules (deploy workflows, fastlane lanes): files you have not edited are updated in place, edited ones get the new version beside them as `<file>.kashi-new`. For Flutter packages run `flutter pub upgrade --major-versions`.
+`npx @softwareseva/cli update` bumps every `@softwareseva/*` package, copies new package migrations into the project, and refreshes files written by template modules (deploy workflows, fastlane lanes): files you have not edited are updated in place, edited ones get the new version beside them as `<file>.kashi-new`. For Flutter packages run `flutter pub upgrade --major-versions`.

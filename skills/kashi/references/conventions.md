@@ -1,6 +1,6 @@
 # kashi conventions
 
-These rules apply to every project on the stack. They are written so that code can be lifted into a `@kashi/*` or `kashi_*` package later without rework.
+These rules apply to every project on the stack. They are written so that code can be lifted into a `@softwareseva/*` or `kashi_*` package later without rework.
 
 ## Architecture
 

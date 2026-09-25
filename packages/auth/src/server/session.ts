@@ -2,7 +2,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { sign, verify } from "hono/jwt";
-import { ApiError, futureIso, nowIso, randomToken } from "@kashi/core/server";
+import { ApiError, futureIso, nowIso, randomToken } from "@softwareseva/core/server";
 import { resolveEnv } from "./env";
 import { AuthStore } from "./store";
 import type { AuthConfig, AuthEnv, AuthUser, AuthVariables, SessionPair, Transport } from "./types";

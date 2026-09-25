@@ -1,11 +1,11 @@
-# @kashi/ui
+# @softwareseva/ui
 
 Accessible React primitives on Tailwind v4, themed by CSS variables. Ships the default **kaushik** theme (warm paper surfaces, saffron brand) with light and dark modes. Override any `--token` in your own CSS to rebrand.
 
 ## Install
 
 ```bash
-pnpm add @kashi/ui react react-dom tailwindcss lucide-react class-variance-authority clsx tailwind-merge \
+pnpm add @softwareseva/ui react react-dom tailwindcss lucide-react class-variance-authority clsx tailwind-merge \
   @radix-ui/react-slot @radix-ui/react-select @radix-ui/react-dropdown-menu @radix-ui/react-radio-group \
   @radix-ui/react-checkbox @radix-ui/react-switch
 ```
@@ -13,10 +13,10 @@ pnpm add @kashi/ui react react-dom tailwindcss lucide-react class-variance-autho
 In your app CSS (the order matters, and the `@source` line is required or Tailwind will not generate the classes used inside the package):
 
 ```css
-@import "@kashi/ui/fonts.css";   /* optional; must come first */
+@import "@softwareseva/ui/fonts.css";   /* optional; must come first */
 @import "tailwindcss";
-@import "@kashi/ui/kashi.css";
-@source "../node_modules/@kashi/ui/dist";
+@import "@softwareseva/ui/kashi.css";
+@source "../node_modules/@softwareseva/ui/dist";
 ```
 
 Dark mode: add the `dark` class to `<html>`.

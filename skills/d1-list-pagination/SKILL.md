@@ -1,10 +1,10 @@
 ---
 name: d1-list-pagination
-description: Add a paginated, searchable, sortable list endpoint on Cloudflare D1 with @kashi/list. Use when a route returns a collection (directory, admin table, feed, search results), when adding sort or search to an existing list, when choosing between keyset cursors and page numbers, or when a list query is slow and needs the right index.
+description: Add a paginated, searchable, sortable list endpoint on Cloudflare D1 with @softwareseva/list. Use when a route returns a collection (directory, admin table, feed, search results), when adding sort or search to an existing list, when choosing between keyset cursors and page numbers, or when a list query is slow and needs the right index.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/list@0.1 @kashi/core@0.1"
+  packages: "@softwareseva/list@0.1 @softwareseva/core@0.1"
 ---
 
 # Lists on D1

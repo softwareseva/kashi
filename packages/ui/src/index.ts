@@ -1,4 +1,4 @@
-/** @kashi/ui — accessible primitives on Tailwind v4 with the kashi tokens. */
+/** @softwareseva/ui — accessible primitives on Tailwind v4 with the kashi tokens. */
 export { cn } from "./lib/utils";
 export * from "./components/ui/button";
 export * from "./components/ui/input";

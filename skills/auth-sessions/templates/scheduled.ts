@@ -1,6 +1,6 @@
 /** Daily cleanup. In wrangler.jsonc: "triggers": { "crons": ["17 3 * * *"] } */
-import { AuthStore } from "@kashi/auth/server";
-import { pruneRateLimits } from "@kashi/core/server";
+import { AuthStore } from "@softwareseva/auth/server";
+import { pruneRateLimits } from "@softwareseva/core/server";
 import app from "./index";
 import type { Bindings } from "./types";
 

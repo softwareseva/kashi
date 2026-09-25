@@ -1,4 +1,4 @@
-# @kashi/sync
+# @softwareseva/sync
 
 Server half of offline-first sync. Pair with `kashi_sync` in Flutter.
 

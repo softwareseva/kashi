@@ -12,13 +12,13 @@
     "kashi": "kashi"
   },
   "dependencies": {
-    "@kashi/core": "workspace:*",
-    "@kashi/list": "workspace:*",
+    "@softwareseva/core": "workspace:*",
+    "@softwareseva/list": "workspace:*",
     "hono": "^4.13.9",
     "zod": "^4.6.0",
-    "@kashi/auth": "workspace:*",
+    "@softwareseva/auth": "workspace:*",
     "@simplewebauthn/server": "^14.0.2",
-    "@kashi/sync": "workspace:*"
+    "@softwareseva/sync": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.2.7",
@@ -26,6 +26,6 @@
     "typescript": "^5.9.0",
     "vitest": "^4.1.0",
     "wrangler": "^4.140.0",
-    "@kashi/cli": "workspace:*"
+    "@softwareseva/cli": "workspace:*"
   }
 }

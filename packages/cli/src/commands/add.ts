@@ -7,11 +7,11 @@ import { addModule } from "./modules.js";
 import { listModules } from "../modules.js";
 
 const FEATURES: Record<string, { pkg: string; mount?: string }> = {
-  core: { pkg: "@kashi/core" },
-  list: { pkg: "@kashi/list" },
-  auth: { pkg: "@kashi/auth", mount: 'app.route("/v1/auth", authRouter({ /* see the auth-sessions skill */ }));' },
-  sync: { pkg: "@kashi/sync", mount: 'app.route("/v1/sync", syncRouter({ handlers }));' },
-  ui: { pkg: "@kashi/ui" },
+  core: { pkg: "@softwareseva/core" },
+  list: { pkg: "@softwareseva/list" },
+  auth: { pkg: "@softwareseva/auth", mount: 'app.route("/v1/auth", authRouter({ /* see the auth-sessions skill */ }));' },
+  sync: { pkg: "@softwareseva/sync", mount: 'app.route("/v1/sync", syncRouter({ handlers }));' },
+  ui: { pkg: "@softwareseva/ui" },
 };
 
 export function add(cwd: string, feature: string, options: { install?: boolean; force?: boolean; var?: string[] }, version = "0.0.0") {

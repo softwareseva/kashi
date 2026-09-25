@@ -1,7 +1,7 @@
 /** Light, dark or system theme; stored per browser. Put the inline script from `themeBootScript` in index.html to avoid a flash. */
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { IconButton } from "@kashi/ui";
+import { IconButton } from "@softwareseva/ui";
 
 type Theme = "light" | "dark" | "system";
 const KEY = "theme";

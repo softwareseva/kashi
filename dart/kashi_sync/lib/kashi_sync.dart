@@ -1,4 +1,4 @@
-/// Offline-first sync for Flutter on Drift and @kashi/sync.
+/// Offline-first sync for Flutter on Drift and @softwareseva/sync.
 library;
 
 export 'src/engine.dart';

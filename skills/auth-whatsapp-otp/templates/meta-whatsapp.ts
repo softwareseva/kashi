@@ -1,5 +1,5 @@
-/** WhatsApp Cloud API sender for @kashi/auth OTP. Secrets: WHATSAPP_TOKEN; vars: WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_TEMPLATE, WHATSAPP_TEMPLATE_LANG. */
-import type { AuthEnv } from "@kashi/auth/server";
+/** WhatsApp Cloud API sender for @softwareseva/auth OTP. Secrets: WHATSAPP_TOKEN; vars: WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_TEMPLATE, WHATSAPP_TEMPLATE_LANG. */
+import type { AuthEnv } from "@softwareseva/auth/server";
 import type { Context } from "hono";
 
 type MetaBindings = { WHATSAPP_TOKEN: string; WHATSAPP_PHONE_NUMBER_ID: string; WHATSAPP_TEMPLATE: string; WHATSAPP_TEMPLATE_LANG?: string };

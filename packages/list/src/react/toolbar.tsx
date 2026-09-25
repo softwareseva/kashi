@@ -1,7 +1,7 @@
 /** Search box (debounced), page-size select and previous/next cursor buttons for directory screens. */
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, cn } from "@kashi/ui";
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, cn } from "@softwareseva/ui";
 
 export function DirectoryToolbar({ q, onSearch, limit, onLimit, placeholder = "Search", limits = [10, 25, 50, 100], debounceMs = 300, children, className }: {
   q: string;

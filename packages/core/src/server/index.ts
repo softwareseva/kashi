@@ -1,4 +1,4 @@
-/** @kashi/core/server — Hono + D1 foundation. */
+/** @softwareseva/core/server — Hono + D1 foundation. */
 export { createApp, type CreateAppOptions, type CoreEnv, type CoreVariables } from "./app";
 export { ApiError, ok, clientIp, nowIso, futureIso, nowUnix, type ApiFailure, type ApiSuccess, type ErrorStatus, type FieldErrors } from "./http";
 export { randomToken, randomDigits, bytesToBase64Url, base64UrlToBytes, sha256, sha256Hex, hmac, safeEqual } from "./crypto";

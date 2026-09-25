@@ -1,5 +1,5 @@
 {
-  "name": "@kashi/core",
+  "name": "@softwareseva/core",
   "version": "0.1.0",
   "description": "Shared foundation for kashi apps: Hono app factory with request ids and error envelope, ApiError, WebCrypto helpers, PBKDF2 passwords, sortable ids, phone normalisation, LIKE escaping, D1 rate limiting, and a fetch client with shared session refresh.",
   "license": "MIT",

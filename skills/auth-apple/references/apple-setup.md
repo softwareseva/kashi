@@ -21,7 +21,7 @@
 
 ## Client secret
 
-Apple's client secret is a JWT (`ES256`, header `kid` = key id; claims `iss` = team id, `sub` = Services ID, `aud` = `https://appleid.apple.com`, `exp` at most 6 months). `@kashi/auth` mints a 10-minute one per exchange with WebCrypto, so there is nothing to rotate on a calendar. The `.p8` key itself does not expire; revoke and replace it if it leaks.
+Apple's client secret is a JWT (`ES256`, header `kid` = key id; claims `iss` = team id, `sub` = Services ID, `aud` = `https://appleid.apple.com`, `exp` at most 6 months). `@softwareseva/auth` mints a 10-minute one per exchange with WebCrypto, so there is nothing to rotate on a calendar. The `.p8` key itself does not expire; revoke and replace it if it leaks.
 
 ## Verification
 

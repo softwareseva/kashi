@@ -1,5 +1,5 @@
-/** All SQL for @kashi/auth. Tables are created by the package migrations (auth_*). */
-import { newId, nowIso, sha256 } from "@kashi/core/server";
+/** All SQL for @softwareseva/auth. Tables are created by the package migrations (auth_*). */
+import { newId, nowIso, sha256 } from "@softwareseva/core/server";
 import type { AuthUser } from "./types";
 
 type UserRow = { id: string; display_name: string; email: string | null; phone: string | null; roles: string; email_verified_at: string | null; phone_verified_at: string | null; password_hash: string | null; disabled_at: string | null };

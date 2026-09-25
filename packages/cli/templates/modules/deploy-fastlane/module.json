@@ -24,6 +24,6 @@
     "Create the upload keystore once: keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload (keep it out of git; back it up in a password manager).",
     "Create a private git repo for match certificates, then from {{APP_DIR}}/ios run: bundle install && bundle exec fastlane certificates",
     "Upload the first Android build to Google Play by hand (Play Console requires it before the API can upload).",
-    "Set the repository secrets listed by: npx kashi secrets"
+    "Set the repository secrets listed by: npx @softwareseva/cli secrets"
   ]
 }

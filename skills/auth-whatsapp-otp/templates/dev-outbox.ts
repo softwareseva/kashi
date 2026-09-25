@@ -1,6 +1,6 @@
 /** Outside production, write codes to dev_outbox instead of sending them. Pair with templates/dev-outbox.sql. */
-import type { AuthEnv } from "@kashi/auth/server";
-import { nowIso } from "@kashi/core/server";
+import type { AuthEnv } from "@softwareseva/auth/server";
+import { nowIso } from "@softwareseva/core/server";
 import type { Context } from "hono";
 
 export function withDevOutbox(send: (env: AuthEnv, destination: string, code: string, c: Context) => Promise<void>) {

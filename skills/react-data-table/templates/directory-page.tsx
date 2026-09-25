@@ -1,7 +1,7 @@
 /** Directory page: URL-backed search, sort, page size and cursor paging over a kashi list endpoint. */
 import { useSearchParams } from "react-router";
-import { CursorPagination, DataTable, DirectoryToolbar, useDirectory, type DataColumn } from "@kashi/list/react";
-import { Alert } from "@kashi/ui";
+import { CursorPagination, DataTable, DirectoryToolbar, useDirectory, type DataColumn } from "@softwareseva/list/react";
+import { Alert } from "@softwareseva/ui";
 import { useNotes, type Note, type NoteSort } from "../hooks/use-notes";
 
 const defaults = { sort: "updatedAt", direction: "desc", sortKeys: ["updatedAt", "title"] } as const satisfies { sort: NoteSort; direction: "desc"; sortKeys: readonly NoteSort[] };

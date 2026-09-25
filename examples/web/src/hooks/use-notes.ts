@@ -1,6 +1,6 @@
 /** Notes resource hooks. Pages use these, never the api client directly. */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toQueryString, type DirectoryQuery, type Page } from "@kashi/list/react";
+import { toQueryString, type DirectoryQuery, type Page } from "@softwareseva/list/react";
 import { api } from "../lib/api";
 
 export type Note = { id: string; title: string; body: string; createdAt: string; updatedAt: string };

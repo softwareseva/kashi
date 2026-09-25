@@ -1,4 +1,4 @@
-# @kashi/ui components
+# @softwareseva/ui components
 
 | Component | Use for | Key props |
 |---|---|---|
@@ -18,8 +18,8 @@
 
 Related packages built on these:
 
-- `@kashi/list/react`: `DataTable`, `DirectoryToolbar`, `CursorPagination` (see `react-data-table`).
-- `@kashi/auth/react`: `SignIn`, `OtpSignIn`, `PasskeyButton`, `OAuthButton`, `PasswordSignIn` (see `api-client-react`).
+- `@softwareseva/list/react`: `DataTable`, `DirectoryToolbar`, `CursorPagination` (see `react-data-table`).
+- `@softwareseva/auth/react`: `SignIn`, `OtpSignIn`, `PasskeyButton`, `OAuthButton`, `PasswordSignIn` (see `api-client-react`).
 
 Choosing:
 

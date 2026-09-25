@@ -1,5 +1,5 @@
 {
-  "name": "@kashi/list",
+  "name": "@softwareseva/list",
   "version": "0.1.0",
   "description": "Paginated, searchable, sortable lists for Cloudflare D1 and React: two-way keyset cursors on (sort_value, id), allowlisted sort keys, escaped LIKE search, an offset variant, the shared list-query contract, and a token-styled DataTable with URL-backed directory state.",
   "license": "MIT",
@@ -35,11 +35,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@kashi/core": "workspace:^"
+    "@softwareseva/core": "workspace:^"
   },
   "peerDependencies": {
     "zod": "^4.0.0",
-    "@kashi/ui": "workspace:^",
+    "@softwareseva/ui": "workspace:^",
     "react": "^19.0.0",
     "lucide-react": ">=0.500.0"
   },
@@ -48,13 +48,13 @@
     "typescript": "^5.9.0",
     "vitest": "^4.1.0",
     "zod": "^4.6.0",
-    "@kashi/ui": "workspace:*",
+    "@softwareseva/ui": "workspace:*",
     "@types/react": "^19.0.0",
     "react": "^19.0.0",
     "lucide-react": "^0.500.0"
   },
   "peerDependenciesMeta": {
-    "@kashi/ui": {
+    "@softwareseva/ui": {
       "optional": true
     },
     "react": {

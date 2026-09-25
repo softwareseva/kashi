@@ -1,15 +1,15 @@
 ---
 name: auth-whatsapp-otp
-description: Phone or email sign-in with one-time codes using @kashi/auth, delivered over WhatsApp (AiSensy or Meta Cloud API), SMS, or email. Use when adding OTP login, passwordless phone sign-in, verifying a phone number, writing a WhatsApp or SMS sender adapter, or tuning OTP rate limits and code expiry.
+description: Phone or email sign-in with one-time codes using @softwareseva/auth, delivered over WhatsApp (AiSensy or Meta Cloud API), SMS, or email. Use when adding OTP login, passwordless phone sign-in, verifying a phone number, writing a WhatsApp or SMS sender adapter, or tuning OTP rate limits and code expiry.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/auth@0.1"
+  packages: "@softwareseva/auth@0.1"
 ---
 
 # One-time codes (WhatsApp, SMS, email)
 
-The `otp` provider in `@kashi/auth` generates, stores and verifies codes. You supply one function that delivers the code. Read `auth-sessions` first; this skill only covers the OTP provider.
+The `otp` provider in `@softwareseva/auth` generates, stores and verifies codes. You supply one function that delivers the code. Read `auth-sessions` first; this skill only covers the OTP provider.
 
 ## Enable
 
@@ -61,7 +61,7 @@ WhatsApp templates cost money per message; the per-destination limit also caps s
 
 ## UI
 
-React: `<OtpSignIn channel="phone" />` or `useOtp()` from `@kashi/auth/react`. Use `autoComplete="one-time-code"` and `inputMode="numeric"` on the code field (the component does). Flutter: the `flutter-auth` skill.
+React: `<OtpSignIn channel="phone" />` or `useOtp()` from `@softwareseva/auth/react`. Use `autoComplete="one-time-code"` and `inputMode="numeric"` on the code field (the component does). Flutter: the `flutter-auth` skill.
 
 ## Test
 

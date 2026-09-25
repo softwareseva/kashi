@@ -1,5 +1,5 @@
 import { env, SELF } from "cloudflare:test";
-import { hashPassword } from "@kashi/core/server";
+import { hashPassword } from "@softwareseva/core/server";
 import { describe, expect, it } from "vitest";
 
 const call = (path: string, init: RequestInit = {}) => SELF.fetch(`http://example.com/v1${path}`, { ...init, headers: { "Content-Type": "application/json", ...init.headers } });

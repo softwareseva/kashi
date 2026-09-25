@@ -17,21 +17,21 @@ importers:
 
   examples/api:
     dependencies:
-      '@kashi/auth':
-        specifier: workspace:*
-        version: link:../../packages/auth
-      '@kashi/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@kashi/list':
-        specifier: workspace:*
-        version: link:../../packages/list
-      '@kashi/sync':
-        specifier: workspace:*
-        version: link:../../packages/sync
       '@simplewebauthn/server':
         specifier: ^14.0.2
         version: 14.0.2
+      '@softwareseva/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@softwareseva/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@softwareseva/list':
+        specifier: workspace:*
+        version: link:../../packages/list
+      '@softwareseva/sync':
+        specifier: workspace:*
+        version: link:../../packages/sync
       hono:
         specifier: ^4.13.9
         version: 4.13.9
@@ -45,7 +45,7 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^5.0.0
         version: 5.20260924.1
-      '@kashi/cli':
+      '@softwareseva/cli':
         specifier: workspace:*
         version: link:../../packages/cli
       typescript:
@@ -60,18 +60,6 @@ importers:
 
   examples/web:
     dependencies:
-      '@kashi/auth':
-        specifier: workspace:*
-        version: link:../../packages/auth
-      '@kashi/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@kashi/list':
-        specifier: workspace:*
-        version: link:../../packages/list
-      '@kashi/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@radix-ui/react-checkbox':
         specifier: ^1.3.0
         version: 1.3.11(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -93,6 +81,18 @@ importers:
       '@simplewebauthn/browser':
         specifier: ^14.0.0
         version: 14.0.0
+      '@softwareseva/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@softwareseva/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@softwareseva/list':
+        specifier: workspace:*
+        version: link:../../packages/list
+      '@softwareseva/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@tanstack/react-query':
         specifier: ^5.103.0
         version: 5.103.2(react@19.3.0)
@@ -142,22 +142,22 @@ importers:
 
   packages/auth:
     dependencies:
-      '@kashi/core':
+      '@softwareseva/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^5.0.0
         version: 5.20260924.1
-      '@kashi/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@simplewebauthn/browser':
         specifier: ^14.0.0
         version: 14.0.0
       '@simplewebauthn/server':
         specifier: ^14.0.2
         version: 14.0.2
+      '@softwareseva/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@types/react':
         specifier: ^19.0.0
         version: 19.3.0
@@ -220,14 +220,14 @@ importers:
 
   packages/list:
     dependencies:
-      '@kashi/core':
+      '@softwareseva/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^5.0.0
         version: 5.20260924.1
-      '@kashi/ui':
+      '@softwareseva/ui':
         specifier: workspace:*
         version: link:../ui
       '@types/react':
@@ -251,7 +251,7 @@ importers:
 
   packages/sync:
     dependencies:
-      '@kashi/core':
+      '@softwareseva/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:

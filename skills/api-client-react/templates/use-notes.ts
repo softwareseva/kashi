@@ -1,6 +1,6 @@
 /** Hooks for the notes resource: keys, list, detail, create. Pages use these, never the api client directly. */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Page } from "@kashi/list/contracts";
+import type { Page } from "@softwareseva/list/contracts";
 import { api } from "../lib/api";
 
 export type Note = { id: string; title: string; body: string; updatedAt: string };

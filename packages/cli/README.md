@@ -1,15 +1,15 @@
-# @kashi/cli
+# @softwareseva/cli
 
 ```bash
-npx kashi init            # AGENTS.md, CLAUDE.md, GEMINI.md, .gitignore lines, renovate.json
-npx kashi add auth        # install @kashi/auth, copy its migrations, print its secrets checklist and mount snippet
-npx kashi add deploy-cloudflare   # GitHub Actions: test, migrate D1, deploy Worker (+ web) to staging/production
-npx kashi add deploy-fastlane     # fastlane lanes + workflow for TestFlight/App Store and Google Play
-npx kashi modules         # list template modules
-npx kashi migrate         # copy new package migrations into your migrations dir (tracked in kashi.lock.json)
-npx kashi secrets         # every secret your installed packages need: how to generate, where to store
-npx kashi doctor          # gitignore coverage, tracked secret files, missing secrets, pending migrations
-npx kashi update          # bump every @kashi/* package, copy new migrations, refresh module files you have not edited
+npx @softwareseva/cli init            # AGENTS.md, CLAUDE.md, GEMINI.md, .gitignore lines, renovate.json
+npx @softwareseva/cli add auth        # install @softwareseva/auth, copy its migrations, print its secrets checklist and mount snippet
+npx @softwareseva/cli add deploy-cloudflare   # GitHub Actions: test, migrate D1, deploy Worker (+ web) to staging/production
+npx @softwareseva/cli add deploy-fastlane     # fastlane lanes + workflow for TestFlight/App Store and Google Play
+npx @softwareseva/cli modules         # list template modules
+npx @softwareseva/cli migrate         # copy new package migrations into your migrations dir (tracked in kashi.lock.json)
+npx @softwareseva/cli secrets         # every secret your installed packages need: how to generate, where to store
+npx @softwareseva/cli doctor          # gitignore coverage, tracked secret files, missing secrets, pending migrations
+npx @softwareseva/cli update          # bump every @softwareseva/* package, copy new migrations, refresh module files you have not edited
 ```
 
 Packages declare their secrets in `secrets.json` (schema: `secrets.schema.json`) and ship SQL in `migrations/`. The CLI never prints secret values.

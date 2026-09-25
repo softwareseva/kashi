@@ -1,4 +1,4 @@
-/** @kashi/list/react — DataTable, URL-backed directory state, toolbar and cursor pagination. */
+/** @softwareseva/list/react — DataTable, URL-backed directory state, toolbar and cursor pagination. */
 export { DataTable, type DataColumn, type DataTableProps } from "./data-table";
 export { DirectoryToolbar, CursorPagination } from "./toolbar";
 export { useDirectory, useUrlSearchParams, type Directory, type SearchParamsPair } from "./use-directory";

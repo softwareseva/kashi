@@ -1,4 +1,4 @@
--- @kashi/sync: applied client operations (for idempotent replay) and the change log clients pull from.
+-- @softwareseva/sync: applied client operations (for idempotent replay) and the change log clients pull from.
 CREATE TABLE IF NOT EXISTS sync_ops (
   op_id TEXT NOT NULL,
   user_id TEXT NOT NULL,

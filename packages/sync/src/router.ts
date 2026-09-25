@@ -1,7 +1,7 @@
 /** syncRouter(config): POST /push applies client operations exactly once; GET /pull streams changes after a cursor. */
 import { Hono, type Context, type MiddlewareHandler } from "hono";
 import { z, type ZodType } from "zod";
-import { ApiError, nowIso, ok } from "@kashi/core/server";
+import { ApiError, nowIso, ok } from "@softwareseva/core/server";
 import { changeStatement, type Change } from "./changes";
 
 export type SyncUser = { id: string };
@@ -28,7 +28,7 @@ export type SyncEntity<U extends SyncUser> = {
 };
 
 export type SyncConfig<U extends SyncUser> = {
-  /** Middleware that authenticates (e.g. requireAuth from @kashi/auth). */
+  /** Middleware that authenticates (e.g. requireAuth from @softwareseva/auth). */
   auth: MiddlewareHandler;
   /** Read the user set by `auth`. */
   user: (c: Context) => U;

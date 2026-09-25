@@ -1,4 +1,4 @@
-/// Time-sortable ids compatible with `@kashi/core` `newId()`: `<prefix>_<base36 ms><12 hex>`.
+/// Time-sortable ids compatible with `@softwareseva/core` `newId()`: `<prefix>_<base36 ms><12 hex>`.
 library;
 
 import 'dart:math';

@@ -1,6 +1,6 @@
 # Agent guide for this repository
 
-This repository is the source of both the `@kashi/*` / `kashi_*` packages and the Agent Skills that teach how to use them. `CLAUDE.md` and `GEMINI.md` point here.
+This repository is the source of both the `@softwareseva/*` / `kashi_*` packages and the Agent Skills that teach how to use them. `CLAUDE.md` and `GEMINI.md` point here.
 
 ## Before changing anything
 

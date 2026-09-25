@@ -1,17 +1,17 @@
 ---
 name: api-client-react
-description: Call a kashi (Hono + D1) API from React with @kashi/core/client and @kashi/auth/react, with one fetch client that unwraps the { data } envelope, throws typed ApiError, refreshes the session once on 401, plus AuthProvider, useAuth, sign-in components, and the TanStack Query hook-per-resource convention. Use when setting up data fetching or sign-in in a React app, adding a query or mutation hook, or handling API errors and field validation messages in forms.
+description: Call a kashi (Hono + D1) API from React with @softwareseva/core/client and @softwareseva/auth/react, with one fetch client that unwraps the { data } envelope, throws typed ApiError, refreshes the session once on 401, plus AuthProvider, useAuth, sign-in components, and the TanStack Query hook-per-resource convention. Use when setting up data fetching or sign-in in a React app, adding a query or mutation hook, or handling API errors and field validation messages in forms.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/core@0.1 @kashi/auth@0.1"
+  packages: "@softwareseva/core@0.1 @softwareseva/auth@0.1"
 ---
 
 # React API client and auth
 
 ## Setup
 
-1. `pnpm add @kashi/core @kashi/auth @kashi/ui @tanstack/react-query @simplewebauthn/browser`.
+1. `pnpm add @softwareseva/core @softwareseva/auth @softwareseva/ui @tanstack/react-query @simplewebauthn/browser`.
 2. Copy `templates/api.ts` to `src/lib/api.ts`. It creates one client: cookie credentials, refresh through `POST /auth/refresh`, and redirect to `/sign-in` when refresh fails.
 3. Wrap the app (`templates/main.tsx`): `QueryClientProvider` then `AuthProvider api={api}`.
 4. Guard routes with `useAuth().status` (`"loading" | "signed-in" | "signed-out"`), see `templates/require-auth.tsx`.
@@ -45,9 +45,9 @@ Pages import hooks, never `api` directly. For lists, pair with the `react-data-t
 
 ## Tailwind
 
-`@kashi/auth/react` components use `@kashi/ui` classes. Add both packages to Tailwind's sources:
+`@softwareseva/auth/react` components use `@softwareseva/ui` classes. Add both packages to Tailwind's sources:
 
 ```css
-@source "../node_modules/@kashi/ui/dist";
-@source "../node_modules/@kashi/auth/dist/react";
+@source "../node_modules/@softwareseva/ui/dist";
+@source "../node_modules/@softwareseva/auth/dist/react";
 ```

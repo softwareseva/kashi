@@ -1,5 +1,5 @@
 /* kashi design tokens (default theme: kaushik) — Tailwind v4 + shadcn variable mapping.
-   In your app CSS, in this order: @import "@kashi/ui/fonts.css"; @import "tailwindcss"; @import "@kashi/ui/kashi.css"; @source "../node_modules/@kashi/ui/dist"; */
+   In your app CSS, in this order: @import "@softwareseva/ui/fonts.css"; @import "tailwindcss"; @import "@softwareseva/ui/kashi.css"; @source "../node_modules/@softwareseva/ui/dist"; */
 
 @custom-variant dark (&:is(.dark *));
 

@@ -1,5 +1,5 @@
 /** Route guard: shows nothing while the session loads, redirects to sign-in when signed out. */
-import { useAuth } from "@kashi/auth/react";
+import { useAuth } from "@softwareseva/auth/react";
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
 

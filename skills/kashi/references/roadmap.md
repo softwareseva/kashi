@@ -2,12 +2,12 @@
 
 | Phase | Packages | Skills | Status |
 |---|---|---|---|
-| 0 | `@kashi/ui`, `kashi_ui`, tokens | `kashi` | done |
-| 1 | `@kashi/core`, `@kashi/list` (server), `@kashi/cli` (init, add, migrate, secrets, doctor, update) | `hono-d1-api`, `d1-list-pagination` | done |
-| 2 | `@kashi/auth` (server + react) | `auth-sessions`, `auth-whatsapp-otp`, `auth-google`, `auth-apple`, `auth-passkeys`, `api-client-react` | done |
-| 3 | `@kashi/list/react` DataTable, `@kashi/ui/fonts.css` | `kashi-ui-web`, `react-data-table` | done |
+| 0 | `@softwareseva/ui`, `kashi_ui`, tokens | `kashi` | done |
+| 1 | `@softwareseva/core`, `@softwareseva/list` (server), `@softwareseva/cli` (init, add, migrate, secrets, doctor, update) | `hono-d1-api`, `d1-list-pagination` | done |
+| 2 | `@softwareseva/auth` (server + react) | `auth-sessions`, `auth-whatsapp-otp`, `auth-google`, `auth-apple`, `auth-passkeys`, `api-client-react` | done |
+| 3 | `@softwareseva/list/react` DataTable, `@softwareseva/ui/fonts.css` | `kashi-ui-web`, `react-data-table` | done |
 | 4 | `kashi_core`, `kashi_auth`, `kashi_list` | `kashi-ui-flutter`, `flutter-api-client`, `flutter-auth` | done |
-| 5 | `@kashi/sync`, `kashi_sync` | `sync-endpoints`, `flutter-drift-sync` | done |
-| 6 | `@kashi/cli` template modules (deploy-cloudflare, deploy-fastlane), hash-tracked updates | `deploy-flutter-fastlane`, `deploy-cloudflare` | done |
+| 5 | `@softwareseva/sync`, `kashi_sync` | `sync-endpoints`, `flutter-drift-sync` | done |
+| 6 | `@softwareseva/cli` template modules (deploy-cloudflare, deploy-fastlane), hash-tracked updates | `deploy-flutter-fastlane`, `deploy-cloudflare` | done |
 
 Not yet done: publishing to npm and pub.dev (needs the npm scope and pub.dev publisher confirmed), and a public GitHub remote.

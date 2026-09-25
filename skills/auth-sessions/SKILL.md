@@ -1,25 +1,25 @@
 ---
 name: auth-sessions
-description: Add sign-in and sessions to a Hono API on Cloudflare Workers + D1 with @kashi/auth. Use when adding authentication, protecting routes, adding roles or admin-only endpoints, choosing between cookie and bearer-token sessions, handling refresh tokens, sign-out, or when wiring React or Flutter clients to the auth API. Start here before any provider-specific auth skill.
+description: Add sign-in and sessions to a Hono API on Cloudflare Workers + D1 with @softwareseva/auth. Use when adding authentication, protecting routes, adding roles or admin-only endpoints, choosing between cookie and bearer-token sessions, handling refresh tokens, sign-out, or when wiring React or Flutter clients to the auth API. Start here before any provider-specific auth skill.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/auth@0.1 @kashi/core@0.1"
+  packages: "@softwareseva/auth@0.1 @softwareseva/core@0.1"
 ---
 
-# Sessions with @kashi/auth
+# Sessions with @softwareseva/auth
 
 `authRouter(config)` mounts every sign-in method plus refresh and sign-out as one Hono sub-app. Guards (`requireAuth`, `requireRole`) protect your own routes. You own only the config object, the OTP sender, and optional hooks.
 
 ## Install
 
-1. `pnpm add @kashi/auth` (and `@simplewebauthn/server` if passkeys are on).
-2. `npx kashi migrate` copies `auth_0001_users_sessions.sql` and `auth_0002_otp_passkeys.sql` into `migrations/`. Apply them locally with `wrangler d1 migrations apply <db> --local`.
-3. `npx kashi secrets` lists what to set. Minimum: `JWT_SECRET` (`openssl rand -base64 48`) as a secret and `WEB_ORIGIN` as a var. Put local values in `.dev.vars` (gitignored).
+1. `pnpm add @softwareseva/auth` (and `@simplewebauthn/server` if passkeys are on).
+2. `npx @softwareseva/cli migrate` copies `auth_0001_users_sessions.sql` and `auth_0002_otp_passkeys.sql` into `migrations/`. Apply them locally with `wrangler d1 migrations apply <db> --local`.
+3. `npx @softwareseva/cli secrets` lists what to set. Minimum: `JWT_SECRET` (`openssl rand -base64 48`) as a secret and `WEB_ORIGIN` as a var. Put local values in `.dev.vars` (gitignored).
 4. Copy `templates/auth.ts` to `src/auth.ts`, enable the providers you need, and mount in `src/index.ts`:
 
 ```ts
-import { authRouter } from "@kashi/auth/server";
+import { authRouter } from "@softwareseva/auth/server";
 import { authConfig } from "./auth";
 app.route("/v1/auth", authRouter(authConfig));
 ```
@@ -29,7 +29,7 @@ app.route("/v1/auth", authRouter(authConfig));
 ## Protect routes
 
 ```ts
-import { requireAuth, requireRole } from "@kashi/auth/server";
+import { requireAuth, requireRole } from "@softwareseva/auth/server";
 app.get("/v1/me", requireAuth(authConfig), (c) => ok(c, c.get("user")));
 app.delete("/v1/admin/users/:id", requireRole(authConfig, "admin"), handler);
 ```
@@ -47,7 +47,7 @@ Never convert one into the other: a cookie session cannot mint a bearer pair. Th
 
 ## Refresh rotation
 
-Refresh tokens are random, stored only as SHA-256 hashes, and grouped by `family_id`. Each refresh marks the old token rotated and issues a new one in the same family. Presenting a rotated token again means it was stolen or replayed: the whole family is revoked and the response is `401 TOKEN_REUSE`. Clients must refresh once at a time: `@kashi/core/client` and `kashi_core` share one in-flight refresh across concurrent 401s. Details: `references/threat-model.md`.
+Refresh tokens are random, stored only as SHA-256 hashes, and grouped by `family_id`. Each refresh marks the old token rotated and issues a new one in the same family. Presenting a rotated token again means it was stolen or replayed: the whole family is revoked and the response is `401 TOKEN_REUSE`. Clients must refresh once at a time: `@softwareseva/core/client` and `kashi_core` share one in-flight refresh across concurrent 401s. Details: `references/threat-model.md`.
 
 ## Hooks
 

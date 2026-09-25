@@ -1,5 +1,5 @@
 /** Opaque, URL-safe cursors for keyset pagination. Invalid cursors never reach SQL. */
-import { ApiError } from "@kashi/core/server";
+import { ApiError } from "@softwareseva/core/server";
 
 export type CursorMode = "next" | "previous";
 export type Cursor = { value: string | number; id: string; mode: CursorMode };

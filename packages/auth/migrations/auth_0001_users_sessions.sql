@@ -1,4 +1,4 @@
--- @kashi/auth: users, external identities and rotating refresh sessions.
+-- @softwareseva/auth: users, external identities and rotating refresh sessions.
 CREATE TABLE IF NOT EXISTS auth_users (
   id TEXT PRIMARY KEY,
   display_name TEXT NOT NULL,

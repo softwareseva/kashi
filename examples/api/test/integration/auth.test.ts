@@ -1,5 +1,5 @@
 import { env, SELF } from "cloudflare:test";
-import { hashPassword } from "@kashi/core/server";
+import { hashPassword } from "@softwareseva/core/server";
 import { describe, expect, it } from "vitest";
 
 const ORIGIN = "http://localhost:5173";

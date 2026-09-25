@@ -1,7 +1,7 @@
 /** Example routes: parse with zod, delegate to the repository, answer with the envelope. */
 import { Hono } from "hono";
 import { z } from "zod";
-import { ApiError, ok, rateLimit } from "@kashi/core/server";
+import { ApiError, ok, rateLimit } from "@softwareseva/core/server";
 import { ExampleRepository } from "../repositories/example-repository";
 import type { AppEnv } from "../types";
 

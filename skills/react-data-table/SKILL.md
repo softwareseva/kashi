@@ -1,10 +1,10 @@
 ---
 name: react-data-table
-description: Build a directory or admin table screen in React with @kashi/list/react, covering the DataTable with sortable headers, skeleton loading, empty state and a card layout on phones, plus search, page size, sort and cursor paging kept in the URL with any router. Use when showing a list of records from a kashi API, adding sort or search to a table, making a table work on mobile, or wiring previous/next cursor pagination.
+description: Build a directory or admin table screen in React with @softwareseva/list/react, covering the DataTable with sortable headers, skeleton loading, empty state and a card layout on phones, plus search, page size, sort and cursor paging kept in the URL with any router. Use when showing a list of records from a kashi API, adding sort or search to a table, making a table work on mobile, or wiring previous/next cursor pagination.
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@kashi/list@0.1 @kashi/ui@0.1"
+  packages: "@softwareseva/list@0.1 @softwareseva/ui@0.1"
 ---
 
 # Directory screens
@@ -31,4 +31,4 @@ The server side is the `d1-list-pagination` skill: the endpoint accepts `q`, `so
 
 ## Tailwind
 
-Add `@source "../node_modules/@kashi/list/dist/react";` to the app CSS or the table renders without styles (see `kashi-ui-web`).
+Add `@source "../node_modules/@softwareseva/list/dist/react";` to the app CSS or the table renders without styles (see `kashi-ui-web`).

@@ -1,4 +1,4 @@
-/// kashi example app: sign in with @kashi/auth, browse notes with kashi_list, biometric lock.
+/// kashi example app: sign in with @softwareseva/auth, browse notes with kashi_list, biometric lock.
 library;
 
 import 'dart:io' show Platform;

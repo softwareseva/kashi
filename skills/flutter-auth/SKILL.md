@@ -1,6 +1,6 @@
 ---
 name: flutter-auth
-description: Sign-in for Flutter apps on @kashi/auth with kashi_auth and kashi_core, covering the Riverpod AuthController, go_router auth redirect, the KSignIn screen for WhatsApp/SMS codes and passwords, adapters for Google (google_sign_in 7), Sign in with Apple (sign_in_with_apple), passkeys (passkeys plugin) and biometric lock (local_auth), passkey settings, offline start, sign-out and the iOS and Android platform setup each method needs. Use when adding login, a sign-in screen, protecting routes, or wiring any sign-in method into a Flutter app.
+description: Sign-in for Flutter apps on @softwareseva/auth with kashi_auth and kashi_core, covering the Riverpod AuthController, go_router auth redirect, the KSignIn screen for WhatsApp/SMS codes and passwords, adapters for Google (google_sign_in 7), Sign in with Apple (sign_in_with_apple), passkeys (passkeys plugin) and biometric lock (local_auth), passkey settings, offline start, sign-out and the iOS and Android platform setup each method needs. Use when adding login, a sign-in screen, protecting routes, or wiring any sign-in method into a Flutter app.
 license: MIT
 metadata:
   version: "0.1.0"

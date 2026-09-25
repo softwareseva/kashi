@@ -1,5 +1,5 @@
 /** Auth configuration for this app. Import it wherever you mount the router or guard a route. */
-import type { AuthConfig, AuthEnv } from "@kashi/auth/server";
+import type { AuthConfig, AuthEnv } from "@softwareseva/auth/server";
 import type { Context } from "hono";
 
 async function sendCode(env: AuthEnv, destination: string, code: string, c: Context) {

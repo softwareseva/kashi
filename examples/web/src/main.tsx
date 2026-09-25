@@ -1,6 +1,6 @@
 /** Entry: query client, auth provider, app. */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@kashi/auth/react";
+import { AuthProvider } from "@softwareseva/auth/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app";

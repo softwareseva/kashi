@@ -28,7 +28,7 @@ export function resolveEnv(config: AuthConfig, raw: Record<string, unknown>): Au
   };
   const merged = { ...base, ...(config.env ? config.env(raw) : {}) } as AuthEnv;
   const missing = (["db", "jwtSecret"] as const).filter((k) => !merged[k]);
-  if (missing.length) throw new Error(`@kashi/auth: missing ${missing.map((k) => (k === "db" ? "DB binding" : "JWT_SECRET")).join(", ")}. See secrets.json.`);
-  if (!merged.origins.length) throw new Error("@kashi/auth: set WEB_ORIGIN (or WEB_ORIGINS) to the browser origin(s) that use cookie sessions.");
+  if (missing.length) throw new Error(`@softwareseva/auth: missing ${missing.map((k) => (k === "db" ? "DB binding" : "JWT_SECRET")).join(", ")}. See secrets.json.`);
+  if (!merged.origins.length) throw new Error("@softwareseva/auth: set WEB_ORIGIN (or WEB_ORIGINS) to the browser origin(s) that use cookie sessions.");
   return merged;
 }

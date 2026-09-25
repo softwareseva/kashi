@@ -6,12 +6,12 @@ Each feature ships as a package that bundles every layer, so one version bump up
 
 | Feature | npm (server + React) | pub.dev (Flutter) | Skills |
 |---|---|---|---|
-| Core: envelope, errors, crypto, ids, rate limits, API client | `@kashi/core` | `kashi_core` | `hono-d1-api`, `api-client-react`, `flutter-api-client` |
-| Auth: JWT sessions, WhatsApp OTP, Google, Apple, passkeys | `@kashi/auth` | `kashi_auth` | `auth-sessions`, `auth-whatsapp-otp`, `auth-google`, `auth-apple`, `auth-passkeys`, `flutter-auth` |
-| Lists: keyset pagination, search, sort, DataTable | `@kashi/list` | `kashi_list` | `d1-list-pagination`, `react-data-table` |
-| Offline sync: outbox, push/pull | `@kashi/sync` | `kashi_sync` | `sync-endpoints`, `flutter-drift-sync` |
-| Design system: tokens, primitives (light + dark) | `@kashi/ui` | `kashi_ui` | `kashi-ui-web`, `kashi-ui-flutter` |
-| Deploy: fastlane (iOS/Android), Cloudflare | `@kashi/cli` templates | | `deploy-flutter-fastlane`, `deploy-cloudflare` |
+| Core: envelope, errors, crypto, ids, rate limits, API client | `@softwareseva/core` | `kashi_core` | `hono-d1-api`, `api-client-react`, `flutter-api-client` |
+| Auth: JWT sessions, WhatsApp OTP, Google, Apple, passkeys | `@softwareseva/auth` | `kashi_auth` | `auth-sessions`, `auth-whatsapp-otp`, `auth-google`, `auth-apple`, `auth-passkeys`, `flutter-auth` |
+| Lists: keyset pagination, search, sort, DataTable | `@softwareseva/list` | `kashi_list` | `d1-list-pagination`, `react-data-table` |
+| Offline sync: outbox, push/pull | `@softwareseva/sync` | `kashi_sync` | `sync-endpoints`, `flutter-drift-sync` |
+| Design system: tokens, primitives (light + dark) | `@softwareseva/ui` | `kashi_ui` | `kashi-ui-web`, `kashi-ui-flutter` |
+| Deploy: fastlane (iOS/Android), Cloudflare | `@softwareseva/cli` templates | | `deploy-flutter-fastlane`, `deploy-cloudflare` |
 
 Status: all six build phases are done (18 skills, 6 npm packages, 5 Flutter packages, example API, web and Flutter apps). Not yet published to npm or pub.dev. Roadmap in `skills/kashi/references/roadmap.md`.
 
@@ -27,19 +27,19 @@ This symlinks every skill into `~/.claude/skills`, `~/.agents/skills` (Codex, Ch
 ## Use the packages
 
 ```bash
-npx kashi init            # AGENTS.md, pointers, .gitignore, renovate
-npx kashi add auth        # installs @kashi/auth, mounts routes, copies migrations, prints the secrets checklist
-npx kashi add deploy-cloudflare   # CI deploy of the Worker (and web app) with D1 migrations, staging and production
-npx kashi add deploy-fastlane     # TestFlight / App Store and Google Play lanes plus a release workflow
-npx kashi secrets         # every secret your packages and modules need: how to create it, where to store it
-npx kashi update          # bumps @kashi/* packages, copies new migrations, refreshes module files you have not edited
-npx kashi doctor          # checks gitignore, tracked secret files, local, Worker and GitHub secrets, pending migrations
+npx @softwareseva/cli init            # AGENTS.md, pointers, .gitignore, renovate
+npx @softwareseva/cli add auth        # installs @softwareseva/auth, mounts routes, copies migrations, prints the secrets checklist
+npx @softwareseva/cli add deploy-cloudflare   # CI deploy of the Worker (and web app) with D1 migrations, staging and production
+npx @softwareseva/cli add deploy-fastlane     # TestFlight / App Store and Google Play lanes plus a release workflow
+npx @softwareseva/cli secrets         # every secret your packages and modules need: how to create it, where to store it
+npx @softwareseva/cli update          # bumps @softwareseva/* packages, copies new migrations, refreshes module files you have not edited
+npx @softwareseva/cli doctor          # checks gitignore, tracked secret files, local, Worker and GitHub secrets, pending migrations
 ```
 
 ## Repo layout
 
 ```
-packages/   npm packages (@kashi/*)         dart/      pub.dev packages (kashi_*)
+packages/   npm packages (@softwareseva/*)         dart/      pub.dev packages (kashi_*)
 skills/     Agent Skills (SKILL.md)         examples/  api, web, app that consume the packages
 scripts/    install.sh, validate.sh         .github/   ci and release
 ```

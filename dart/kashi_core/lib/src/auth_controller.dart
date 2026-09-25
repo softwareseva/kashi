@@ -1,4 +1,4 @@
-/// Riverpod session state for apps signing in with `@kashi/auth` over the token transport.
+/// Riverpod session state for apps signing in with `@softwareseva/auth` over the token transport.
 library;
 
 import 'dart:async';
