@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "example-api", "runtimeExecutable": "pnpm", "runtimeArgs": ["--dir", "examples/api", "exec", "wrangler", "dev", "--port", "8797", "--var", "WEB_ORIGIN:http://localhost:5183"], "port": 8797 },
+    { "name": "example-web", "runtimeExecutable": "env", "runtimeArgs": ["PORT=5183", "API_URL=http://localhost:8797", "pnpm", "--dir", "examples/web", "dev"], "port": 5183 }
+  ]
+}

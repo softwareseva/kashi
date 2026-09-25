@@ -1,16 +1,33 @@
 {
   "name": "@kashi/list",
   "version": "0.1.0",
-  "description": "Paginated, searchable, sortable lists for Cloudflare D1: two-way keyset cursors on (sort_value, id), allowlisted sort keys, escaped LIKE search, an offset variant for small admin lists, and the zod list-query contract shared with clients.",
+  "description": "Paginated, searchable, sortable lists for Cloudflare D1 and React: two-way keyset cursors on (sort_value, id), allowlisted sort keys, escaped LIKE search, an offset variant, the shared list-query contract, and a token-styled DataTable with URL-backed directory state.",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/softwareseva/kashi", "directory": "packages/list" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/softwareseva/kashi",
+    "directory": "packages/list"
+  },
   "type": "module",
   "sideEffects": false,
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "exports": {
-    "./server": { "types": "./dist/server/index.d.ts", "import": "./dist/server/index.js" },
-    "./contracts": { "types": "./dist/contracts/index.d.ts", "import": "./dist/contracts/index.js" },
-    "./package.json": "./package.json"
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/index.d.ts",
+      "import": "./dist/contracts/index.js"
+    },
+    "./package.json": "./package.json",
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -21,12 +38,30 @@
     "@kashi/core": "workspace:^"
   },
   "peerDependencies": {
-    "zod": "^4.0.0"
+    "zod": "^4.0.0",
+    "@kashi/ui": "workspace:^",
+    "react": "^19.0.0",
+    "lucide-react": ">=0.500.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.0.0",
     "typescript": "^5.9.0",
     "vitest": "^4.1.0",
-    "zod": "^4.6.0"
+    "zod": "^4.6.0",
+    "@kashi/ui": "workspace:*",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "lucide-react": "^0.500.0"
+  },
+  "peerDependenciesMeta": {
+    "@kashi/ui": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "lucide-react": {
+      "optional": true
+    }
   }
 }

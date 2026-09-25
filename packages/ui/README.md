@@ -13,6 +13,7 @@ pnpm add @kashi/ui react react-dom tailwindcss lucide-react class-variance-autho
 In your app CSS (the order matters, and the `@source` line is required or Tailwind will not generate the classes used inside the package):
 
 ```css
+@import "@kashi/ui/fonts.css";   /* optional; must come first */
 @import "tailwindcss";
 @import "@kashi/ui/kashi.css";
 @source "../node_modules/@kashi/ui/dist";

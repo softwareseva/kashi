@@ -3,14 +3,29 @@
   "version": "0.1.0",
   "description": "Accessible React primitives on Tailwind v4 with the kashi design tokens (light and dark). Button, IconButton, DropdownMenu, Input, Select, RadioGroup, Checkbox, Switch, Card, Badge, Alert.",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/softwareseva/kashi", "directory": "packages/ui" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/softwareseva/kashi",
+    "directory": "packages/ui"
+  },
   "type": "module",
-  "sideEffects": ["*.css"],
-  "files": ["dist", "src/kashi.css", "README.md"],
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist",
+    "src/kashi.css",
+    "src/fonts.css",
+    "README.md"
+  ],
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./kashi.css": "./src/kashi.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./fonts.css": "./src/fonts.css"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

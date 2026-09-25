@@ -1,0 +1,3 @@
+/* kashi fonts (Inter, JetBrains Mono). Import before tailwindcss: @import rules must come first.
+   Self-host instead if you cannot load from Google Fonts. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap");

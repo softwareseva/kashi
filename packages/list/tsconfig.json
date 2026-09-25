@@ -1,5 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "rootDir": "src", "outDir": "dist", "types": ["@cloudflare/workers-types"] },
-  "include": ["src"]
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": [
+      "@cloudflare/workers-types"
+    ],
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src"
+  ]
 }

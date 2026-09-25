@@ -1,0 +1,7 @@
+/* Tailwind, the kashi tokens, and the packages whose components use Tailwind classes. */
+@import "@kashi/ui/fonts.css";
+@import "tailwindcss";
+@import "@kashi/ui/kashi.css";
+@source "../node_modules/@kashi/ui/dist";
+@source "../node_modules/@kashi/list/dist/react";
+@source "../node_modules/@kashi/auth/dist/react";
