@@ -7,4 +7,5 @@ workspace:
   - dart/kashi_core
   - dart/kashi_auth
   - dart/kashi_list
+  - dart/kashi_sync
   - examples/app

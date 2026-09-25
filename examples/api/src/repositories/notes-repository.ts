@@ -1,6 +1,7 @@
 /** All SQL for notes. Sort keys are an allowlist; search is an escaped LIKE. */
 import { likeAny, likePattern, newId, nowIso } from "@kashi/core/server";
 import { listKeyset, type ListQuery, type Page } from "@kashi/list/server";
+import { changeStatement } from "@kashi/sync";
 
 export type NoteRow = { id: string; title: string; body: string; createdAt: string; updatedAt: string };
 export type NoteSort = "title" | "updatedAt";
@@ -26,7 +27,11 @@ export class NotesRepository {
 
   async create(input: { title: string; body: string }): Promise<NoteRow> {
     const id = newId("note"); const now = nowIso();
-    await this.db.prepare("INSERT INTO notes(id, title, body, created_at, updated_at) VALUES (?, ?, ?, ?, ?)").bind(id, input.title, input.body, now, now).run();
+    // The write and its change-log entry commit together, so synced devices receive web edits.
+    await this.db.batch([
+      this.db.prepare("INSERT INTO notes(id, title, body, created_at, updated_at) VALUES (?, ?, ?, ?, ?)").bind(id, input.title, input.body, now, now),
+      changeStatement(this.db, { scope: "global", entity: "notes", id }),
+    ]);
     return { id, title: input.title, body: input.body, createdAt: now, updatedAt: now };
   }
 }

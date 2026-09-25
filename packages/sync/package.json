@@ -1,0 +1,33 @@
+{
+  "name": "@kashi/sync",
+  "version": "0.1.0",
+  "description": "Offline-first sync for Hono on Cloudflare Workers + D1: idempotent batched push of client operations with replay, and a change log with a monotonic cursor for pulling upserts and deletes per scope. Pairs with the kashi_sync Flutter package.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/softwareseva/kashi", "directory": "packages/sync" },
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist", "migrations", "secrets.json", "README.md"],
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kashi/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "hono": "^4.13.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.0.0",
+    "hono": "^4.13.9",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.0",
+    "zod": "^4.6.0"
+  }
+}

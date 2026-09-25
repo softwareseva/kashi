@@ -17,7 +17,8 @@
     "hono": "^4.13.9",
     "zod": "^4.6.0",
     "@kashi/auth": "workspace:*",
-    "@simplewebauthn/server": "^14.0.2"
+    "@simplewebauthn/server": "^14.0.2",
+    "@kashi/sync": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.2.7",

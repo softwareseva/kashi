@@ -26,6 +26,9 @@ importers:
       '@kashi/list':
         specifier: workspace:*
         version: link:../../packages/list
+      '@kashi/sync':
+        specifier: workspace:*
+        version: link:../../packages/sync
       '@simplewebauthn/server':
         specifier: ^14.0.2
         version: 14.0.2
@@ -236,6 +239,28 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.3.0
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.11(@types/node@24.13.6)(vite@8.3.1(@types/node@24.13.6)(esbuild@0.28.1)(jiti@2.7.0))
+      zod:
+        specifier: ^4.6.0
+        version: 4.6.5
+
+  packages/sync:
+    dependencies:
+      '@kashi/core':
+        specifier: workspace:^
+        version: link:../core
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^5.0.0
+        version: 5.20260924.1
+      hono:
+        specifier: ^4.13.9
+        version: 4.13.9
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
