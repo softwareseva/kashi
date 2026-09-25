@@ -1,0 +1,52 @@
+{
+  "name": "@kashi/ui",
+  "version": "0.1.0",
+  "description": "Accessible React primitives on Tailwind v4 with the kashi design tokens (light and dark). Button, IconButton, DropdownMenu, Input, Select, RadioGroup, Checkbox, Switch, Card, Badge, Alert.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/softwareseva/kashi", "directory": "packages/ui" },
+  "type": "module",
+  "sideEffects": ["*.css"],
+  "files": ["dist", "src/kashi.css", "README.md"],
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./kashi.css": "./src/kashi.css",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "true"
+  },
+  "peerDependencies": {
+    "@radix-ui/react-checkbox": "^1.3.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.0",
+    "@radix-ui/react-radio-group": "^1.3.0",
+    "@radix-ui/react-select": "^2.2.0",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-switch": "^1.2.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "lucide-react": ">=0.500.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "devDependencies": {
+    "@radix-ui/react-checkbox": "^1.3.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.0",
+    "@radix-ui/react-radio-group": "^1.3.0",
+    "@radix-ui/react-select": "^2.2.0",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-switch": "^1.2.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.500.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.0",
+    "typescript": "^5.9.0"
+  }
+}

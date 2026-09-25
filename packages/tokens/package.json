@@ -1,0 +1,8 @@
+{
+  "name": "@kashi/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Single source of truth for kashi design tokens; ui and kashi_ui mirror it.",
+  "scripts": { "build": "true", "typecheck": "true", "test": "node check-tokens.mjs" }
+}

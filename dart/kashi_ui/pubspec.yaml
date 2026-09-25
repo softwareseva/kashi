@@ -1,0 +1,19 @@
+name: kashi_ui
+description: Cupertino design tokens, theme and primitives for kashi apps. Light and dark. Button, IconButton, ActionMenu, TextField, Select, RadioGroup, Checkbox, Switch, Card, Badge, Alert.
+version: 0.1.0
+repository: https://github.com/softwareseva/kashi
+issue_tracker: https://github.com/softwareseva/kashi/issues
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

@@ -1,0 +1,4 @@
+packages:
+  - packages/*
+  - examples/api
+  - examples/web

@@ -1,0 +1,123 @@
+/* kashi design tokens (default theme: kaushik) — Tailwind v4 + shadcn variable mapping.
+   In your app CSS: @import "tailwindcss"; @import "@kashi/ui/kashi.css"; @source "../node_modules/@kashi/ui/dist"; */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Kaushik tokens */
+  --surface: #fbf7f0;
+  --surface-raised: #ffffff;
+  --ink: #2a2119;
+  --ink-muted: #6b5d4f;
+  --border: #e6dccd;
+  --border-strong: #8c7c6a;
+  --saffron: #e8891c;
+  --saffron-soft: #fbe6c8;
+  --saffron-strong: #b9640c;
+  --on-saffron-strong: #ffffff;
+  --terracotta: #a8481f;
+  --sage: #4f6b40;
+  --danger: #b3261e;
+  --focus-ring: var(--terracotta);
+  --on-saffron: #2a2119;
+  --on-danger: #fbf7f0;
+
+  /* shadcn aliases, so stock shadcn components pick up the brand */
+  --background: var(--surface);
+  --foreground: var(--ink);
+  --card: var(--surface-raised);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--ink);
+  --primary: var(--saffron);
+  --primary-foreground: var(--on-saffron);
+  --secondary: var(--saffron-soft);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--saffron-soft);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --input: var(--border-strong);
+  --ring: var(--focus-ring);
+  --radius: 10px;
+}
+
+.dark {
+  --surface: #1c1814;
+  --surface-raised: #26211c;
+  --ink: #f4ede3;
+  --ink-muted: #b5a795;
+  --border: #3a332b;
+  --border-strong: #85776a;
+  --saffron: #f0a040;
+  --saffron-soft: #4a3520;
+  --saffron-strong: #f0a040;
+  --on-saffron-strong: #1c1814;
+  --terracotta: #e8845c;
+  --sage: #9bb584;
+  --danger: #f2877c;
+  --focus-ring: var(--saffron);
+  --on-saffron: #1c1814;
+  --on-danger: #1c1814;
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-border-strong: var(--border-strong);
+  --color-saffron: var(--saffron);
+  --color-saffron-soft: var(--saffron-soft);
+  --color-saffron-strong: var(--saffron-strong);
+  --color-on-saffron-strong: var(--on-saffron-strong);
+  --color-terracotta: var(--terracotta);
+  --color-sage: var(--sage);
+  --color-danger: var(--danger);
+  --color-on-saffron: var(--on-saffron);
+  --color-on-danger: var(--on-danger);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Type scale: text-display, text-title, text-heading, text-body, text-body-sm, text-label, text-code */
+  --text-display: 40px;   --text-display--line-height: 44px;   --text-display--font-weight: 600;
+  --text-title: 28px;     --text-title--line-height: 34px;     --text-title--font-weight: 600;
+  --text-heading: 20px;   --text-heading--line-height: 28px;   --text-heading--font-weight: 600;
+  --text-body: 16px;      --text-body--line-height: 24px;
+  --text-body-sm: 14px;   --text-body-sm--line-height: 20px;
+  --text-label: 13px;     --text-label--line-height: 18px;     --text-label--font-weight: 500;
+  --text-code: 13px;      --text-code--line-height: 20px;
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { @apply bg-background text-foreground font-sans antialiased; }
+  body { @apply text-body; }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+}
