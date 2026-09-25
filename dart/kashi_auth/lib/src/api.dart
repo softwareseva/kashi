@@ -1,0 +1,190 @@
+/// Calls to the `@kashi/auth` router with the token transport.
+library;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kashi_core/kashi_core.dart';
+
+@immutable
+class AuthProviders {
+  const AuthProviders({
+    this.password = false,
+    this.otpChannel,
+    this.google = false,
+    this.apple = false,
+    this.passkeys = false,
+  });
+
+  factory AuthProviders.fromJson(Map<String, dynamic> json) {
+    final p = json['providers'] as Map<String, dynamic>;
+    final otp = p['otp'] as Map<String, dynamic>?;
+    return AuthProviders(
+      password: p['password'] == true,
+      otpChannel: otp?['channel'] as String?,
+      google: p['google'] == true,
+      apple: p['apple'] == true,
+      passkeys: p['passkeys'] == true,
+    );
+  }
+
+  final bool password;
+
+  /// `phone`, `email`, or null when OTP is off.
+  final String? otpChannel;
+  final bool google;
+  final bool apple;
+  final bool passkeys;
+}
+
+@immutable
+class PasskeyItem {
+  const PasskeyItem({
+    required this.id,
+    required this.deviceName,
+    required this.backedUp,
+    required this.createdAt,
+    this.lastUsedAt,
+  });
+  factory PasskeyItem.fromJson(Map<String, dynamic> j) => PasskeyItem(
+    id: j['id'] as String,
+    deviceName: j['deviceName'] as String,
+    backedUp: j['backedUp'] == true,
+    createdAt: j['createdAt'] as String,
+    lastUsedAt: j['lastUsedAt'] as String?,
+  );
+  final String id;
+  final String deviceName;
+  final bool backedUp;
+  final String createdAt;
+  final String? lastUsedAt;
+}
+
+class KashiAuthApi {
+  KashiAuthApi(this.client, {this.authPath = '/auth', this.deviceName});
+
+  final KashiApiClient client;
+  final String authPath;
+  final String? deviceName;
+
+  Map<String, dynamic> get _token => {
+    'transport': 'token',
+    if (deviceName != null) 'deviceName': deviceName,
+  };
+
+  Future<AuthProviders> config() async => AuthProviders.fromJson(
+    await client.get<Map<String, dynamic>>('$authPath/config'),
+  );
+
+  Future<void> requestOtp(String destination) => client.post<dynamic>(
+    '$authPath/otp/request',
+    body: {'destination': destination},
+  );
+  Future<Map<String, dynamic>> verifyOtp(
+    String destination,
+    String code, {
+    String? name,
+  }) => client.post<Map<String, dynamic>>(
+    '$authPath/otp/verify',
+    body: {
+      'destination': destination,
+      'code': code,
+      if (name != null && name.isNotEmpty) 'name': name,
+      ..._token,
+    },
+  );
+
+  Future<Map<String, dynamic>> passwordSignIn(
+    String identifier,
+    String password,
+  ) => client.post<Map<String, dynamic>>(
+    '$authPath/password/sign-in',
+    body: {'identifier': identifier, 'password': password, ..._token},
+  );
+
+  Future<Map<String, dynamic>> google(String idToken) =>
+      client.post<Map<String, dynamic>>(
+        '$authPath/google/token',
+        body: {'idToken': idToken, ..._token},
+      );
+  Future<Map<String, dynamic>> apple(String idToken, {String? name}) =>
+      client.post<Map<String, dynamic>>(
+        '$authPath/apple/token',
+        body: {
+          'idToken': idToken,
+          if (name != null && name.isNotEmpty) 'name': name,
+          ..._token,
+        },
+      );
+
+  Future<({Map<String, dynamic> options, String challengeId})>
+  passkeyOptions() async {
+    final r = await client.post<Map<String, dynamic>>(
+      '$authPath/passkeys/authenticate/options',
+      body: const {},
+    );
+    return (
+      options: r['options'] as Map<String, dynamic>,
+      challengeId: r['challengeId'] as String,
+    );
+  }
+
+  Future<Map<String, dynamic>> passkeyVerify(
+    String challengeId,
+    Map<String, dynamic> response,
+  ) => client.post<Map<String, dynamic>>(
+    '$authPath/passkeys/authenticate/verify',
+    body: {'challengeId': challengeId, 'response': response, ..._token},
+  );
+
+  Future<({Map<String, dynamic> options, String challengeId})>
+  passkeyRegisterOptions() async {
+    final r = await client.post<Map<String, dynamic>>(
+      '$authPath/passkeys/register/options',
+      body: const {},
+    );
+    return (
+      options: r['options'] as Map<String, dynamic>,
+      challengeId: r['challengeId'] as String,
+    );
+  }
+
+  Future<void> passkeyRegisterVerify(
+    String challengeId,
+    Map<String, dynamic> response,
+    String deviceName,
+  ) => client.post<dynamic>(
+    '$authPath/passkeys/register/verify',
+    body: {
+      'challengeId': challengeId,
+      'response': response,
+      'deviceName': deviceName,
+    },
+  );
+
+  Future<List<PasskeyItem>> passkeys() async =>
+      ((await client.get<Map<String, dynamic>>('$authPath/passkeys'))['items']
+              as List)
+          .cast<Map<String, dynamic>>()
+          .map(PasskeyItem.fromJson)
+          .toList();
+  Future<void> renamePasskey(String id, String deviceName) =>
+      client.patch<dynamic>(
+        '$authPath/passkeys/$id',
+        body: {'deviceName': deviceName},
+      );
+  Future<void> removePasskey(String id) =>
+      client.delete<dynamic>('$authPath/passkeys/$id');
+}
+
+final kashiAuthApiProvider = Provider<KashiAuthApi>((ref) {
+  final config = ref.watch(kashiConfigProvider);
+  return KashiAuthApi(
+    ref.watch(apiClientProvider),
+    authPath: config.authPath,
+    deviceName: config.deviceName,
+  );
+});
+
+final authProvidersProvider = FutureProvider<AuthProviders>(
+  (ref) => ref.watch(kashiAuthApiProvider).config(),
+);

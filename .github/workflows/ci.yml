@@ -23,6 +23,6 @@ jobs:
       - uses: subosito/flutter-action@v2
         with: { channel: stable }
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed dart
-      - run: flutter analyze dart
-      - run: for p in dart/*/; do (cd "$p" && [ -d test ] && flutter test) || true; done
+      - run: dart format --output=none --set-exit-if-changed dart examples/app/lib
+      - run: flutter analyze dart examples/app
+      - run: set -e; for p in dart/*/ examples/app; do (cd "$p" && flutter test); done

@@ -1,0 +1,31 @@
+name: kashi_example_app
+description: "A new Flutter project."
+publish_to: 'none'
+resolution: workspace
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.1
+  google_sign_in: ^7.2.0
+  kashi_auth: ^0.1.0
+  kashi_core: ^0.1.0
+  kashi_list: ^0.1.0
+  kashi_ui: ^0.1.0
+  local_auth: ^3.0.2
+  passkeys: ^2.23.1
+  sign_in_with_apple: ^8.2.0
+
+dev_dependencies:
+  flutter_secure_storage: ^11.2.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

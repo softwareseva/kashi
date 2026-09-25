@@ -4,3 +4,7 @@ environment:
   sdk: ^3.13.0
 workspace:
   - dart/kashi_ui
+  - dart/kashi_core
+  - dart/kashi_auth
+  - dart/kashi_list
+  - examples/app
