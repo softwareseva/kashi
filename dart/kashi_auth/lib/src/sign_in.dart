@@ -161,16 +161,21 @@ class _KSignInState extends ConsumerState<KSignIn> {
     await _session(() => _api.facebook(result.accessToken));
   });
 
-  Future<void> _peer(PeerBrowserSignIn browser, PeerConfig peer) => _run(() async {
-    final url = await browser(
-      _api.peerAuthorizeUrl(peer.key),
-      _api.peerRedirectPrefix(),
-    );
-    if (url == null) return;
-    final code = url.queryParameters['code'];
-    if (code == null) throw const UnexpectedFailure('Sign-in did not complete. Please try again.');
-    await _session(() => _api.peerToken(peer.key, code));
-  });
+  Future<void> _peer(PeerBrowserSignIn browser, PeerConfig peer) =>
+      _run(() async {
+        final url = await browser(
+          _api.peerAuthorizeUrl(peer.key),
+          _api.peerRedirectPrefix(),
+        );
+        if (url == null) return;
+        final code = url.queryParameters['code'];
+        if (code == null) {
+          throw const UnexpectedFailure(
+            'Sign-in did not complete. Please try again.',
+          );
+        }
+        await _session(() => _api.peerToken(peer.key, code));
+      });
 
   @override
   Widget build(BuildContext context) {

@@ -309,7 +309,9 @@ void main() {
             home: CupertinoPageScaffold(
               child: KSignIn(
                 peerBrowser: (authorizeUrl, redirectPrefix) async =>
-                    redirectPrefix.replace(queryParameters: {'code': 'the-code'}),
+                    redirectPrefix.replace(
+                      queryParameters: {'code': 'the-code'},
+                    ),
               ),
             ),
           ),

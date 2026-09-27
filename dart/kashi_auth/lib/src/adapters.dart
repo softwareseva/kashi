@@ -44,5 +44,7 @@ class SignInCancelled implements Exception {
 /// site completes it. `kashi_auth` pulls in no browser/webview plugin, same as it pulls in no
 /// Google/Apple/Facebook SDK — the host app supplies this bridge. Return null when the user
 /// dismisses the browser; throw on real errors.
-typedef PeerBrowserSignIn =
-    Future<Uri?> Function(Uri authorizeUrl, Uri redirectPrefix);
+typedef PeerBrowserSignIn = Future<Uri?> Function(
+  Uri authorizeUrl,
+  Uri redirectPrefix,
+);
