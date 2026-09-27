@@ -12,20 +12,20 @@
     "kashi": "kashi"
   },
   "dependencies": {
+    "@simplewebauthn/server": "^14.0.3",
+    "@softwareseva/auth": "workspace:*",
     "@softwareseva/core": "workspace:*",
     "@softwareseva/list": "workspace:*",
+    "@softwareseva/sync": "workspace:*",
     "hono": "^4.13.9",
-    "zod": "^4.6.0",
-    "@softwareseva/auth": "workspace:*",
-    "@simplewebauthn/server": "^14.0.2",
-    "@softwareseva/sync": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@cloudflare/vitest-plugin": "^1.2.7",
-    "@cloudflare/workers-types": "^5.0.0",
-    "typescript": "^5.9.0",
-    "vitest": "^4.1.0",
-    "wrangler": "^4.140.0",
-    "@softwareseva/cli": "workspace:*"
+    "@cloudflare/vitest-plugin": "^1.2.8",
+    "@cloudflare/workers-types": "^5.20260926.1",
+    "@softwareseva/cli": "workspace:*",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.141.0"
   }
 }
