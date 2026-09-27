@@ -1,7 +1,7 @@
 /** authRouter(config): every sign-in method, session refresh and sign-out as one mountable Hono sub-app. */
 import { Hono, type Context } from "hono";
 import { z } from "zod";
-import { ApiError, newId, ok, randomToken, rateLimit, sha256Hex } from "@softwareseva/core/server";
+import { ApiError, newId, ok, randomToken, rateLimit, safeEqual, sha256Hex } from "@softwareseva/core/server";
 import { resolveEnv } from "./env";
 import { changePassword, passwordChangeSchema, passwordSignInSchema, authenticatePassword, normalizeIdentifier } from "./providers/password";
 import { otpRequestSchema, otpVerifySchema, requestOtp, verifyOtp } from "./providers/otp";
@@ -40,7 +40,8 @@ const peerTokenBody = z.object({ key: z.string().min(1), code: z.string().min(1)
  * - `POST /passkeys/signup/options` · `POST /passkeys/signup/verify` (contact-free: no sign-in required, account is created only once the passkey verifies)
  * - Peer issuer (this site lets other kashi sites sign their users in here): `POST /federation/clients/register` ·
  *   `GET /federation/clients` · `POST /federation/clients/:id/approve` (admin) · `POST /federation/clients/:id/rotate` (admin) ·
- *   `GET /federation/authorize?client_id=&redirect_uri=&state=` · `POST /federation/token` · `GET /federation/.well-known/jwks.json`
+ *   `POST /federation/clients/:id/revoke` (admin) · `GET /federation/authorize?client_id=&redirect_uri=&state=` ·
+ *   `POST /federation/token` · `GET /federation/.well-known/jwks.json`
  * - Peer consumer (this site trusts another kashi site's accounts): `GET /peer/:key/start?next=` · `GET /peer/callback` · `POST /peer/token`
  */
 export function authRouter(config: AuthConfig): Hono<Env> {
@@ -304,6 +305,14 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       if (!rotated) throw new ApiError(404, "NOT_FOUND", "No approved client with that id.");
       return ok(c, { clientSecret: secret });
     });
+    // Stops trust immediately: /federation/authorize and /federation/token both gate on status
+    // 'approved', so a revoked client can no longer start a new authorization or exchange a code,
+    // even one issued moments earlier. Unlike rotate, there is no new secret to hand back.
+    app.post("/federation/clients/:id/revoke", admin, async (c) => {
+      const revoked = await new AuthStore(env(c).db).revokeFederationClient(c.req.param("id"));
+      if (!revoked) throw new ApiError(404, "NOT_FOUND", "No approved client with that id.");
+      return ok(c, { status: "revoked" });
+    });
     app.get("/federation/authorize", auth, async (c) => {
       const e = env(c);
       const clientId = c.req.query("client_id") ?? "";
@@ -322,7 +331,7 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       const input = federationTokenBody.parse(await c.req.json());
       const store = new AuthStore(e.db);
       const client = await store.federationClientByClientId(input.clientId);
-      if (!client || client.status !== "approved" || !client.client_secret_hash || client.client_secret_hash !== (await sha256Hex(input.clientSecret))) throw new ApiError(401, "INVALID_CLIENT", "Unknown client or client secret.");
+      if (!client || client.status !== "approved" || !client.client_secret_hash || !safeEqual(client.client_secret_hash, await sha256Hex(input.clientSecret))) throw new ApiError(401, "INVALID_CLIENT", "Unknown client or client secret.");
       const grant = await store.consumeFederationCode(input.code);
       if (!grant || grant.clientId !== input.clientId || grant.redirectUri !== input.redirectUri) throw new ApiError(400, "INVALID_GRANT", "This authorization code is invalid or has expired.");
       const user = await store.userById(grant.userId);

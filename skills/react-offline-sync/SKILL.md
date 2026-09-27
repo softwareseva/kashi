@@ -4,7 +4,7 @@ description: Offline-first data in React with RxDB, TanStack DB and @softwaresev
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/sync@0.2 @softwareseva/core@0.2 rxdb@17 @tanstack/db@0.9 @tanstack/react-db@0.4"
+  packages: "@softwareseva/sync@1.2 @softwareseva/core@1.2 rxdb@17 @tanstack/db@0.9 @tanstack/react-db@0.4"
 ---
 
 # Offline-first with RxDB and TanStack DB

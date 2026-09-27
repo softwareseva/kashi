@@ -4,7 +4,7 @@ description: Cross-site single sign-on between kashi sites with @softwareseva/au
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/auth@1.1"
+  packages: "@softwareseva/auth@1.2"
 ---
 
 # Cross-site sign-in (peer federation)

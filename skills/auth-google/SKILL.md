@@ -4,7 +4,7 @@ description: Google sign-in for web and mobile with @softwareseva/auth, with no 
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/auth@0.1"
+  packages: "@softwareseva/auth@1.2"
 ---
 
 # Google sign-in

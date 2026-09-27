@@ -4,7 +4,7 @@ description: Call a kashi (Hono + D1) API from React with @softwareseva/core/cli
 license: MIT
 metadata:
   version: "0.2.0"
-  packages: "@softwareseva/core@0.2 @softwareseva/auth@0.2"
+  packages: "@softwareseva/core@1.2 @softwareseva/auth@1.2"
 ---
 
 # React API client and auth

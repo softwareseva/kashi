@@ -22,3 +22,7 @@ This repository is the source of both the `@softwareseva/*` / `kashi_*` packages
 ## Style
 
 TypeScript strict, ESM only, no default exports from packages. Dart follows `flutter_lints`. Keep files under 400 lines. Every published file starts with a one-line `/** ... */` or `///` overview.
+
+## Testing
+
+Every npm package uses vitest, with tests under `test/` mirroring `src/` module names. Logic-only packages (`core`, `auth`, `list`, `sync`, `cli`) test with plain vitest (`vitest.config.ts` with `include: ["test/**/*.test.ts"]`, no DOM). React component packages (`ui`) additionally need a DOM: use `environment: "jsdom"`, `@testing-library/react` + `@testing-library/user-event` for rendering and interaction, and a `test/setup.ts` (wired via `setupFiles`) that imports `@testing-library/jest-dom/vitest`, registers `afterEach(() => cleanup())`, and polyfills what jsdom is missing for Radix primitives (`scrollIntoView`, `hasPointerCapture`/`releasePointerCapture`, and a `PointerEvent` that extends `MouseEvent` — extending the bare `Event` class breaks native click/submit handling in jsdom).

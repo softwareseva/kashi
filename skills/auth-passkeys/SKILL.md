@@ -4,7 +4,7 @@ description: Passkeys (WebAuthn) with @softwareseva/auth and @simplewebauthn/ser
 license: MIT
 metadata:
   version: "0.2.0"
-  packages: "@softwareseva/auth@0.2 @simplewebauthn/server@14 @simplewebauthn/browser@14"
+  packages: "@softwareseva/auth@1.2 @simplewebauthn/server@14 @simplewebauthn/browser@14"
 ---
 
 # Passkeys

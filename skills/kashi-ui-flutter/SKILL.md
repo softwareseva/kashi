@@ -4,7 +4,7 @@ description: Style a Flutter (Cupertino) app with kashi_ui, covering the theme, 
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "kashi_ui@0.1 kashi_list@0.1"
+  packages: "kashi_ui@1.2 kashi_list@1.2"
 ---
 
 # kashi UI in Flutter

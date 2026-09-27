@@ -4,7 +4,7 @@ description: Deploy a Hono Worker with D1 (and optionally a Vite web app) to Clo
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/cli@0.1"
+  packages: "@softwareseva/cli@1.2"
 ---
 
 # Deploy to Cloudflare

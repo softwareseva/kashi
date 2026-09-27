@@ -31,7 +31,13 @@ export const authConfig: AuthConfig = {
       // deployment points `issuer` at *another* kashi site's AUTH_URL, with a clientId/clientSecret
       // obtained from that site's admin after they approve the registration — see the
       // auth-federation skill.
-      trust: [{ issuer: "http://example.com/v1/auth", clientId: "fedcli_test", clientSecret: "test-secret-value", label: "self" }],
+      trust: [
+        { issuer: "http://example.com/v1/auth", clientId: "fedcli_test", clientSecret: "test-secret-value", label: "self" },
+        // Second self-trust entry with sign-up disabled, purely to exercise that branch in the
+        // integration test (see test/integration/federation.test.ts) — a real deployment would use
+        // this on a peer whose users should never auto-provision an account here.
+        { issuer: "http://example.com/v1/auth", clientId: "fedcli_test_nosignup", clientSecret: "test-secret-value-2", label: "self-nosignup", allowSignUp: false },
+      ],
     },
   },
 };

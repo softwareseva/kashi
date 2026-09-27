@@ -4,7 +4,7 @@ description: Add sign-in and sessions to a Hono API on Cloudflare Workers + D1 w
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/auth@0.1 @softwareseva/core@0.1"
+  packages: "@softwareseva/auth@1.2 @softwareseva/core@1.2"
 ---
 
 # Sessions with @softwareseva/auth

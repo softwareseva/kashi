@@ -4,7 +4,7 @@ description: Call a kashi (Hono + D1) API from Flutter with kashi_core, covering
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "kashi_core@0.1"
+  packages: "kashi_core@1.2"
 ---
 
 # Flutter API client

@@ -4,7 +4,7 @@ description: Ship a Flutter app to TestFlight, the App Store and Google Play wit
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/cli@0.1 fastlane@2.240"
+  packages: "@softwareseva/cli@1.2 fastlane@2.240"
 ---
 
 # Ship a Flutter app with fastlane
