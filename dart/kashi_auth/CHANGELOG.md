@@ -1,3 +1,7 @@
+## 1.2.0
+
+- Cross-site sign-in: `AuthProviders.peers`, `KashiAuthApi.peerAuthorizeUrl`/`peerToken`, the `PeerBrowserSignIn` adapter seam, and `KSignIn(peerBrowser: ...)` render a "Continue with {label}" button per kashi site the server trusts. The app supplies the system-browser bridge (e.g. `flutter_web_auth_2`); the client secret never leaves the backend.
+
 ## 1.1.0
 
 - Passkeys are now the default, anonymous entry point: `passkeySignUpOptions`/`passkeySignUpVerify` create a contact-free account straight from a new passkey (no email, phone or OAuth), and `KSignIn` offers it alongside passkey sign-in when the server reports `passkeySignUp`.

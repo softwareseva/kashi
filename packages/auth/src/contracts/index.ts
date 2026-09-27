@@ -16,7 +16,8 @@ export type Transport = "cookie" | "token";
 /** Cookie transport answers `{ user }`; token transport adds the pair. */
 export type SessionResponse = { user: AuthUser; accessToken?: string; refreshToken?: string; expiresIn?: number };
 
-export type AuthConfigResponse = { providers: { password: boolean; otp: { channel: "phone" | "email" } | null; google: boolean; apple: boolean; facebook: boolean; passkeys: boolean; passkeySignUp: boolean } };
+export type PeerConfig = { key: string; label: string };
+export type AuthConfigResponse = { providers: { password: boolean; otp: { channel: "phone" | "email" } | null; google: boolean; apple: boolean; facebook: boolean; passkeys: boolean; passkeySignUp: boolean; peer: PeerConfig[] } };
 
 export const passwordSignInRequest = z.object({ identifier: z.string().min(3), password: z.string().min(1), transport: z.enum(["cookie", "token"]).optional(), deviceName: z.string().optional() });
 export const otpRequestRequest = z.object({ destination: z.string().min(3) });

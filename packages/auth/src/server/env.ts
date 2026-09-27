@@ -27,6 +27,7 @@ export function resolveEnv(config: AuthConfig, raw: Record<string, unknown>): Au
     facebookClientSecret: str(raw.FACEBOOK_CLIENT_SECRET),
     rpId: str(raw.RP_ID) ?? (origins[0] ? new URL(origins[0]).hostname : undefined),
     rpName: str(raw.RP_NAME) ?? "App",
+    federationPrivateKey: str(raw.FEDERATION_PRIVATE_KEY),
   };
   const merged = { ...base, ...(config.env ? config.env(raw) : {}) } as AuthEnv;
   const missing = (["db", "jwtSecret"] as const).filter((k) => !merged[k]);

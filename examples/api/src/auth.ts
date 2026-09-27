@@ -23,5 +23,15 @@ export const authConfig: AuthConfig = {
     apple: {},
     facebook: {},
     passkeys: {},
+    peer: {
+      issuer: { enabled: true },
+      // Self-federation, for local dev and the integration test only: this example trusts its own
+      // AUTH_URL, so the whole register -> approve -> authorize -> token -> callback loop can be
+      // exercised end-to-end against one worker (see test/integration/federation.test.ts). A real
+      // deployment points `issuer` at *another* kashi site's AUTH_URL, with a clientId/clientSecret
+      // obtained from that site's admin after they approve the registration — see the
+      // auth-federation skill.
+      trust: [{ issuer: "http://example.com/v1/auth", clientId: "fedcli_test", clientSecret: "test-secret-value", label: "self" }],
+    },
   },
 };

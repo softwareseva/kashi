@@ -28,6 +28,7 @@ class KSignIn extends ConsumerStatefulWidget {
     this.apple,
     this.facebook,
     this.passkeys,
+    this.peerBrowser,
     this.title = 'Sign in',
     this.askNameOnSignUp = true,
   });
@@ -41,6 +42,10 @@ class KSignIn extends ConsumerStatefulWidget {
   /// Adapter for Facebook Login; hidden when null or disabled on the server.
   final AccessTokenSignIn? facebook;
   final PasskeyBridge? passkeys;
+
+  /// Adapter that runs a trusted peer kashi site's sign-in in a system browser; a "Continue with
+  /// {label}" button is shown per peer the server reports, hidden entirely when null.
+  final PeerBrowserSignIn? peerBrowser;
   final String title;
 
   /// Shows an optional name field on the code step (used only when the account is new).
@@ -156,6 +161,17 @@ class _KSignInState extends ConsumerState<KSignIn> {
     await _session(() => _api.facebook(result.accessToken));
   });
 
+  Future<void> _peer(PeerBrowserSignIn browser, PeerConfig peer) => _run(() async {
+    final url = await browser(
+      _api.peerAuthorizeUrl(peer.key),
+      _api.peerRedirectPrefix(),
+    );
+    if (url == null) return;
+    final code = url.queryParameters['code'];
+    if (code == null) throw const UnexpectedFailure('Sign-in did not complete. Please try again.');
+    await _session(() => _api.peerToken(peer.key, code));
+  });
+
   @override
   Widget build(BuildContext context) {
     final providers = ref.watch(authProvidersProvider);
@@ -245,6 +261,18 @@ class _KSignInState extends ConsumerState<KSignIn> {
             ),
             const SizedBox(height: KSpace.s2),
           ],
+          if (widget.peerBrowser != null)
+            for (final peer in p.peers) ...[
+              KButton(
+                label: 'Continue with ${peer.label}',
+                variant: KButtonVariant.outline,
+                expand: true,
+                onPressed: _busy
+                    ? null
+                    : () => _peer(widget.peerBrowser!, peer),
+              ),
+              const SizedBox(height: KSpace.s2),
+            ],
           const SizedBox(height: KSpace.s4),
           if (_step == _Step.destination && p.otpChannel != null) ...[
             KTextField(

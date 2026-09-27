@@ -38,3 +38,11 @@ abstract interface class PasskeyBridge {
 class SignInCancelled implements Exception {
   const SignInCancelled();
 }
+
+/// Runs a peer kashi site's sign-in page in a system browser (e.g. `flutter_web_auth_2` or
+/// `ASWebAuthenticationSession`/Custom Tabs directly) and returns the final redirect URL once the
+/// site completes it. `kashi_auth` pulls in no browser/webview plugin, same as it pulls in no
+/// Google/Apple/Facebook SDK — the host app supplies this bridge. Return null when the user
+/// dismisses the browser; throw on real errors.
+typedef PeerBrowserSignIn =
+    Future<Uri?> Function(Uri authorizeUrl, Uri redirectPrefix);
