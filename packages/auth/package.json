@@ -1,16 +1,34 @@
 {
   "name": "@softwareseva/auth",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Drop-in authentication for Hono on Cloudflare Workers + D1 and React: JWT access tokens with rotating refresh-token families, cookie or bearer transport, password, WhatsApp/SMS/email one-time codes, Google, Sign in with Apple, and passkeys (WebAuthn). Ships its migrations, a secrets manifest, and React sign-in components.",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/softwareseva/kashi", "directory": "packages/auth" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/softwareseva/kashi",
+    "directory": "packages/auth"
+  },
   "type": "module",
   "sideEffects": false,
-  "files": ["dist", "migrations", "secrets.json", "README.md"],
+  "files": [
+    "dist",
+    "migrations",
+    "secrets.json",
+    "README.md"
+  ],
   "exports": {
-    "./server": { "types": "./dist/server/index.d.ts", "import": "./dist/server/index.js" },
-    "./contracts": { "types": "./dist/contracts/index.d.ts", "import": "./dist/contracts/index.js" },
-    "./react": { "types": "./dist/react/index.d.ts", "import": "./dist/react/index.js" },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/index.d.ts",
+      "import": "./dist/contracts/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -31,11 +49,21 @@
     "zod": "^4.0.0"
   },
   "peerDependenciesMeta": {
-    "@softwareseva/ui": { "optional": true },
-    "@simplewebauthn/browser": { "optional": true },
-    "@simplewebauthn/server": { "optional": true },
-    "@tanstack/react-query": { "optional": true },
-    "react": { "optional": true }
+    "@softwareseva/ui": {
+      "optional": true
+    },
+    "@simplewebauthn/browser": {
+      "optional": true
+    },
+    "@simplewebauthn/server": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.0.0",
