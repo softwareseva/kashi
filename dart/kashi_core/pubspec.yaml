@@ -1,6 +1,6 @@
 name: kashi_core
-description: Flutter client foundation for kashi APIs. Dio client that unwraps the { data } envelope into typed failures, single-flight token refresh, secure session storage, and a Riverpod auth controller with a go_router redirect helper.
-version: 0.1.1
+description: Flutter client foundation for kashi APIs, a Dio client with typed failures, single-flight token refresh, secure storage, and a Riverpod auth controller.
+version: 0.1.2
 repository: https://github.com/softwareseva/kashi
 issue_tracker: https://github.com/softwareseva/kashi/issues
 resolution: workspace
