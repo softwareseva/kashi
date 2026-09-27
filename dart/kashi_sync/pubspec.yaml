@@ -1,6 +1,6 @@
 name: kashi_sync
 description: Offline-first sync for Flutter apps on Drift, with a transactional outbox with batched push and retries, and a cursor-based pull that never overwrites unsent edits.
-version: 0.1.2
+version: 1.0.0
 repository: https://github.com/softwareseva/kashi
 issue_tracker: https://github.com/softwareseva/kashi/issues
 resolution: workspace
@@ -13,7 +13,7 @@ dependencies:
   drift: ^2.35.0
   flutter:
     sdk: flutter
-  kashi_core: ^0.1.0
+  kashi_core: ^1.0.0
 
 dev_dependencies:
   dio: ^5.11.1

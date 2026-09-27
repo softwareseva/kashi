@@ -9,6 +9,7 @@ This repository is the source of both the `@softwareseva/*` / `kashi_*` packages
 3. `packages/tokens/tokens.json` is the single source for design tokens. Edit it first, then mirror in `packages/ui/src/kashi.css` and `dart/kashi_ui/lib/src/tokens.dart`. `pnpm run check:tokens` must pass.
 4. Published packages need a changeset (`pnpm changeset`). Dart packages bump `version` and `CHANGELOG.md` by hand, then release with `scripts/release-dart.sh <package>`.
 5. Run `pnpm run check` and `flutter analyze dart` before handoff. Never publish from a working tree; releases run in CI.
+6. **Versioning is lockstep across every published package, npm and dart alike.** `@softwareseva/core`, `auth`, `ui`, `list`, `sync`, `cli` are one fixed group in `.changeset/config.json` — any changeset bumps all of them together to the same version. The `kashi_*` dart packages don't go through changesets, so when the npm group's version moves, bump every `dart/kashi_*/pubspec.yaml` and `CHANGELOG.md` by hand to the same number (even packages with no functional change — note that in the changelog) before running `scripts/release-dart.sh` for each. `@softwareseva/tokens` is exempt (private, internal-only, stays unversioned at `0.0.0`).
 
 ## Layout
 

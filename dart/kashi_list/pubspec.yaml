@@ -1,6 +1,6 @@
 name: kashi_list
 description: Searchable, sortable, infinitely scrolling lists for kashi keyset APIs, with a directory controller and a Cupertino KDataList widget with pull-to-refresh and a sort sheet.
-version: 0.1.2
+version: 1.0.0
 repository: https://github.com/softwareseva/kashi
 issue_tracker: https://github.com/softwareseva/kashi/issues
 resolution: workspace
@@ -12,8 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  kashi_core: ^0.1.0
-  kashi_ui: ^0.1.0
+  kashi_core: ^1.0.0
+  kashi_ui: ^1.0.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0
