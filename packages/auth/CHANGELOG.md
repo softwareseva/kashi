@@ -1,5 +1,32 @@
 # @softwareseva/auth
 
+## 1.2.0
+
+### Minor Changes
+
+- 0afc4eb: Peer federation: issuer admins can now rotate a registered client's secret without deleting and re-registering it.
+  
+  - `POST /v1/auth/federation/clients/:id/rotate` (role `admin`) mints a new `clientSecret` for an already-approved client, shown once, same as the initial approval. The client's `clientId` and `redirectUri` are unchanged — only the secret's hash is replaced, so the old secret stops working immediately (no overlap window).
+  - `GET /v1/auth/federation/clients` now reports `secretRotatedAt` per client.
+  - New migration `auth_0006_federation_client_secret_rotated_at.sql` (additive `ALTER TABLE`).
+  
+  See the "Rotating a compromised or expiring secret" section of the `auth-federation` skill.
+- 6ceefc8: Cross-site sign-in: a user created on one kashi site can now sign in on another, with each site's admin approving the relationship independently.
+  
+  - **New provider, `providers.peer`**: a site can act as an OIDC-style **issuer** (`peer.issuer.enabled`), letting other kashi sites' users sign in there, and/or a **consumer** (`peer.trust`), accepting sign-ins from peers it trusts. No shared database or `JWT_SECRET` between sites — the issuer signs short-lived ID tokens with a dedicated RS256 keypair (`FEDERATION_PRIVATE_KEY`, published at `GET /v1/auth/federation/.well-known/jwks.json`), and the consumer auto-provisions its own local user on first sign-in through the existing `auth_identities` table (`provider: "kashi"`), exactly like Google/Apple/Facebook.
+  - **Double opt-in, no live handshake**: a consumer registers with `POST /federation/clients/register`; the issuer's admin approves with `POST /federation/clients/:id/approve` (role `admin`), which mints a `clientSecret` shown once; the consumer's admin then adds it to their own `providers.peer.trust` config. Both sides act independently — the same shape as registering any external OAuth app.
+  - **Web and native**: `GET /peer/:key/start` → `GET /peer/callback` mirrors the existing Google/Apple/Facebook web redirect flow; `POST /peer/token` lets a native app (via its own in-app-browser adapter) complete the exchange without the `clientSecret` ever leaving the backend.
+  - Authorization codes are single-use, DB-backed (`auth_federation_codes`) and expire in 60 seconds.
+  - React: `<PeerSignInButton />`, `usePeerUrl()`, and `<SignIn />` now renders a "Continue with {label}" button per trusted peer automatically.
+  - Flutter (`kashi_auth`): `AuthProviders.peers`, `KashiAuthApi.peerAuthorizeUrl`/`peerToken`, the `PeerBrowserSignIn` adapter seam, and `KSignIn(peerBrowser: ...)`.
+  
+  New migrations: `auth_0004_federation_clients.sql` (issuer-side client registry) and `auth_0005_federation_codes.sql` (single-use authorization codes). See the new `auth-federation` skill.
+
+### Patch Changes
+
+- @softwareseva/core@1.2.0
+  - @softwareseva/ui@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes
