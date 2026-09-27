@@ -1,6 +1,6 @@
 {
   "name": "@softwareseva/list",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Paginated, searchable, sortable lists for Cloudflare D1 and React: two-way keyset cursors on (sort_value, id), allowlisted sort keys, escaped LIKE search, an offset variant, the shared list-query contract, and a token-styled DataTable with URL-backed directory state.",
   "license": "MIT",
   "repository": {
