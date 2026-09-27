@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Alert, Button, Card, CardContent, CardHeader, CardTitle, useAppForm } from "@softwareseva/ui";
 import { useAuth } from "./context";
-import { oauthErrorFromLocation, useOAuthUrl, useOtp, usePasskeySignIn, usePasskeySignUp, usePasswordSignIn } from "./hooks";
+import { oauthErrorFromLocation, useOAuthUrl, useOtp, usePasskeySignIn, usePasskeySignUp, usePasswordSignIn, usePeerUrl } from "./hooks";
+import type { PeerConfig } from "../contracts/index";
 
 const messages: Record<string, string> = {
   INVALID_CREDENTIALS: "That identifier or password is incorrect.",
@@ -108,6 +109,12 @@ export function OAuthButton({ provider, next = "/" }: { provider: "google" | "ap
   return <Button asChild variant="outline"><a href={href}>{oauthLabel[provider]}</a></Button>;
 }
 
+/** "Continue with {label}" for a trusted peer kashi site (e.g. an SSO provider site). */
+export function PeerSignInButton({ peer, next = "/" }: { peer: PeerConfig; next?: string }) {
+  const href = usePeerUrl(peer.key, next);
+  return <Button asChild variant="outline"><a href={href}>{`Continue with ${peer.label}`}</a></Button>;
+}
+
 /**
  * Default sign-in card: shows every provider the server reports as enabled. Passkeys come first
  * — sign-in for a returning device, sign-up for a new one — since auth is anonymous by default;
@@ -129,6 +136,7 @@ export function SignIn({ title = "Sign in", next = "/", onSuccess }: { title?: s
         {providers.google ? <OAuthButton provider="google" next={next} /> : null}
         {providers.apple ? <OAuthButton provider="apple" next={next} /> : null}
         {providers.facebook ? <OAuthButton provider="facebook" next={next} /> : null}
+        {providers.peer.map((peer) => <PeerSignInButton key={peer.key} peer={peer} next={next} />)}
         {showOtp ? <OtpSignIn channel={providers.otp!.channel} onSuccess={onSuccess} /> : providers.password ? <PasswordSignIn onSuccess={onSuccess} /> : null}
         {providers.otp && providers.password ? (
           <Button type="button" variant="link" onClick={() => setMode(mode === "otp" ? "password" : "otp")}>{mode === "otp" ? "Use a password instead" : "Use a one-time code instead"}</Button>

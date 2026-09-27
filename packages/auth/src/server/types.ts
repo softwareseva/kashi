@@ -41,6 +41,8 @@ export type AuthEnv = {
   facebookClientSecret?: string;
   rpId?: string;
   rpName?: string;
+  /** RS256 private key (JWK JSON) used only to sign federation ID tokens when acting as a peer issuer. */
+  federationPrivateKey?: string;
 };
 
 export type OtpProviderConfig = {
@@ -60,6 +62,24 @@ export type OtpProviderConfig = {
 export type OAuthProviderConfig = { allowSignUp?: boolean };
 export type AppleProviderConfig = OAuthProviderConfig;
 export type FacebookProviderConfig = OAuthProviderConfig;
+
+/** A kashi site this one trusts as an identity provider ("Sign in with {label ?? issuer}"). */
+export type PeerTrustConfig = {
+  /** The peer's own AUTH_URL, e.g. https://auth.vvmvp.in/v1/auth. Also its OIDC issuer id. */
+  issuer: string;
+  clientId: string;
+  clientSecret: string;
+  /** Shown on the sign-in button; defaults to the issuer host. */
+  label?: string;
+  allowSignUp?: boolean;
+};
+
+export type PeerProviderConfig = {
+  /** Let other kashi sites register as clients and sign their users in here. */
+  issuer?: { enabled: boolean };
+  /** Peers whose users this site accepts, once both admins have approved the relationship. */
+  trust?: PeerTrustConfig[];
+};
 export type PasskeyProviderConfig = {
   /** Extra WebAuthn origins, e.g. android:apk-key-hash:... */
   extraOrigins?: string[];
@@ -95,6 +115,7 @@ export type AuthConfig = {
     apple?: AppleProviderConfig;
     facebook?: FacebookProviderConfig;
     passkeys?: PasskeyProviderConfig;
+    peer?: PeerProviderConfig;
   };
   hooks?: AuthHooks;
 };

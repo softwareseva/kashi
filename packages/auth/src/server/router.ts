@@ -1,7 +1,7 @@
 /** authRouter(config): every sign-in method, session refresh and sign-out as one mountable Hono sub-app. */
 import { Hono, type Context } from "hono";
 import { z } from "zod";
-import { ApiError, ok } from "@softwareseva/core/server";
+import { ApiError, newId, ok, randomToken, rateLimit, sha256Hex } from "@softwareseva/core/server";
 import { resolveEnv } from "./env";
 import { changePassword, passwordChangeSchema, passwordSignInSchema, authenticatePassword, normalizeIdentifier } from "./providers/password";
 import { otpRequestSchema, otpVerifySchema, requestOtp, verifyOtp } from "./providers/otp";
@@ -9,16 +9,21 @@ import { exchangeGoogleCode, googleAuthorizeUrl, googleConfigured, safeNext, sig
 import { appleAuthorizeUrl, appleConfigured, appleNameFromUserJson, exchangeAppleCode, verifyAppleIdToken } from "./providers/apple";
 import { exchangeFacebookCode, facebookAuthorizeUrl, facebookConfigured, verifyFacebookAccessToken, signOAuthState as signFacebookState, verifyOAuthState as verifyFacebookState } from "./providers/facebook";
 import { anonymousRegistrationOptions, authenticationOptions, passkeySignupVerifySchema, passkeyAuthVerifySchema, passkeyRegisterVerifySchema, passkeyRenameSchema, registrationOptions, verifyAnonymousRegistration, verifyAuthentication, verifyRegistration } from "./providers/passkeys";
-import { clearSessionCookies, completeSignIn, issueSession, readRefreshCookie, requireAuth, rotateRefreshToken } from "./session";
+import { federationJwks, peerIssuerConfigured, signFederationIdToken } from "./providers/peer-issuer";
+import { exchangePeerCode, peerAuthorizeUrl, signPeerState, verifyPeerState } from "./providers/peer-consumer";
+import { clearSessionCookies, completeSignIn, issueSession, readRefreshCookie, requireAuth, requireRole, rotateRefreshToken } from "./session";
 import { AuthStore } from "./store";
 import { userForIdentity } from "./users";
-import type { AuthConfig, AuthEnv, AuthVariables } from "./types";
+import type { AuthConfig, AuthEnv, AuthVariables, PeerTrustConfig } from "./types";
 
 type Env = { Bindings: Record<string, unknown>; Variables: AuthVariables & { requestId?: string } };
 const refreshBody = z.object({ refreshToken: z.string().min(20).max(200) });
 const idTokenBody = z.object({ idToken: z.string().min(20), transport: z.enum(["cookie", "token"]).default("token"), deviceName: z.string().max(80).optional() });
 const appleTokenBody = idTokenBody.extend({ name: z.string().trim().max(120).optional() });
 const facebookTokenBody = z.object({ accessToken: z.string().min(20), transport: z.enum(["cookie", "token"]).default("token"), deviceName: z.string().max(80).optional() });
+const federationRegisterBody = z.object({ siteName: z.string().trim().min(1).max(120), redirectUri: z.string().url() });
+const federationTokenBody = z.object({ grant_type: z.literal("authorization_code"), code: z.string().min(20), clientId: z.string().min(1), clientSecret: z.string().min(1), redirectUri: z.string().url() });
+const peerTokenBody = z.object({ key: z.string().min(1), code: z.string().min(1), transport: z.enum(["cookie", "token"]).default("token"), deviceName: z.string().max(80).optional() });
 
 /**
  * Mount with `app.route("/v1/auth", authRouter(config))`. Routes (all under the mount path):
@@ -33,6 +38,10 @@ const facebookTokenBody = z.object({ accessToken: z.string().min(20), transport:
  * - `POST /passkeys/register/options` · `POST /passkeys/register/verify` · `GET /passkeys` · `PATCH /passkeys/:id` · `DELETE /passkeys/:id`
  * - `POST /passkeys/authenticate/options` · `POST /passkeys/authenticate/verify`
  * - `POST /passkeys/signup/options` · `POST /passkeys/signup/verify` (contact-free: no sign-in required, account is created only once the passkey verifies)
+ * - Peer issuer (this site lets other kashi sites sign their users in here): `POST /federation/clients/register` ·
+ *   `GET /federation/clients` · `POST /federation/clients/:id/approve` (admin) · `GET /federation/authorize?client_id=&redirect_uri=&state=` ·
+ *   `POST /federation/token` · `GET /federation/.well-known/jwks.json`
+ * - Peer consumer (this site trusts another kashi site's accounts): `GET /peer/:key/start?next=` · `GET /peer/callback` · `POST /peer/token`
  */
 export function authRouter(config: AuthConfig): Hono<Env> {
   const app = new Hono<Env>();
@@ -42,7 +51,8 @@ export function authRouter(config: AuthConfig): Hono<Env> {
 
   app.get("/config", (c) => {
     const e = env(c);
-    return ok(c, { providers: { password: Boolean(p.password), otp: p.otp ? { channel: p.otp.channel } : null, google: Boolean(p.google) && googleConfigured(e), apple: Boolean(p.apple) && appleConfigured(e), facebook: Boolean(p.facebook) && facebookConfigured(e), passkeys: Boolean(p.passkeys), passkeySignUp: Boolean(p.passkeys) && p.passkeys?.allowSignUp !== false } });
+    const peers = (p.peer?.trust ?? []).map((t, i) => ({ key: String(i), label: t.label ?? new URL(t.issuer).host }));
+    return ok(c, { providers: { password: Boolean(p.password), otp: p.otp ? { channel: p.otp.channel } : null, google: Boolean(p.google) && googleConfigured(e), apple: Boolean(p.apple) && appleConfigured(e), facebook: Boolean(p.facebook) && facebookConfigured(e), passkeys: Boolean(p.passkeys), passkeySignUp: Boolean(p.passkeys) && p.passkeys?.allowSignUp !== false, peer: peers } });
   });
   app.get("/me", auth, (c) => ok(c, { user: c.get("user") }));
 
@@ -264,6 +274,101 @@ export function authRouter(config: AuthConfig): Hono<Env> {
         return ok(c, await completeSignIn(c, config, e, user, "passkey", input.transport, input.deviceName), 201);
       });
     }
+  }
+
+  // ----- peer issuer: let other kashi sites register and sign their users in here -----
+  if (p.peer?.issuer?.enabled) {
+    const admin = requireRole(config, "admin");
+    app.post("/federation/clients/register", rateLimit({ scope: "federation-register", limit: 10, windowSeconds: 3600 }), async (c) => {
+      const e = env(c);
+      const input = federationRegisterBody.parse(await c.req.json());
+      const client = await new AuthStore(e.db).createFederationClient(newId("fedcli"), input.siteName, input.redirectUri);
+      return ok(c, { id: client.id, clientId: client.client_id, status: client.status }, 201);
+    });
+    app.get("/federation/clients", admin, async (c) => {
+      const rows = (await new AuthStore(env(c).db).listFederationClients(c.req.query("status"))).results;
+      return ok(c, { items: rows.map((r) => ({ id: r.id, clientId: r.client_id, siteName: r.site_name, redirectUri: r.redirect_uri, status: r.status, createdAt: r.created_at, approvedAt: r.approved_at })) });
+    });
+    app.post("/federation/clients/:id/approve", admin, async (c) => {
+      const secret = randomToken(32);
+      const approved = await new AuthStore(env(c).db).approveFederationClient(c.req.param("id"), await sha256Hex(secret));
+      if (!approved) throw new ApiError(404, "NOT_FOUND", "No pending registration with that id.");
+      return ok(c, { clientSecret: secret });
+    });
+    app.get("/federation/authorize", auth, async (c) => {
+      const e = env(c);
+      const clientId = c.req.query("client_id") ?? "";
+      const redirectUri = c.req.query("redirect_uri") ?? "";
+      const client = await new AuthStore(e.db).federationClientByClientId(clientId);
+      if (!client || client.status !== "approved" || client.redirect_uri !== redirectUri) throw new ApiError(400, "INVALID_CLIENT", "This client is not registered and approved for that redirect URI.");
+      const code = await new AuthStore(e.db).createFederationCode(clientId, c.get("user").id, redirectUri);
+      const url = new URL(redirectUri);
+      url.searchParams.set("code", code);
+      if (c.req.query("state")) url.searchParams.set("state", c.req.query("state")!);
+      return c.redirect(url.toString());
+    });
+    app.post("/federation/token", async (c) => {
+      const e = env(c);
+      if (!peerIssuerConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "This site is not configured as a federation issuer.");
+      const input = federationTokenBody.parse(await c.req.json());
+      const store = new AuthStore(e.db);
+      const client = await store.federationClientByClientId(input.clientId);
+      if (!client || client.status !== "approved" || !client.client_secret_hash || client.client_secret_hash !== (await sha256Hex(input.clientSecret))) throw new ApiError(401, "INVALID_CLIENT", "Unknown client or client secret.");
+      const grant = await store.consumeFederationCode(input.code);
+      if (!grant || grant.clientId !== input.clientId || grant.redirectUri !== input.redirectUri) throw new ApiError(400, "INVALID_GRANT", "This authorization code is invalid or has expired.");
+      const user = await store.userById(grant.userId);
+      if (!user) throw new ApiError(401, "UNAUTHORIZED", "This account is no longer active.");
+      return ok(c, { idToken: await signFederationIdToken(e, input.clientId, user) });
+    });
+    app.get("/federation/.well-known/jwks.json", (c) => {
+      const e = env(c);
+      if (!peerIssuerConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "This site is not configured as a federation issuer.");
+      return ok(c, federationJwks(e));
+    });
+  }
+
+  // ----- peer consumer: sign in with an account from a trusted kashi site -----
+  if (p.peer?.trust?.length) {
+    const trustByKey = (key: string): PeerTrustConfig | undefined => p.peer!.trust![Number(key)];
+    const redirectUri = (e: AuthEnv) => `${e.authUrl}/peer/callback`;
+    app.get("/peer/:key/start", async (c) => {
+      const e = env(c);
+      const key = c.req.param("key");
+      const trust = trustByKey(key);
+      if (!trust) throw new ApiError(404, "NOT_FOUND", "Unknown peer.");
+      if (!e.authUrl) throw new Error("@softwareseva/auth: AUTH_URL must be the public URL of this router, e.g. https://api.example.com/v1/auth");
+      const state = await signPeerState(e, { key, next: safeNext(c.req.query("next")) });
+      return c.redirect(peerAuthorizeUrl(trust, redirectUri(e), state));
+    });
+    app.get("/peer/callback", async (c) => {
+      const e = env(c);
+      const fail = (code: string) => c.redirect(`${e.appOrigin}/sign-in?error=${code}`);
+      const state = await verifyPeerState(e, c.req.query("state") ?? "");
+      if (!state) return fail("OAUTH_STATE_INVALID");
+      const trust = trustByKey(state.key);
+      const code = c.req.query("code");
+      if (!trust || !code) return fail("OAUTH_FAILED");
+      try {
+        const profile = await exchangePeerCode(trust, code, redirectUri(e));
+        const user = await userForIdentity(c, config, e, "kashi", profile, trust.allowSignUp !== false);
+        await completeSignIn(c, config, e, user, "kashi", "cookie");
+        return c.redirect(`${e.appOrigin}${state.next}`);
+      } catch {
+        return fail("OAUTH_FAILED");
+      }
+    });
+    // For native apps: the app opens `/peer/:key/start` in a system browser and catches the final
+    // redirect itself (e.g. via a universal link on this same AUTH_URL host), then posts the code
+    // here to complete the exchange — the client_secret never leaves this backend.
+    app.post("/peer/token", async (c) => {
+      const e = env(c);
+      const input = peerTokenBody.parse(await c.req.json());
+      const trust = trustByKey(input.key);
+      if (!trust) throw new ApiError(404, "NOT_FOUND", "Unknown peer.");
+      const profile = await exchangePeerCode(trust, input.code, redirectUri(e)).catch(() => { throw new ApiError(401, "OAUTH_FAILED", "Peer sign-in could not be verified."); });
+      const user = await userForIdentity(c, config, e, "kashi", profile, trust.allowSignUp !== false);
+      return ok(c, await completeSignIn(c, config, e, user, "kashi", input.transport, input.deviceName));
+    });
   }
 
   return app;

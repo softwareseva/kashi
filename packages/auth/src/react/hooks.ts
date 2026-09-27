@@ -76,6 +76,12 @@ export function useOAuthUrl(provider: "google" | "apple" | "facebook", next = "/
   return `${basePath}/${provider}/start?next=${encodeURIComponent(next)}`;
 }
 
+/** URL that starts sign-in with a trusted peer kashi site; render as a plain link so the browser navigates. */
+export function usePeerUrl(peerKey: string, next = "/") {
+  const { basePath } = useAuth();
+  return `${basePath}/peer/${peerKey}/start?next=${encodeURIComponent(next)}`;
+}
+
 /** Reads `?error=CODE` left by an OAuth callback redirect. */
 export function oauthErrorFromLocation(search = typeof window !== "undefined" ? window.location.search : ""): string | null {
   return new URLSearchParams(search).get("error");

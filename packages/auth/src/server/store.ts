@@ -1,9 +1,10 @@
 /** All SQL for @softwareseva/auth. Tables are created by the package migrations (auth_*). */
-import { newId, nowIso, sha256 } from "@softwareseva/core/server";
+import { futureIso, newId, nowIso, sha256 } from "@softwareseva/core/server";
 import type { AuthUser } from "./types";
 
 type UserRow = { id: string; display_name: string; email: string | null; phone: string | null; roles: string; email_verified_at: string | null; phone_verified_at: string | null; password_hash: string | null; disabled_at: string | null };
 export type PasskeyRow = { id: string; user_id: string; credential_id: string; public_key: string; counter: number; transports: string | null; device_name: string; backed_up: number; rp_id: string | null; created_at: string; last_used_at: string | null };
+export type FederationClientRow = { id: string; client_id: string; client_secret_hash: string | null; site_name: string; redirect_uri: string; status: "pending" | "approved" | "revoked"; created_at: string; approved_at: string | null };
 
 const userColumns = "id, display_name, email, phone, roles, email_verified_at, phone_verified_at, password_hash, disabled_at";
 const toUser = (r: UserRow): AuthUser => ({ id: r.id, name: r.display_name, email: r.email, phone: r.phone, roles: JSON.parse(r.roles || "[]") as string[], emailVerifiedAt: r.email_verified_at, phoneVerifiedAt: r.phone_verified_at });
@@ -120,6 +121,39 @@ export class AuthStore {
     if (!row || row.user_id !== userId) return null;
     const r = await this.db.prepare("UPDATE auth_challenges SET consumed_at = ? WHERE id = ? AND consumed_at IS NULL").bind(nowIso(), id).run();
     return r.meta.changes === 1 ? row.challenge : null;
+  }
+
+  // ----- federation authorization codes (issuer side, single-use, mirrors consumeChallenge) -----
+  async createFederationCode(clientId: string, userId: string, redirectUri: string, ttlSeconds = 60): Promise<string> {
+    const id = newId("fedcode");
+    await this.db.prepare("INSERT INTO auth_federation_codes(id, client_id, user_id, redirect_uri, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(id, clientId, userId, redirectUri, futureIso(ttlSeconds), nowIso()).run();
+    return id;
+  }
+  /** Consumes exactly once; returns null when missing, expired or already used. */
+  async consumeFederationCode(code: string): Promise<{ clientId: string; userId: string; redirectUri: string } | null> {
+    const row = await this.db.prepare("SELECT client_id, user_id, redirect_uri FROM auth_federation_codes WHERE id = ? AND consumed_at IS NULL AND expires_at > ?").bind(code, nowIso()).first<{ client_id: string; user_id: string; redirect_uri: string }>();
+    if (!row) return null;
+    const r = await this.db.prepare("UPDATE auth_federation_codes SET consumed_at = ? WHERE id = ? AND consumed_at IS NULL").bind(nowIso(), code).run();
+    return r.meta.changes === 1 ? { clientId: row.client_id, userId: row.user_id, redirectUri: row.redirect_uri } : null;
+  }
+
+  // ----- federation clients (issuer side: peer sites allowed to sign their users in here) -----
+  async createFederationClient(clientId: string, siteName: string, redirectUri: string): Promise<FederationClientRow> {
+    const id = newId("fed"); const now = nowIso();
+    await this.db.prepare("INSERT INTO auth_federation_clients(id, client_id, client_secret_hash, site_name, redirect_uri, status, created_at) VALUES (?, ?, NULL, ?, ?, 'pending', ?)").bind(id, clientId, siteName, redirectUri, now).run();
+    return { id, client_id: clientId, client_secret_hash: null, site_name: siteName, redirect_uri: redirectUri, status: "pending", created_at: now, approved_at: null };
+  }
+  federationClientByClientId(clientId: string) {
+    return this.db.prepare("SELECT * FROM auth_federation_clients WHERE client_id = ?").bind(clientId).first<FederationClientRow>();
+  }
+  async approveFederationClient(id: string, clientSecretHash: string): Promise<boolean> {
+    const r = await this.db.prepare("UPDATE auth_federation_clients SET status = 'approved', client_secret_hash = ?, approved_at = ? WHERE id = ? AND status = 'pending'").bind(clientSecretHash, nowIso(), id).run();
+    return r.meta.changes === 1;
+  }
+  listFederationClients(status?: string) {
+    return status
+      ? this.db.prepare("SELECT * FROM auth_federation_clients WHERE status = ? ORDER BY created_at DESC").bind(status).all<FederationClientRow>()
+      : this.db.prepare("SELECT * FROM auth_federation_clients ORDER BY created_at DESC").all<FederationClientRow>();
   }
 
   /** Housekeeping for a cron trigger. */

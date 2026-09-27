@@ -5,6 +5,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kashi_core/kashi_core.dart';
 
+/// A trusted peer kashi site this app can sign in through ("Continue with {label}").
+@immutable
+class PeerConfig {
+  const PeerConfig({required this.key, required this.label});
+  factory PeerConfig.fromJson(Map<String, dynamic> j) =>
+      PeerConfig(key: j['key'] as String, label: j['label'] as String);
+  final String key;
+  final String label;
+}
+
 @immutable
 class AuthProviders {
   const AuthProviders({
@@ -15,6 +25,7 @@ class AuthProviders {
     this.facebook = false,
     this.passkeys = false,
     this.passkeySignUp = false,
+    this.peers = const [],
   });
 
   factory AuthProviders.fromJson(Map<String, dynamic> json) {
@@ -28,6 +39,12 @@ class AuthProviders {
       facebook: p['facebook'] == true,
       passkeys: p['passkeys'] == true,
       passkeySignUp: p['passkeySignUp'] == true,
+      peers:
+          (p['peer'] as List?)
+              ?.cast<Map<String, dynamic>>()
+              .map(PeerConfig.fromJson)
+              .toList() ??
+          const [],
     );
   }
 
@@ -42,6 +59,9 @@ class AuthProviders {
 
   /// Contact-free account creation from a brand-new passkey (`/passkeys/signup/*`).
   final bool passkeySignUp;
+
+  /// Other kashi sites whose accounts this site accepts sign-in from.
+  final List<PeerConfig> peers;
 }
 
 @immutable
@@ -132,6 +152,30 @@ class KashiAuthApi {
       client.post<Map<String, dynamic>>(
         '$authPath/facebook/token',
         body: {'accessToken': accessToken, ..._token},
+      );
+
+  /// The URL that starts sign-in with a trusted peer kashi site (`peerKey` from [PeerConfig.key]).
+  /// Open it in a system browser via a [PeerBrowserSignIn] adapter; [redirectPrefix] is what that
+  /// browser should watch for, since the peer redirects back to this app's own `/peer/callback`.
+  Uri peerAuthorizeUrl(String peerKey, {String next = '/'}) {
+    final base = Uri.parse(client.baseUrl);
+    return base.replace(
+      path: '${base.path}$authPath/peer/$peerKey/start',
+      queryParameters: {'next': next},
+    );
+  }
+
+  Uri peerRedirectPrefix() {
+    final base = Uri.parse(client.baseUrl);
+    return base.replace(path: '${base.path}$authPath/peer/callback');
+  }
+
+  /// Completes peer sign-in with the `code` pulled off the redirect URL the browser returned.
+  /// The client secret for `peerKey` lives only on this app's own backend, never in the app.
+  Future<Map<String, dynamic>> peerToken(String peerKey, String code) =>
+      client.post<Map<String, dynamic>>(
+        '$authPath/peer/token',
+        body: {'key': peerKey, 'code': code, ..._token},
       );
 
   Future<({Map<String, dynamic> options, String challengeId})>

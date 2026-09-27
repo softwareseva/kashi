@@ -1,3 +1,7 @@
+## 1.2.0
+
+- No functional changes; version aligned with the fixed npm release group and the other kashi_* packages.
+
 ## 1.1.0
 
 - No functional changes; version aligned with the fixed npm release group and the other kashi_* packages.

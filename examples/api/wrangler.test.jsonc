@@ -4,6 +4,16 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
-  "vars": { "ENVIRONMENT": "test", "WEB_ORIGIN": "http://localhost:5173", "JWT_SECRET": "test-jwt-secret-that-is-long-enough", "OTP_PEPPER": "test-pepper", "RP_ID": "localhost", "RP_NAME": "kashi test" },
+  "vars": {
+    "ENVIRONMENT": "test",
+    "WEB_ORIGIN": "http://localhost:5173",
+    "JWT_SECRET": "test-jwt-secret-that-is-long-enough",
+    "OTP_PEPPER": "test-pepper",
+    "RP_ID": "localhost",
+    "RP_NAME": "kashi test",
+    // Only used to exercise the peer-federation loop end-to-end (see auth.ts); never reused for JWT_SECRET.
+    "AUTH_URL": "http://example.com/v1/auth",
+    "FEDERATION_PRIVATE_KEY": "{\"key_ops\":[\"sign\"],\"ext\":true,\"alg\":\"RS256\",\"kty\":\"RSA\",\"n\":\"0V-xnG0rnuWUInE-Dkiqfx4iAS1tHtauJlqFLLdo8ZdSuZrj-7K-f4WTgzxx00Lmeg3d5anvkhb-BIbg2bHX0pEfYzXI_H1jJmmgOb14KeP3w9UQeZcXX8DrvxGl6N0jPrFyk1ijwTWeEwb0gUXmk3w27vw98lHuah5nttYDjWmWk-XvDqe0Qc0ToUnsZIKxtSngpzqskyNkDciTWduGUwq6UdjrAk3yksxzHtzkGixdCi4MiYFr-tuUd2SvTWgbWmXP0o_cO56uZsc5J02aKaoOYz1ElXze-RKsZ6DHuOaJWMOyHT7MpqDbkCg_qUlEMZPEHh1UW2g_3zuQjpyUcw\",\"e\":\"AQAB\",\"d\":\"tVhxbMdEEfY-voU09l1xk5eW7W4m0TnLNqBByhLv46Y-zXL0jQ1VjA03UNqBM8_PSApUScsIxtWJty7XkfreJ2FpAXQdB6Vww_a40J9tMJcQRvSq6fsFEJVdvZgUG52QHJrqxHCKdmgcgjxQvcmJQjUhGzM9Hwu1uQElXEiKQpqwKtULiX-LdOJHu49BN3tjPCdjjj_fcJTikINkfAewTMUaTnEgtSZCnpgGBgMXG3uOOwVq5xef8uqIHb33DKrTRT8kHgFXQhX1X2jTUUbr0PfwgDQrkm5a9G0RfgJnj__5C8FatSDsI2JFoYKI-SNmFSvnZrprmk7Xl1PuW9YB\",\"p\":\"_ZabO4vP_wJ7_8kXKBoUaRujid0s5LT63W88s_Diaf0EHrZV1FJE58WqQ78WqHGuqOHIzCFc9TxCjCZ5YKvWmEQ7q6H6Ag6378QP1tvtWE06zYyAx3WCoLZnCdk-Gn8RqFgGpUxAguaWjygrBISaPWIC7he-Gyh7BHeyRP_G6YE\",\"q\":\"011xBIStqkr7ozgiFDZWfrphmNtAKatzHncQJ9c-fbTIzGUU5_LVIADyzJo63TucV4KNro-T7BNBWSxtcgv6y_it5kVt1o_GtMsCH5HC9ty3RUzLuUQTHHy6FBp09erbHHKBUlL5yg7PotNh3oe8TDaCEsj9hj96fvIxVQCOb_M\",\"dp\":\"DJ84bshQvAKlpV-e9XIG3gxwIWaO23temTL2NIai3l-nmte8geruXxLpnKGgQRYXeXRziCWI-PPc5BjuJa-n6MBMsAhJ51xQL3D00N71e1WsvZpmtobUz6cEjerwOmVkvZpUClo3Q8yyZcG8Emd_PdrpBmzMG5HyPZCvoNuSTQE\",\"dq\":\"CRAGmoT91UFlzLfJbkhuKPzg1mcAN0kspG_Cd5LZERbBTVJANTnKPZcM0g0C3R2DNJVacdOiKgshUCuBfdRZqok9G5R6gyqjAHl729KqI1-PVB9Y1NbAYwZODDKeNTUes_eM5_S61RkReg_KMHptbm8f4KJRjIIIRI0p5FUjxlU\",\"qi\":\"8lqM1Ho4SEsewZAwrnlAGfeeHP-22Pcz0Fqe6saWVXYURlIDj3TOl_mwYZ3B9bo1M57A7B4wt92MFyCrHlnOkrdWEsNCC3xD2BXUWnpel33_CEZ1zEO-t5fDu_cR54q1W_kO0kvzYZwcU8lLLTZWqXSCdEA__SdLzbmTWkwZ0hY\",\"kid\":\"test-key-1\",\"use\":\"sig\"}"
+  },
   "d1_databases": [{ "binding": "DB", "database_name": "kashi-example-test", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }]
 }

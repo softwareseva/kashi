@@ -249,4 +249,79 @@ void main() {
       expect(find.byType(KAlert), findsNothing, reason: 'cancelling is silent');
     },
   );
+
+  testWidgets(
+    'shows a peer button per trusted site and signs in with the redirected code',
+    (tester) async {
+      final adapter = FakeAdapter((o) {
+        switch (o.path) {
+          case '/auth/config':
+            return json(200, {
+              'data': {
+                'providers': {
+                  'password': false,
+                  'otp': null,
+                  'passkeys': false,
+                  'peer': [
+                    {'key': '0', 'label': 'vvmvp'},
+                  ],
+                },
+              },
+            });
+          case '/auth/peer/token':
+            final body = o.data as Map<String, dynamic>;
+            expect(body['key'], '0');
+            expect(body['code'], 'the-code');
+            return json(200, {
+              'data': {
+                'user': {
+                  'id': 'usr_2',
+                  'name': 'Riya',
+                  'roles': ['user'],
+                },
+                'accessToken': 'a',
+                'refreshToken': 'refresh-token-yyyyyyyyyyyy',
+                'expiresIn': 900,
+              },
+            });
+        }
+        return json(404, {
+          'code': 'NOT_FOUND',
+          'message': 'nope',
+          'requestId': 'r',
+        });
+      });
+      final tokens = TokenStore(storage: MemoryStorage());
+      final client = KashiApiClient(
+        baseUrl: 'https://api.test/v1',
+        tokens: tokens,
+      )..dio.httpClientAdapter = adapter;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            kashiConfigProvider.overrideWithValue(
+              const KashiConfig(baseUrl: 'x'),
+            ),
+            tokenStoreProvider.overrideWithValue(tokens),
+            apiClientProvider.overrideWithValue(client),
+          ],
+          child: CupertinoApp(
+            home: CupertinoPageScaffold(
+              child: KSignIn(
+                peerBrowser: (authorizeUrl, redirectPrefix) async =>
+                    redirectPrefix.replace(
+                      queryParameters: {'code': 'the-code'},
+                    ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Continue with vvmvp'), findsOneWidget);
+      await tester.tap(find.text('Continue with vvmvp'));
+      await tester.pumpAndSettle();
+      expect(find.byType(KAlert), findsNothing);
+    },
+  );
 }
