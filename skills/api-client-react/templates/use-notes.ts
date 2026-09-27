@@ -1,5 +1,6 @@
 /** Hooks for the notes resource: keys, list, detail, create. Pages use these, never the api client directly. */
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
+import { useApiQuery, useApiMutation } from "@softwareseva/core/react";
 import type { Page } from "@softwareseva/list/contracts";
 import { api } from "../lib/api";
 
@@ -14,9 +15,9 @@ export const noteKeys = {
   one: (id: string) => [...noteKeys.all, "one", id] as const,
 };
 
-export const useNotes = (p: NoteListParams) => useQuery({ queryKey: noteKeys.list(p), queryFn: () => api.get<Page<Note>>(`/notes?${toSearch(p)}`), placeholderData: keepPreviousData });
-export const useNote = (id: string) => useQuery({ queryKey: noteKeys.one(id), queryFn: () => api.get<Note>(`/notes/${id}`) });
+export const useNotes = (p: NoteListParams) => useApiQuery({ queryKey: noteKeys.list(p), queryFn: () => api.get<Page<Note>>(`/notes?${toSearch(p)}`), placeholderData: keepPreviousData });
+export const useNote = (id: string) => useApiQuery({ queryKey: noteKeys.one(id), queryFn: () => api.get<Note>(`/notes/${id}`) });
 export function useCreateNote() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (body: { title: string; body?: string }) => api.post<Note>("/notes", body), onSuccess: () => qc.invalidateQueries({ queryKey: noteKeys.all }) });
+  return useApiMutation({ mutationFn: (body: { title: string; body?: string }) => api.post<Note>("/notes", body), onSuccess: () => qc.invalidateQueries({ queryKey: noteKeys.all }) });
 }

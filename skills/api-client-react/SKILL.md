@@ -3,8 +3,8 @@ name: api-client-react
 description: Call a kashi (Hono + D1) API from React with @softwareseva/core/client and @softwareseva/auth/react, with one fetch client that unwraps the { data } envelope, throws typed ApiError, refreshes the session once on 401, plus AuthProvider, useAuth, sign-in components, and the TanStack Query hook-per-resource convention. Use when setting up data fetching or sign-in in a React app, adding a query or mutation hook, or handling API errors and field validation messages in forms.
 license: MIT
 metadata:
-  version: "0.1.0"
-  packages: "@softwareseva/core@0.1 @softwareseva/auth@0.1"
+  version: "0.2.0"
+  packages: "@softwareseva/core@0.2 @softwareseva/auth@0.2"
 ---
 
 # React API client and auth
@@ -13,7 +13,7 @@ metadata:
 
 1. `pnpm add @softwareseva/core @softwareseva/auth @softwareseva/ui @tanstack/react-query @simplewebauthn/browser`.
 2. Copy `templates/api.ts` to `src/lib/api.ts`. It creates one client: cookie credentials, refresh through `POST /auth/refresh`, and redirect to `/sign-in` when refresh fails.
-3. Wrap the app (`templates/main.tsx`): `QueryClientProvider` then `AuthProvider api={api}`.
+3. Wrap the app (`templates/main.tsx`): `QueryClientProvider client={createQueryClient()}` (from `@softwareseva/core/react`) then `AuthProvider api={api}`. `AuthProvider`/`useAuth` are TanStack Query-backed, so the provider must be inside `QueryClientProvider`.
 4. Guard routes with `useAuth().status` (`"loading" | "signed-in" | "signed-out"`), see `templates/require-auth.tsx`.
 
 In development, proxy `/v1` to the Worker (`vite.config.ts` `server.proxy`), so cookies are same-origin and CORS is not involved.
@@ -29,15 +29,15 @@ Every method returns the unwrapped `data` or throws `ApiError { code, message, s
 
 ## One hook per resource
 
-Keep query keys and fetchers together (`templates/use-notes.ts`):
+Keep query keys and fetchers together (`templates/use-notes.ts`), built on `useApiQuery`/`useApiMutation` from `@softwareseva/core/react` — thin wrappers over TanStack Query's `useQuery`/`useMutation` that type errors as `ApiError` instead of `unknown`:
 
 ```ts
 export const noteKeys = { all: ["notes"] as const, list: (q: ListParams) => [...noteKeys.all, "list", q] as const, one: (id: string) => [...noteKeys.all, id] as const };
-export const useNotes = (q: ListParams) => useQuery({ queryKey: noteKeys.list(q), queryFn: () => api.get<Page<Note>>(`/notes?${toSearch(q)}`), placeholderData: keepPreviousData });
-export const useCreateNote = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (b: NewNote) => api.post<Note>("/notes", b), onSuccess: () => qc.invalidateQueries({ queryKey: noteKeys.all }) }); };
+export const useNotes = (q: ListParams) => useApiQuery({ queryKey: noteKeys.list(q), queryFn: () => api.get<Page<Note>>(`/notes?${toSearch(q)}`), placeholderData: keepPreviousData });
+export const useCreateNote = () => { const qc = useQueryClient(); return useApiMutation({ mutationFn: (b: NewNote) => api.post<Note>("/notes", b), onSuccess: () => qc.invalidateQueries({ queryKey: noteKeys.all }) }); };
 ```
 
-Pages import hooks, never `api` directly. For lists, pair with the `react-data-table` skill.
+Pages import hooks, never `api` directly. For a paginated list, use `createListQuery` from `@softwareseva/list/react` instead of hand-writing this — see the `react-data-table` skill.
 
 ## Sign-in UI
 
