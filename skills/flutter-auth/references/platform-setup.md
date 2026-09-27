@@ -15,12 +15,20 @@
 3. Name and email arrive only on first authorisation; the adapter forwards the name, the server stores it.
 4. App Store rule: if you offer Google (or any third-party) sign-in on iOS, you must offer Apple too.
 
+## Facebook Login (flutter_facebook_auth)
+
+1. Facebook App (Consumer type) with the Facebook Login product; `FACEBOOK_CLIENT_ID`/`FACEBOOK_CLIENT_SECRET` on the server (see the `auth-facebook` skill).
+2. iOS `Info.plist`: `FacebookAppID`, `FacebookClientToken`, `FacebookDisplayName`, and the `fbAPP_ID`/`fbAUTH_PROTOCOL_SCHEME` URL scheme entries the plugin's setup docs list.
+3. Android `res/values/strings.xml`: `facebook_app_id`, `facebook_client_token`; `AndroidManifest.xml`: the `com.facebook.sdk.ApplicationId` and `com.facebook.sdk.ClientToken` meta-data, plus the `FacebookActivity` and `CustomTabActivity` entries.
+4. The adapter returns an access token (`AccessTokenResult`), not an ID token — the server verifies it itself via `debug_token`, so no separate native verification step is needed.
+5. Move the Facebook App from Development to Live before launch (see `auth-facebook`'s pitfalls).
+
 ## Passkeys (passkeys plugin)
 
-1. Choose `RP_ID` (e.g. `example.com`) and serve `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` there (see the `auth-passkeys` skill).
-2. iOS: Associated Domains capability with `webcredentials:example.com`. Deployment target iOS 16 or later for passkeys.
-3. Android: `minSdk` 28+, Google Play services; add the app's `android:apk-key-hash:...` origin to `providers.passkeys.extraOrigins` on the server.
-4. The plugin returns standard WebAuthn JSON; the bridge passes it through unchanged.
+1. Choose `RP_ID` (e.g. `example.com`) during project setup — before the app's first release, not when the passkey feature ships — and wire the app-side config in step 2/3 at the same time, even though `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` (see the `auth-passkeys` skill) may not be deployed yet. Neither depends on the other being live.
+2. iOS: Associated Domains capability with `webcredentials:example.com` (or the equivalent `ios/Runner/Runner.entitlements` entry). Deployment target iOS 16 or later for passkeys.
+3. Android: `minSdk` 28+, Google Play services, and the `autoVerify` intent filter for `example.com` in `AndroidManifest.xml`; add the app's `android:apk-key-hash:...` origin to `providers.passkeys.extraOrigins` on the server.
+4. The plugin returns standard WebAuthn JSON; the bridge passes it through unchanged for both `/passkeys/authenticate/*` (sign-in) and `/passkeys/signup/*` (contact-free sign-up) — same bridge, same `register`/`authenticate` methods.
 
 ## Biometric lock (local_auth 3)
 

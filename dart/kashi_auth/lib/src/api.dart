@@ -12,7 +12,9 @@ class AuthProviders {
     this.otpChannel,
     this.google = false,
     this.apple = false,
+    this.facebook = false,
     this.passkeys = false,
+    this.passkeySignUp = false,
   });
 
   factory AuthProviders.fromJson(Map<String, dynamic> json) {
@@ -23,7 +25,9 @@ class AuthProviders {
       otpChannel: otp?['channel'] as String?,
       google: p['google'] == true,
       apple: p['apple'] == true,
+      facebook: p['facebook'] == true,
       passkeys: p['passkeys'] == true,
+      passkeySignUp: p['passkeySignUp'] == true,
     );
   }
 
@@ -33,7 +37,11 @@ class AuthProviders {
   final String? otpChannel;
   final bool google;
   final bool apple;
+  final bool facebook;
   final bool passkeys;
+
+  /// Contact-free account creation from a brand-new passkey (`/passkeys/signup/*`).
+  final bool passkeySignUp;
 }
 
 @immutable
@@ -43,18 +51,23 @@ class PasskeyItem {
     required this.deviceName,
     required this.backedUp,
     required this.createdAt,
+    this.rpId,
     this.lastUsedAt,
   });
   factory PasskeyItem.fromJson(Map<String, dynamic> j) => PasskeyItem(
     id: j['id'] as String,
     deviceName: j['deviceName'] as String,
     backedUp: j['backedUp'] == true,
+    rpId: j['rpId'] as String?,
     createdAt: j['createdAt'] as String,
     lastUsedAt: j['lastUsedAt'] as String?,
   );
   final String id;
   final String deviceName;
   final bool backedUp;
+
+  /// The domain this passkey was created for (WebAuthn RP ID), for display on a settings screen.
+  final String? rpId;
   final String createdAt;
   final String? lastUsedAt;
 }
@@ -115,6 +128,11 @@ class KashiAuthApi {
           ..._token,
         },
       );
+  Future<Map<String, dynamic>> facebook(String accessToken) =>
+      client.post<Map<String, dynamic>>(
+        '$authPath/facebook/token',
+        body: {'accessToken': accessToken, ..._token},
+      );
 
   Future<({Map<String, dynamic> options, String challengeId})>
   passkeyOptions() async {
@@ -158,6 +176,36 @@ class KashiAuthApi {
       'challengeId': challengeId,
       'response': response,
       'deviceName': deviceName,
+    },
+  );
+
+  /// Contact-free sign-up: no auth, no email/phone/OAuth. The account is created only once
+  /// [passkeySignUpVerify] confirms the new passkey.
+  Future<({Map<String, dynamic> options, String challengeId})>
+  passkeySignUpOptions() async {
+    final r = await client.post<Map<String, dynamic>>(
+      '$authPath/passkeys/signup/options',
+      body: const {},
+    );
+    return (
+      options: r['options'] as Map<String, dynamic>,
+      challengeId: r['challengeId'] as String,
+    );
+  }
+
+  Future<Map<String, dynamic>> passkeySignUpVerify(
+    String challengeId,
+    Map<String, dynamic> response,
+    String deviceName, {
+    String? name,
+  }) => client.post<Map<String, dynamic>>(
+    '$authPath/passkeys/signup/verify',
+    body: {
+      'challengeId': challengeId,
+      'response': response,
+      'deviceName': deviceName,
+      if (name != null && name.isNotEmpty) 'name': name,
+      ..._token,
     },
   );
 

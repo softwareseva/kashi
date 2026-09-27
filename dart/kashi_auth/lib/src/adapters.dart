@@ -15,6 +15,16 @@ class IdTokenResult {
 /// Runs the platform sign-in sheet. Return null when the user cancels; throw on real errors.
 typedef IdTokenSignIn = Future<IdTokenResult?> Function();
 
+/// Result of a native Facebook Login (the SDK returns an access token, not an ID token).
+@immutable
+class AccessTokenResult {
+  const AccessTokenResult(this.accessToken);
+  final String accessToken;
+}
+
+/// Runs the Facebook Login sheet. Return null when the user cancels; throw on real errors.
+typedef AccessTokenSignIn = Future<AccessTokenResult?> Function();
+
 /// Bridges WebAuthn JSON between the server and a platform passkey plugin.
 abstract interface class PasskeyBridge {
   /// `options` is PublicKeyCredentialRequestOptionsJSON; return AuthenticationResponseJSON.

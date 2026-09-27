@@ -8,6 +8,7 @@ import 'package:kashi_auth/kashi_auth.dart';
 import 'package:kashi_ui/kashi_ui.dart';
 
 import '../adapters/apple.dart';
+import '../adapters/facebook.dart';
 import '../adapters/google.dart';
 import '../adapters/passkeys.dart';
 
@@ -22,6 +23,7 @@ class SignInScreen extends StatelessWidget {
         child: KSignIn(
           google: googleIdToken,
           apple: Platform.isIOS ? appleIdToken : null,
+          facebook: facebookAccessToken,
           passkeys: PluginPasskeyBridge(),
         ),
       ),

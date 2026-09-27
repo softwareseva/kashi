@@ -36,6 +36,21 @@ app.delete("/v1/admin/users/:id", requireRole(authConfig, "admin"), handler);
 
 `c.get("user")` is `{ id, name, email, phone, roles, emailVerifiedAt, phoneVerifiedAt }`. Roles live on `auth_users.roles` (a JSON array). New users get `config.defaultRoles` (default `["user"]`). Grant roles with a migration or an admin route that updates that column; the next access token (at most 15 minutes) carries them, and `requireAuth` re-reads the user row on every request so a disabled user is locked out immediately.
 
+## Anonymous by default, verified where it matters
+
+Sign-in itself asks for nothing: passkeys (`auth-passkeys`) let a user get a working, signed-in account with no email, phone or OAuth grant at all. That is deliberate — most of an app (browsing, most writes, most reads) does not need to know who a person really is, only that they are the same person who was here before.
+
+A handful of actions genuinely do need a reachable, verified identity: payouts, anything that emails or texts the user, appeals against an automated decision, closing an account for good. Gate exactly those with `requireVerified`, not with a broader "must have signed up with OTP/OAuth" rule applied everywhere:
+
+```ts
+import { requireAuth, requireVerified, isVerifiedIdentity } from "@softwareseva/auth/server";
+app.post("/v1/payouts", requireVerified(authConfig), handler);
+// or check inline, e.g. to show a banner instead of hard-blocking:
+app.get("/v1/payouts/eligibility", requireAuth(authConfig), (c) => ok(c, { verified: isVerifiedIdentity(c.get("user")) }));
+```
+
+`requireVerified` passes once `user.emailVerifiedAt` or `user.phoneVerifiedAt` is set — which happens through an OTP-verified email/phone (`auth-whatsapp-otp`) or a linked Google/Apple/Facebook sign-in with a provider-verified email (`auth-google`, `auth-apple`, `auth-facebook`). A passkey-only account has neither field set, so it fails `requireVerified` until the user attaches one of those. On rejection the response is `403 IDENTITY_REQUIRED`; prompt the user to add an email/phone or link an OAuth account rather than asking them to "sign in again" (they already are).
+
 ## Transports: cookie vs token
 
 Every sign-in endpoint accepts `transport`:
@@ -72,8 +87,8 @@ hooks: {
 | POST | `/token/refresh`, `/token/revoke` | token transport |
 | POST | `/password/sign-in`, `/password/change` | when `password: true` |
 | POST | `/otp/request`, `/otp/verify` | see `auth-whatsapp-otp` |
-| GET/POST | `/google/*`, `/apple/*` | see `auth-google`, `auth-apple` |
-| POST/GET/PATCH/DELETE | `/passkeys/*` | see `auth-passkeys` |
+| GET/POST | `/google/*`, `/apple/*`, `/facebook/*` | see `auth-google`, `auth-apple`, `auth-facebook` |
+| POST/GET/PATCH/DELETE | `/passkeys/*` | see `auth-passkeys`; `/passkeys/signup/*` needs no auth |
 
 ## React clients
 

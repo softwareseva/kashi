@@ -128,6 +128,31 @@ export function requireRole(config: AuthConfig, ...roles: string[]): MiddlewareH
   };
 }
 
+/**
+ * A user carries a "valid id" once an OTP-verified email/phone or an OAuth identity (google,
+ * apple, facebook) has been attached — both paths set `emailVerifiedAt`/`phoneVerifiedAt`. A
+ * passkey-only, contact-free account has neither: it is signed in, but anonymous.
+ */
+export function isVerifiedIdentity(user: AuthUser): boolean {
+  return Boolean(user.emailVerifiedAt || user.phoneVerifiedAt);
+}
+
+/**
+ * Gate a specific action behind a valid id (after requireAuth): OTP-verified email/phone, or a
+ * linked Google/Apple/Facebook sign-in. Everything else — sign-in itself, browsing, most writes —
+ * stays open to anonymous, passkey-only accounts. Use this only on the handful of actions that
+ * genuinely need a reachable, verified identity (payouts, support hand-off, abuse appeals, ...).
+ */
+export function requireVerified(config: AuthConfig): MiddlewareHandler<{ Variables: AuthVariables }> {
+  const auth = requireAuth(config);
+  return async (c, next) => {
+    await auth(c, async () => {
+      if (!isVerifiedIdentity(c.get("user"))) throw new ApiError(403, "IDENTITY_REQUIRED", "This action needs a verified email, phone or account (Google, Apple or Facebook).");
+      await next();
+    });
+  };
+}
+
 /** Run hooks and issue the session; every provider ends here. */
 export async function completeSignIn(c: Context, config: AuthConfig, env: AuthEnv, user: AuthUser, provider: string, transport: Transport, deviceName?: string | null) {
   const adjusted = (await config.hooks?.beforeSession?.(user, provider, c)) ?? user;

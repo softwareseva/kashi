@@ -21,6 +21,7 @@ export const authConfig: AuthConfig = {
     otp: { channel: "phone", send: sendCode, defaultCountry: "IN" },
     google: {},
     apple: {},
+    facebook: {},
     passkeys: {},
   },
 };

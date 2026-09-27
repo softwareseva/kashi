@@ -23,6 +23,8 @@ export function resolveEnv(config: AuthConfig, raw: Record<string, unknown>): Au
     appleKeyId: str(raw.APPLE_KEY_ID),
     applePrivateKey: str(raw.APPLE_PRIVATE_KEY),
     appleBundleIds: list(raw.APPLE_BUNDLE_IDS),
+    facebookClientId: str(raw.FACEBOOK_CLIENT_ID),
+    facebookClientSecret: str(raw.FACEBOOK_CLIENT_SECRET),
     rpId: str(raw.RP_ID) ?? (origins[0] ? new URL(origins[0]).hostname : undefined),
     rpName: str(raw.RP_NAME) ?? "App",
   };
