@@ -37,6 +37,8 @@ export type AuthEnv = {
   appleKeyId?: string;
   applePrivateKey?: string;
   appleBundleIds?: string[];
+  facebookClientId?: string;
+  facebookClientSecret?: string;
   rpId?: string;
   rpName?: string;
 };
@@ -57,9 +59,16 @@ export type OtpProviderConfig = {
 
 export type OAuthProviderConfig = { allowSignUp?: boolean };
 export type AppleProviderConfig = OAuthProviderConfig;
+export type FacebookProviderConfig = OAuthProviderConfig;
 export type PasskeyProviderConfig = {
   /** Extra WebAuthn origins, e.g. android:apk-key-hash:... */
   extraOrigins?: string[];
+  /**
+   * Allow a brand-new, contact-free account to be created straight from a passkey
+   * (`POST /passkeys/signup/*`, no prior sign-in). Default true — passkeys are the
+   * default, anonymous entry point; disable to require an OTP/OAuth sign-up first.
+   */
+  allowSignUp?: boolean;
 };
 
 export type AuthHooks = {
@@ -84,6 +93,7 @@ export type AuthConfig = {
     otp?: OtpProviderConfig;
     google?: OAuthProviderConfig;
     apple?: AppleProviderConfig;
+    facebook?: FacebookProviderConfig;
     passkeys?: PasskeyProviderConfig;
   };
   hooks?: AuthHooks;

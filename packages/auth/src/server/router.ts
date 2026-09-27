@@ -7,7 +7,8 @@ import { changePassword, passwordChangeSchema, passwordSignInSchema, authenticat
 import { otpRequestSchema, otpVerifySchema, requestOtp, verifyOtp } from "./providers/otp";
 import { exchangeGoogleCode, googleAuthorizeUrl, googleConfigured, safeNext, signOAuthState, verifyGoogleIdToken, verifyOAuthState } from "./providers/google";
 import { appleAuthorizeUrl, appleConfigured, appleNameFromUserJson, exchangeAppleCode, verifyAppleIdToken } from "./providers/apple";
-import { authenticationOptions, passkeyAuthVerifySchema, passkeyRegisterVerifySchema, passkeyRenameSchema, registrationOptions, verifyAuthentication, verifyRegistration } from "./providers/passkeys";
+import { exchangeFacebookCode, facebookAuthorizeUrl, facebookConfigured, verifyFacebookAccessToken, signOAuthState as signFacebookState, verifyOAuthState as verifyFacebookState } from "./providers/facebook";
+import { anonymousRegistrationOptions, authenticationOptions, passkeySignupVerifySchema, passkeyAuthVerifySchema, passkeyRegisterVerifySchema, passkeyRenameSchema, registrationOptions, verifyAnonymousRegistration, verifyAuthentication, verifyRegistration } from "./providers/passkeys";
 import { clearSessionCookies, completeSignIn, issueSession, readRefreshCookie, requireAuth, rotateRefreshToken } from "./session";
 import { AuthStore } from "./store";
 import { userForIdentity } from "./users";
@@ -17,6 +18,7 @@ type Env = { Bindings: Record<string, unknown>; Variables: AuthVariables & { req
 const refreshBody = z.object({ refreshToken: z.string().min(20).max(200) });
 const idTokenBody = z.object({ idToken: z.string().min(20), transport: z.enum(["cookie", "token"]).default("token"), deviceName: z.string().max(80).optional() });
 const appleTokenBody = idTokenBody.extend({ name: z.string().trim().max(120).optional() });
+const facebookTokenBody = z.object({ accessToken: z.string().min(20), transport: z.enum(["cookie", "token"]).default("token"), deviceName: z.string().max(80).optional() });
 
 /**
  * Mount with `app.route("/v1/auth", authRouter(config))`. Routes (all under the mount path):
@@ -27,8 +29,10 @@ const appleTokenBody = idTokenBody.extend({ name: z.string().trim().max(120).opt
  * - `POST /otp/request` · `POST /otp/verify`
  * - `GET /google/start?next=` · `GET /google/callback` · `POST /google/token`
  * - `GET /apple/start?next=` · `POST /apple/callback` · `POST /apple/token`
+ * - `GET /facebook/start?next=` · `GET /facebook/callback` · `POST /facebook/token`
  * - `POST /passkeys/register/options` · `POST /passkeys/register/verify` · `GET /passkeys` · `PATCH /passkeys/:id` · `DELETE /passkeys/:id`
  * - `POST /passkeys/authenticate/options` · `POST /passkeys/authenticate/verify`
+ * - `POST /passkeys/signup/options` · `POST /passkeys/signup/verify` (contact-free: no sign-in required, account is created only once the passkey verifies)
  */
 export function authRouter(config: AuthConfig): Hono<Env> {
   const app = new Hono<Env>();
@@ -38,7 +42,7 @@ export function authRouter(config: AuthConfig): Hono<Env> {
 
   app.get("/config", (c) => {
     const e = env(c);
-    return ok(c, { providers: { password: Boolean(p.password), otp: p.otp ? { channel: p.otp.channel } : null, google: Boolean(p.google) && googleConfigured(e), apple: Boolean(p.apple) && appleConfigured(e), passkeys: Boolean(p.passkeys) } });
+    return ok(c, { providers: { password: Boolean(p.password), otp: p.otp ? { channel: p.otp.channel } : null, google: Boolean(p.google) && googleConfigured(e), apple: Boolean(p.apple) && appleConfigured(e), facebook: Boolean(p.facebook) && facebookConfigured(e), passkeys: Boolean(p.passkeys), passkeySignUp: Boolean(p.passkeys) && p.passkeys?.allowSignUp !== false } });
   });
   app.get("/me", auth, (c) => ok(c, { user: c.get("user") }));
 
@@ -185,13 +189,49 @@ export function authRouter(config: AuthConfig): Hono<Env> {
     });
   }
 
+  // ----- facebook -----
+  if (p.facebook) {
+    const redirectUri = (e: AuthEnv) => `${e.authUrl}/facebook/callback`;
+    app.get("/facebook/start", async (c) => {
+      const e = env(c);
+      if (!facebookConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "Facebook sign-in is not configured.");
+      if (!e.authUrl) throw new Error("@softwareseva/auth: AUTH_URL must be the public URL of this router, e.g. https://api.example.com/v1/auth");
+      const state = await signFacebookState(e, { next: safeNext(c.req.query("next")), transport: "cookie" });
+      return c.redirect(facebookAuthorizeUrl(e, redirectUri(e), state));
+    });
+    app.get("/facebook/callback", async (c) => {
+      const e = env(c);
+      const fail = (code: string) => c.redirect(`${e.appOrigin}/sign-in?error=${code}`);
+      const state = await verifyFacebookState(e, c.req.query("state") ?? "");
+      if (!state) return fail("OAUTH_STATE_INVALID");
+      if (c.req.query("error")) return fail("OAUTH_CANCELLED");
+      const code = c.req.query("code");
+      if (!code) return fail("OAUTH_FAILED");
+      try {
+        const profile = await exchangeFacebookCode(e, code, redirectUri(e));
+        const user = await userForIdentity(c, config, e, "facebook", profile, p.facebook!.allowSignUp !== false);
+        await completeSignIn(c, config, e, user, "facebook", "cookie");
+        return c.redirect(`${e.appOrigin}${state.next}`);
+      } catch (error) {
+        return fail(error instanceof ApiError ? error.code : "OAUTH_FAILED");
+      }
+    });
+    app.post("/facebook/token", async (c) => {
+      const e = env(c);
+      const input = facebookTokenBody.parse(await c.req.json());
+      const profile = await verifyFacebookAccessToken(e, input.accessToken).catch(() => { throw new ApiError(401, "OAUTH_FAILED", "Facebook sign-in could not be verified."); });
+      const user = await userForIdentity(c, config, e, "facebook", profile, p.facebook!.allowSignUp !== false);
+      return ok(c, await completeSignIn(c, config, e, user, "facebook", input.transport, input.deviceName));
+    });
+  }
+
   // ----- passkeys -----
   if (p.passkeys) {
     app.post("/passkeys/register/options", auth, async (c) => ok(c, await registrationOptions(config, env(c), c.get("user"))));
     app.post("/passkeys/register/verify", auth, async (c) => ok(c, await verifyRegistration(config, env(c), c.get("user"), passkeyRegisterVerifySchema.parse(await c.req.json())), 201));
     app.get("/passkeys", auth, async (c) => {
       const rows = (await new AuthStore(env(c).db).listPasskeys(c.get("user").id)).results;
-      return ok(c, { items: rows.map((r) => ({ id: r.id, deviceName: r.device_name, backedUp: r.backed_up === 1, createdAt: r.created_at, lastUsedAt: r.last_used_at })) });
+      return ok(c, { items: rows.map((r) => ({ id: r.id, deviceName: r.device_name, backedUp: r.backed_up === 1, rpId: r.rp_id, createdAt: r.created_at, lastUsedAt: r.last_used_at })) });
     });
     app.patch("/passkeys/:id", auth, async (c) => {
       const okRename = await new AuthStore(env(c).db).renamePasskey(c.req.param("id"), c.get("user").id, passkeyRenameSchema.parse(await c.req.json()).deviceName);
@@ -211,6 +251,19 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       const user = await verifyAuthentication(config, e, input);
       return ok(c, await completeSignIn(c, config, e, user, "passkey", input.transport, input.deviceName));
     });
+
+    // Contact-free account creation: no auth, no email/phone/OAuth — the account exists only
+    // once the new passkey has verified. This is the default sign-up path; gate with
+    // `providers.passkeys.allowSignUp = false` to require OTP/OAuth sign-up instead.
+    if (p.passkeys.allowSignUp !== false) {
+      app.post("/passkeys/signup/options", async (c) => ok(c, await anonymousRegistrationOptions(config, env(c))));
+      app.post("/passkeys/signup/verify", async (c) => {
+        const e = env(c);
+        const input = passkeySignupVerifySchema.parse(await c.req.json());
+        const user = await verifyAnonymousRegistration(c, config, e, input);
+        return ok(c, await completeSignIn(c, config, e, user, "passkey", input.transport, input.deviceName), 201);
+      });
+    }
   }
 
   return app;

@@ -16,15 +16,18 @@ export type Transport = "cookie" | "token";
 /** Cookie transport answers `{ user }`; token transport adds the pair. */
 export type SessionResponse = { user: AuthUser; accessToken?: string; refreshToken?: string; expiresIn?: number };
 
-export type AuthConfigResponse = { providers: { password: boolean; otp: { channel: "phone" | "email" } | null; google: boolean; apple: boolean; passkeys: boolean } };
+export type AuthConfigResponse = { providers: { password: boolean; otp: { channel: "phone" | "email" } | null; google: boolean; apple: boolean; facebook: boolean; passkeys: boolean; passkeySignUp: boolean } };
 
 export const passwordSignInRequest = z.object({ identifier: z.string().min(3), password: z.string().min(1), transport: z.enum(["cookie", "token"]).optional(), deviceName: z.string().optional() });
 export const otpRequestRequest = z.object({ destination: z.string().min(3) });
 export const otpVerifyRequest = z.object({ destination: z.string().min(3), code: z.string().regex(/^\d{4,8}$/), name: z.string().optional(), transport: z.enum(["cookie", "token"]).optional(), deviceName: z.string().optional() });
 export const idTokenRequest = z.object({ idToken: z.string().min(20), transport: z.enum(["cookie", "token"]).optional(), deviceName: z.string().optional(), name: z.string().optional() });
+export const facebookTokenRequest = z.object({ accessToken: z.string().min(20), transport: z.enum(["cookie", "token"]).optional(), deviceName: z.string().optional() });
 export const refreshRequest = z.object({ refreshToken: z.string().min(20) });
+/** No auth required: verified first, then the account is created (contact-free sign-up). */
+export const passkeySignupVerifyRequest = z.object({ challengeId: z.string().min(1), response: z.unknown(), deviceName: z.string().max(80).optional(), name: z.string().max(120).optional(), transport: z.enum(["cookie", "token"]).optional() });
 
-export type PasskeyItem = { id: string; deviceName: string; backedUp: boolean; createdAt: string; lastUsedAt: string | null };
+export type PasskeyItem = { id: string; deviceName: string; backedUp: boolean; rpId: string | null; createdAt: string; lastUsedAt: string | null };
 
 /** Error codes the auth router emits beyond the core set. */
 export const AuthErrorCodes = {
@@ -39,4 +42,6 @@ export const AuthErrorCodes = {
   OAUTH_STATE_INVALID: "OAUTH_STATE_INVALID",
   PASSKEY_REJECTED: "PASSKEY_REJECTED",
   CHALLENGE_EXPIRED: "CHALLENGE_EXPIRED",
+  /** `requireVerified` rejected an anonymous, passkey-only account. */
+  IDENTITY_REQUIRED: "IDENTITY_REQUIRED",
 } as const;

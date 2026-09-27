@@ -55,8 +55,23 @@ export function usePasskeyRegister() {
   });
 }
 
+/**
+ * Contact-free sign-up: no email, phone or OAuth — the new passkey is verified first, and the
+ * account is created (with only a name, no contact info) as part of that same request. This is
+ * the default entry point; pair it with `<PasskeyButton />` for returning users.
+ */
+export function usePasskeySignUp() {
+  const { api, basePath } = useAuth();
+  return useAction(async (name?: string, deviceName = defaultDeviceName()) => {
+    const { startRegistration } = await import("@simplewebauthn/browser");
+    const start = await api.post<{ options: Parameters<typeof startRegistration>[0]["optionsJSON"]; challengeId: string }>(`${basePath}/passkeys/signup/options`, {});
+    const response = await startRegistration({ optionsJSON: start.options });
+    return api.post<SessionResponse>(`${basePath}/passkeys/signup/verify`, { challengeId: start.challengeId, response, deviceName, name });
+  });
+}
+
 /** URL that starts the OAuth code flow; render as a plain link so the browser navigates. */
-export function useOAuthUrl(provider: "google" | "apple", next = "/") {
+export function useOAuthUrl(provider: "google" | "apple" | "facebook", next = "/") {
   const { basePath } = useAuth();
   return `${basePath}/${provider}/start?next=${encodeURIComponent(next)}`;
 }

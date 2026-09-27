@@ -3,7 +3,7 @@ import { newId, nowIso, sha256 } from "@softwareseva/core/server";
 import type { AuthUser } from "./types";
 
 type UserRow = { id: string; display_name: string; email: string | null; phone: string | null; roles: string; email_verified_at: string | null; phone_verified_at: string | null; password_hash: string | null; disabled_at: string | null };
-export type PasskeyRow = { id: string; user_id: string; credential_id: string; public_key: string; counter: number; transports: string | null; device_name: string; backed_up: number; created_at: string; last_used_at: string | null };
+export type PasskeyRow = { id: string; user_id: string; credential_id: string; public_key: string; counter: number; transports: string | null; device_name: string; backed_up: number; rp_id: string | null; created_at: string; last_used_at: string | null };
 
 const userColumns = "id, display_name, email, phone, roles, email_verified_at, phone_verified_at, password_hash, disabled_at";
 const toUser = (r: UserRow): AuthUser => ({ id: r.id, name: r.display_name, email: r.email, phone: r.phone, roles: JSON.parse(r.roles || "[]") as string[], emailVerifiedAt: r.email_verified_at, phoneVerifiedAt: r.phone_verified_at });
@@ -81,16 +81,32 @@ export class AuthStore {
 
   // ----- passkeys -----
   listPasskeys(userId: string) {
-    return this.db.prepare("SELECT id, credential_id, transports, device_name, backed_up, created_at, last_used_at FROM auth_passkeys WHERE user_id = ? ORDER BY created_at DESC").bind(userId).all<Pick<PasskeyRow, "id" | "credential_id" | "transports" | "device_name" | "backed_up" | "created_at" | "last_used_at">>();
+    return this.db.prepare("SELECT id, credential_id, transports, device_name, backed_up, rp_id, created_at, last_used_at FROM auth_passkeys WHERE user_id = ? ORDER BY created_at DESC").bind(userId).all<Pick<PasskeyRow, "id" | "credential_id" | "transports" | "device_name" | "backed_up" | "rp_id" | "created_at" | "last_used_at">>();
   }
   passkeyByCredential(credentialId: string) { return this.db.prepare("SELECT * FROM auth_passkeys WHERE credential_id = ?").bind(credentialId).first<PasskeyRow>(); }
-  async addPasskey(userId: string, credentialId: string, publicKey: string, counter: number, transports: string[], deviceName: string, backedUp: boolean) {
-    await this.db.prepare("INSERT INTO auth_passkeys(id, user_id, credential_id, public_key, counter, transports, device_name, backed_up, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(newId("pk"), userId, credentialId, publicKey, counter, JSON.stringify(transports), deviceName.slice(0, 80), backedUp ? 1 : 0, nowIso()).run();
+  async addPasskey(userId: string, credentialId: string, publicKey: string, counter: number, transports: string[], deviceName: string, backedUp: boolean, rpId: string) {
+    await this.db.prepare("INSERT INTO auth_passkeys(id, user_id, credential_id, public_key, counter, transports, device_name, backed_up, rp_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(newId("pk"), userId, credentialId, publicKey, counter, JSON.stringify(transports), deviceName.slice(0, 80), backedUp ? 1 : 0, rpId, nowIso()).run();
   }
   async updatePasskeyCounter(id: string, counter: number) { await this.db.prepare("UPDATE auth_passkeys SET counter = ?, last_used_at = ? WHERE id = ?").bind(counter, nowIso(), id).run(); }
   async renamePasskey(id: string, userId: string, name: string) { return (await this.db.prepare("UPDATE auth_passkeys SET device_name = ? WHERE id = ? AND user_id = ?").bind(name.slice(0, 80), id, userId).run()).meta.changes === 1; }
   async removePasskey(id: string, userId: string) { return (await this.db.prepare("DELETE FROM auth_passkeys WHERE id = ? AND user_id = ?").bind(id, userId).run()).meta.changes === 1; }
   async countPasskeys(userId: string) { return (await this.db.prepare("SELECT count(*) AS n FROM auth_passkeys WHERE user_id = ?").bind(userId).first<{ n: number }>())?.n ?? 0; }
+
+  /**
+   * Contact-free signup: the account and its passkey are written in one batch, so a user row
+   * never exists without the credential that was just verified (and a verified credential never
+   * ends up orphaned). Call only after `verifyRegistrationResponse` succeeds.
+   */
+  async createUserWithPasskey(user: { name: string; roles: string[] }, passkey: { credentialId: string; publicKey: string; counter: number; transports: string[]; deviceName: string; backedUp: boolean; rpId: string }): Promise<AuthUser> {
+    const userId = newId("usr"); const now = nowIso();
+    await this.db.batch([
+      this.db.prepare("INSERT INTO auth_users(id, display_name, email, phone, roles, email_verified_at, phone_verified_at, password_hash, created_at, updated_at) VALUES (?, ?, NULL, NULL, ?, NULL, NULL, NULL, ?, ?)")
+        .bind(userId, user.name, JSON.stringify(user.roles), now, now),
+      this.db.prepare("INSERT INTO auth_passkeys(id, user_id, credential_id, public_key, counter, transports, device_name, backed_up, rp_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(newId("pk"), userId, passkey.credentialId, passkey.publicKey, passkey.counter, JSON.stringify(passkey.transports), passkey.deviceName.slice(0, 80), passkey.backedUp ? 1 : 0, passkey.rpId, now),
+    ]);
+    return { id: userId, name: user.name, email: null, phone: null, roles: user.roles, emailVerifiedAt: null, phoneVerifiedAt: null };
+  }
 
   // ----- webauthn challenges -----
   async createChallenge(userId: string | null, kind: string, challenge: string, ttlSeconds = 300) {

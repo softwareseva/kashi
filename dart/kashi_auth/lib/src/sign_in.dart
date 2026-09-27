@@ -26,6 +26,7 @@ class KSignIn extends ConsumerStatefulWidget {
     super.key,
     this.google,
     this.apple,
+    this.facebook,
     this.passkeys,
     this.title = 'Sign in',
     this.askNameOnSignUp = true,
@@ -36,6 +37,9 @@ class KSignIn extends ConsumerStatefulWidget {
 
   /// Adapter for Sign in with Apple; hidden when null or disabled on the server.
   final IdTokenSignIn? apple;
+
+  /// Adapter for Facebook Login; hidden when null or disabled on the server.
+  final AccessTokenSignIn? facebook;
   final PasskeyBridge? passkeys;
   final String title;
 
@@ -131,6 +135,27 @@ class _KSignInState extends ConsumerState<KSignIn> {
     await _session(() => _api.passkeyVerify(start.challengeId, response));
   });
 
+  /// Contact-free sign-up: no destination, no code — the passkey is verified first and the
+  /// account is created as part of that same call.
+  Future<void> _passkeySignUp(PasskeyBridge bridge) => _run(() async {
+    final start = await _api.passkeySignUpOptions();
+    final response = await bridge.register(start.options);
+    await _session(
+      () => _api.passkeySignUpVerify(
+        start.challengeId,
+        response,
+        'This device',
+        name: _name.text.trim(),
+      ),
+    );
+  });
+
+  Future<void> _facebook(AccessTokenSignIn adapter) => _run(() async {
+    final result = await adapter();
+    if (result == null) return;
+    await _session(() => _api.facebook(result.accessToken));
+  });
+
   @override
   Widget build(BuildContext context) {
     final providers = ref.watch(authProvidersProvider);
@@ -173,6 +198,24 @@ class _KSignInState extends ConsumerState<KSignIn> {
               variant: KButtonVariant.outline,
               expand: true,
               onPressed: _busy ? null : () => _passkey(widget.passkeys!),
+            ),
+            const SizedBox(height: KSpace.s2),
+          ],
+          if (p.passkeySignUp && widget.passkeys != null) ...[
+            KButton(
+              label: 'Create an account with a passkey',
+              icon: CupertinoIcons.add_circled,
+              expand: true,
+              onPressed: _busy ? null : () => _passkeySignUp(widget.passkeys!),
+            ),
+            const SizedBox(height: KSpace.s2),
+          ],
+          if (p.facebook && widget.facebook != null) ...[
+            KButton(
+              label: 'Continue with Facebook',
+              variant: KButtonVariant.outline,
+              expand: true,
+              onPressed: _busy ? null : () => _facebook(widget.facebook!),
             ),
             const SizedBox(height: KSpace.s2),
           ],

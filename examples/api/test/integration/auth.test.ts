@@ -1,6 +1,8 @@
 import { env, SELF } from "cloudflare:test";
 import { hashPassword } from "@softwareseva/core/server";
+import { resolveEnv, signAccessToken } from "@softwareseva/auth/server";
 import { describe, expect, it } from "vitest";
+import { authConfig } from "../../src/auth";
 
 const ORIGIN = "http://localhost:5173";
 type Json = { data?: any; code?: string; fields?: Record<string, string[]> };
@@ -16,7 +18,7 @@ const lastCode = async (destination: string) => (await env.DB.prepare("SELECT bo
 describe("auth config", () => {
   it("reports providers; unconfigured OAuth is reported as disabled", async () => {
     const { body } = await call("/auth/config");
-    expect(body.data.providers).toMatchObject({ password: true, otp: { channel: "phone" }, google: false, apple: false, passkeys: true });
+    expect(body.data.providers).toMatchObject({ password: true, otp: { channel: "phone" }, google: false, apple: false, facebook: false, passkeys: true, passkeySignUp: true });
   });
 });
 
@@ -110,5 +112,41 @@ describe("passkeys", () => {
     const res = await call("/auth/passkeys/register/options", { method: "POST", json: {}, headers: { Authorization: `Bearer ${s.body.data.accessToken}` } });
     expect(res.status).toBe(200);
     expect(res.body.data.options.authenticatorSelection).toMatchObject({ residentKey: "required", userVerification: "required" });
+  });
+
+  it("issues contact-free sign-up options with no session, and rejects a bogus registration without creating an account", async () => {
+    const before = (await env.DB.prepare("SELECT count(*) AS n FROM auth_users").first<{ n: number }>())?.n;
+    const opts = await call("/auth/passkeys/signup/options", { method: "POST", json: {} });
+    expect(opts.status).toBe(200);
+    expect(opts.body.data.options.rp.id).toBe("localhost");
+    expect(opts.body.data.options.authenticatorSelection).toMatchObject({ residentKey: "required", userVerification: "required" });
+    expect(opts.body.data.challengeId).toMatch(/^ch_/);
+    const bogus = await call("/auth/passkeys/signup/verify", { method: "POST", json: { challengeId: opts.body.data.challengeId, response: { id: "nope", rawId: "nope", type: "public-key", response: {} } } });
+    expect(bogus.body.code).toBe("PASSKEY_REJECTED");
+    const after = (await env.DB.prepare("SELECT count(*) AS n FROM auth_users").first<{ n: number }>())?.n;
+    expect(after).toBe(before);
+  });
+});
+
+describe("requireVerified", () => {
+  it("blocks an anonymous, passkey-only account and admits one with a verified email/phone", async () => {
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO auth_users(id, display_name, roles, created_at, updated_at) VALUES ('usr_anon', 'Anon', '[\"user\"]', '2026-01-01', '2026-01-01')"),
+      env.DB.prepare("INSERT INTO auth_passkeys(id, user_id, credential_id, public_key, counter, device_name, rp_id, created_at) VALUES ('pk_anon', 'usr_anon', 'cred_anon', 'pub', 0, 'This device', 'localhost', '2026-01-01')"),
+    ]);
+    const e = resolveEnv(authConfig, env as unknown as Record<string, unknown>);
+    const anonToken = await signAccessToken(authConfig, e, { id: "usr_anon", name: "Anon", email: null, phone: null, roles: ["user"], emailVerifiedAt: null, phoneVerifiedAt: null });
+    const anonAttempt = await call("/account/payout-details", { headers: { Authorization: `Bearer ${anonToken}` } });
+    expect(anonAttempt.status).toBe(403);
+    expect(anonAttempt.body.code).toBe("IDENTITY_REQUIRED");
+
+    await call("/auth/otp/request", { method: "POST", json: { destination: "9000000003" } });
+    const verified = await call("/auth/otp/verify", { method: "POST", json: { destination: "9000000003", code: await lastCode("+919000000003"), transport: "token" } });
+    const verifiedAttempt = await call("/account/payout-details", { headers: { Authorization: `Bearer ${verified.body.data.accessToken}` } });
+    expect(verifiedAttempt.status).toBe(200);
+    expect(verifiedAttempt.body.data).toEqual({ verified: true });
+
+    const list = await call("/auth/passkeys", { headers: { Authorization: `Bearer ${anonToken}` } });
+    expect(list.body.data.items).toEqual([expect.objectContaining({ id: "pk_anon", deviceName: "This device", rpId: "localhost" })]);
   });
 });

@@ -15,6 +15,10 @@ export const authConfig: AuthConfig = {
     otp: { channel: "phone", send: sendCode, defaultCountry: "IN" },
     google: {},
     apple: {},
+    facebook: {},
+    // Passkeys are the default, anonymous entry point: `allowSignUp` (default true) lets a
+    // brand-new account be created straight from a verified passkey, no email/phone/OAuth
+    // required. Set `allowSignUp: false` to require OTP/OAuth sign-up first instead.
     passkeys: {},
   },
   hooks: {

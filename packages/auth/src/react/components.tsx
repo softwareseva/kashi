@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Alert, Button, Card, CardContent, CardHeader, CardTitle, useAppForm } from "@softwareseva/ui";
 import { useAuth } from "./context";
-import { oauthErrorFromLocation, useOAuthUrl, useOtp, usePasskeySignIn, usePasswordSignIn } from "./hooks";
+import { oauthErrorFromLocation, useOAuthUrl, useOtp, usePasskeySignIn, usePasskeySignUp, usePasswordSignIn } from "./hooks";
 
 const messages: Record<string, string> = {
   INVALID_CREDENTIALS: "That identifier or password is incorrect.",
@@ -83,14 +83,36 @@ export function PasskeyButton({ onSuccess, children = "Sign in with a passkey" }
   );
 }
 
-export function OAuthButton({ provider, next = "/" }: { provider: "google" | "apple"; next?: string }) {
+/**
+ * The default, anonymous entry point: creates a passkey-only account with no email, phone or
+ * OAuth grant. The passkey is verified first; only then does the account get created. Gate any
+ * action that needs a reachable identity behind `requireVerified` on the server instead of
+ * behind sign-up.
+ */
+export function PasskeySignUpButton({ onSuccess, children = "Create an account with a passkey" }: { onSuccess?: () => void; children?: string }) {
+  const { run, pending, error } = usePasskeySignUp();
+  return (
+    <div className="grid gap-2">
+      <ErrorAlert code={error?.code} message={error?.message} />
+      <Button type="button" disabled={pending} onClick={async () => { if (await run()) onSuccess?.(); }}>{pending ? "Waiting for your device…" : children}</Button>
+    </div>
+  );
+}
+
+const oauthLabel: Record<"google" | "apple" | "facebook", string> = { google: "Continue with Google", apple: "Continue with Apple", facebook: "Continue with Facebook" };
+
+export function OAuthButton({ provider, next = "/" }: { provider: "google" | "apple" | "facebook"; next?: string }) {
   const href = useOAuthUrl(provider, next);
   const { api } = useAuth();
   void api;
-  return <Button asChild variant="outline"><a href={href}>{provider === "google" ? "Continue with Google" : "Continue with Apple"}</a></Button>;
+  return <Button asChild variant="outline"><a href={href}>{oauthLabel[provider]}</a></Button>;
 }
 
-/** Default sign-in card: shows every provider the server reports as enabled. */
+/**
+ * Default sign-in card: shows every provider the server reports as enabled. Passkeys come first
+ * — sign-in for a returning device, sign-up for a new one — since auth is anonymous by default;
+ * OTP and OAuth are offered as the way to attach a valid id, not as the primary way in.
+ */
 export function SignIn({ title = "Sign in", next = "/", onSuccess }: { title?: string; next?: string; onSuccess?: () => void }) {
   const { providers } = useAuth();
   const [mode, setMode] = useState<"otp" | "password">("otp");
@@ -103,8 +125,10 @@ export function SignIn({ title = "Sign in", next = "/", onSuccess }: { title?: s
       <CardContent className="grid gap-4">
         {oauthError ? <ErrorAlert code={oauthError} /> : null}
         {providers.passkeys ? <PasskeyButton onSuccess={onSuccess} /> : null}
+        {providers.passkeySignUp ? <PasskeySignUpButton onSuccess={onSuccess} /> : null}
         {providers.google ? <OAuthButton provider="google" next={next} /> : null}
         {providers.apple ? <OAuthButton provider="apple" next={next} /> : null}
+        {providers.facebook ? <OAuthButton provider="facebook" next={next} /> : null}
         {showOtp ? <OtpSignIn channel={providers.otp!.channel} onSuccess={onSuccess} /> : providers.password ? <PasswordSignIn onSuccess={onSuccess} /> : null}
         {providers.otp && providers.password ? (
           <Button type="button" variant="link" onClick={() => setMode(mode === "otp" ? "password" : "otp")}>{mode === "otp" ? "Use a password instead" : "Use a one-time code instead"}</Button>
