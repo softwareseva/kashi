@@ -1,3 +1,10 @@
+## 1.1.0
+
+- Passkeys are now the default, anonymous entry point: `passkeySignUpOptions`/`passkeySignUpVerify` create a contact-free account straight from a new passkey (no email, phone or OAuth), and `KSignIn` offers it alongside passkey sign-in when the server reports `passkeySignUp`.
+- `PasskeyItem.rpId` records which domain a passkey was created for.
+- Facebook Login: `KashiAuthApi.facebook`, the `AccessTokenSignIn`/`AccessTokenResult` adapter seam, and `KSignIn(facebook: ...)`.
+- `AuthProviders` gains `facebook` and `passkeySignUp`.
+
 ## 1.0.0
 
 - No functional changes; version aligned with the fixed npm release group and the other kashi_* packages.

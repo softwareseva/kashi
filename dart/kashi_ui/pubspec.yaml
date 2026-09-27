@@ -1,6 +1,6 @@
 name: kashi_ui
 description: Cupertino design tokens, theme and primitives for kashi apps, with Button, IconButton, ActionMenu, TextField, Select, RadioGroup, Checkbox, Switch, Card, Badge, Alert.
-version: 1.0.0
+version: 1.1.0
 repository: https://github.com/softwareseva/kashi
 issue_tracker: https://github.com/softwareseva/kashi/issues
 resolution: workspace
