@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Adds `example/example.md`.
+
 ## 0.1.2
 
 - No functional changes; shortens the pubspec description to fit pub.dev's 180-character limit.
