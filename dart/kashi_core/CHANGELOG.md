@@ -1,3 +1,7 @@
+## 1.0.0
+
+- No functional changes; version aligned with the fixed npm release group and the other kashi_* packages.
+
 ## 0.1.3
 
 - Adds `example/example.md`.

@@ -1,5 +1,11 @@
 # @softwareseva/sync
 
+## 1.0.0
+
+### Patch Changes
+
+- No functional changes; version aligned to the fixed npm release group (see `@softwareseva/core`, `@softwareseva/auth`, `@softwareseva/ui`, `@softwareseva/list`, `@softwareseva/cli`).
+
 ## 0.2.0
 
 ### Minor Changes
