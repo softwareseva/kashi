@@ -47,6 +47,12 @@ Both sides are independent, ordinary OAuth-app registration — the same shape a
 
 ID tokens are minted for **5 minutes** and carry `iss` (this site's `AUTH_URL`), `aud` (the consumer's `clientId`), `sub` (this site's local user id), `email`/`email_verified`/`name`. They never touch `JWT_SECRET`.
 
+### Rotating a compromised or expiring secret
+
+`POST {issuer}/v1/auth/federation/clients/:id/approve` shows the `clientSecret` exactly once — if it leaks, or you just rotate secrets on a schedule, an admin calls `POST {issuer}/v1/auth/federation/clients/:id/rotate` (also `admin`-gated) to mint a new one for that same client. This keeps the client's `clientId` and `redirectUri` unchanged, so the consumer never has to re-register — only update its stored secret.
+
+Rotation is **immediate**: the old secret stops validating the instant the new one is issued (there is no overlap window), so line up the consumer admin's config update right after rotating — the same manual handoff as the initial approval, just repeated. `GET /v1/auth/federation/clients` reports `secretRotatedAt` per client so you can see how long a secret has been live. Rotating a client that was never approved (still `pending`) or has been `revoked` returns 404.
+
 ## Consumer setup
 
 1. Register with each issuer (step 1 above) and get the relationship approved.
