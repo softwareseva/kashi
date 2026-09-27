@@ -1,0 +1,26 @@
+name: pub-release
+on:
+  push:
+    tags:
+      - "kashi_core-v[0-9]+.[0-9]+.[0-9]+"
+      - "kashi_auth-v[0-9]+.[0-9]+.[0-9]+"
+      - "kashi_list-v[0-9]+.[0-9]+.[0-9]+"
+      - "kashi_sync-v[0-9]+.[0-9]+.[0-9]+"
+      - "kashi_ui-v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.pkg.outputs.package }}
+    steps:
+      - id: pkg
+        run: echo "package=${GITHUB_REF_NAME%-v*}" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: resolve
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: dart/${{ needs.resolve.outputs.package }}
