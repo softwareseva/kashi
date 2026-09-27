@@ -1,9 +1,7 @@
 /** Notes directory: search, sort, page size and cursor paging, all kept in the URL. */
-import { useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router";
-import { CursorPagination, DataTable, DirectoryToolbar, useDirectory, type DataColumn } from "@softwareseva/list/react";
-import { Alert, Button, Field, Input } from "@softwareseva/ui";
-import { useCreateNote, useNotes, type Note, type NoteSort } from "../hooks/use-notes";
+import { CursorPagination, DataTable, DirectoryToolbar, useUrlSearchParams, type DataColumn } from "@softwareseva/list/react";
+import { Alert, Button, useAppForm } from "@softwareseva/ui";
+import { useCreateNote, useNotesQuery, type Note, type NoteSort } from "../hooks/use-notes";
 
 const defaults = { sort: "updatedAt", direction: "desc", sortKeys: ["updatedAt", "title"] } as const satisfies { sort: NoteSort; direction: "desc"; sortKeys: readonly NoteSort[] };
 const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -15,41 +13,46 @@ const columns: DataColumn<Note, NoteSort | "body">[] = [
 ];
 
 export function NotesPage() {
-  const dir = useDirectory(useSearchParams(), defaults);
-  const notes = useNotes(dir.query);
+  const { dir, query } = useNotesQuery(useUrlSearchParams(), defaults);
   return (
     <section className="grid gap-4">
       <h1 className="text-title">Notes</h1>
       <NewNote />
       <DirectoryToolbar q={dir.q} onSearch={dir.setSearch} limit={dir.limit} onLimit={dir.setLimit} placeholder="Search title or body" />
-      {notes.error ? <Alert variant="danger" title={notes.error.message} /> : null}
+      {query.error ? <Alert variant="danger" title={query.error.message} /> : null}
       <DataTable
         caption="Notes"
-        rows={notes.data?.items ?? []}
+        rows={query.data?.items ?? []}
         columns={columns}
         sort={dir.sort}
         direction={dir.direction}
         onSort={(key) => { if (key !== "body") dir.setSort(key); }}
-        loading={notes.isFetching}
+        loading={query.isFetching}
         empty={dir.q ? `No notes match “${dir.q}”.` : "No notes yet."}
         mobileRow={(n) => <div className="grid gap-1"><span className="font-medium">{n.title}</span><span className="text-body-sm text-ink-muted">{dateFmt.format(new Date(n.updatedAt))}</span></div>}
       />
-      <CursorPagination previous={notes.data?.previous ?? null} next={notes.data?.next ?? null} onPage={dir.goTo} />
+      <CursorPagination previous={query.data?.previous ?? null} next={query.data?.next ?? null} onPage={dir.goTo} />
     </section>
   );
 }
 
 function NewNote() {
   const create = useCreateNote();
-  const [title, setTitle] = useState("");
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    await create.mutateAsync({ title }).then(() => setTitle("")).catch(() => undefined);
-  }
-  const fieldError = (create.error as { fields?: Record<string, string[]> } | null)?.fields?.title?.[0];
+  const form = useAppForm({
+    defaultValues: { title: "" },
+    onSubmit: async ({ value, formApi }) => {
+      try {
+        await create.mutateAsync({ title: value.title });
+        formApi.reset();
+      } catch (e) {
+        const message = (e as { fields?: Record<string, string[]> } | null)?.fields?.title?.[0];
+        if (message) formApi.setFieldMeta("title", (meta) => ({ ...meta, errorMap: { onSubmit: message } }));
+      }
+    },
+  });
   return (
-    <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
-      <Field id="new-title" label="New note" error={fieldError}><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" /></Field>
+    <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); void form.handleSubmit(); }} className="flex flex-wrap items-end gap-3">
+      <form.AppField name="title">{(field) => <field.TextField label="New note" placeholder="Title" />}</form.AppField>
       <Button type="submit" disabled={create.isPending}>Add</Button>
     </form>
   );

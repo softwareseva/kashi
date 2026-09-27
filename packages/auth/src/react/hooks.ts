@@ -1,6 +1,6 @@
-/** Sign-in actions as hooks. Each returns `{ run, pending, error }` and stores the session on success. */
-import { useCallback, useState } from "react";
-import { ApiError } from "@softwareseva/core/client";
+/** Sign-in actions as hooks, backed by TanStack Mutation. Each returns `{ run, pending, error }` and stores the session on success. */
+import { useCallback } from "react";
+import { useApiMutation, type ApiError } from "@softwareseva/core/react";
 import type { SessionResponse } from "../contracts/index";
 import { useAuth } from "./context";
 
@@ -8,20 +8,17 @@ type Action<A extends unknown[]> = { run: (...args: A) => Promise<boolean>; pend
 
 function useAction<A extends unknown[]>(fn: (...args: A) => Promise<SessionResponse | void>): Action<A> {
   const { setSession } = useAuth();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
+  const mutation = useApiMutation<SessionResponse | void, A>({ mutationFn: (args) => fn(...args) });
   const run = useCallback(async (...args: A) => {
-    setPending(true); setError(null);
     try {
-      const session = await fn(...args);
+      const session = await mutation.mutateAsync(args);
       if (session) setSession(session);
       return true;
-    } catch (e) {
-      setError(e instanceof ApiError ? e : new ApiError("REQUEST_FAILED", e instanceof Error ? e.message : "Something went wrong.", 0));
+    } catch {
       return false;
-    } finally { setPending(false); }
-  }, [fn, setSession]);
-  return { run, pending, error, reset: () => setError(null) };
+    }
+  }, [mutation, setSession]);
+  return { run, pending: mutation.isPending, error: mutation.error, reset: mutation.reset };
 }
 
 export function usePasswordSignIn() {

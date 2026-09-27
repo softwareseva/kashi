@@ -14,7 +14,7 @@ Clients keep a local database and an outbox of operations. `@softwareseva/sync` 
 - `POST /v1/sync/push { ops: [{ opId, type, payload }] }` runs each op's handler **once**. The result is stored by `(user, opId)`; a retried batch gets `replayed` with the original result. Failures carry `retryable` so clients back off or park the op.
 - `GET /v1/sync/pull?since=<seq>&limit=` returns `{ changes: { <entity>: { upserts, deletes } }, next, hasMore, reset }` from the `sync_changes` log for the user's scopes.
 
-The Flutter half is the `flutter-drift-sync` skill.
+The Flutter half is the `flutter-drift-sync` skill; the React web half is `react-offline-sync` (RxDB + TanStack DB).
 
 ## Install
 

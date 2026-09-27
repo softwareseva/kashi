@@ -4,7 +4,7 @@ description: Index and conventions for the kashi toolkit (Cloudflare Workers + D
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/cli@0.1 @softwareseva/core@0.1 @softwareseva/list@0.1 @softwareseva/auth@0.1 @softwareseva/ui@0.1 kashi_ui@0.1 kashi_core@0.1 kashi_auth@0.1 kashi_list@0.1 @softwareseva/sync@0.1 kashi_sync@0.1"
+  packages: "@softwareseva/cli@0.1 @softwareseva/core@0.2 @softwareseva/list@0.2 @softwareseva/auth@0.2 @softwareseva/ui@0.2 kashi_ui@0.1 kashi_core@0.1 kashi_auth@0.1 kashi_list@0.1 @softwareseva/sync@0.2 kashi_sync@0.1"
 ---
 
 # kashi
@@ -23,6 +23,7 @@ kashi is a set of packages that each bundle a whole feature (API routes, React c
 | Passkeys / WebAuthn | `auth-passkeys` | `@softwareseva/auth` |
 | List endpoint with search, sort, paging on D1 | `d1-list-pagination` | `@softwareseva/list` |
 | Offline-first sync endpoints | `sync-endpoints` | `@softwareseva/sync` |
+| Offline-first data in React with RxDB | `react-offline-sync` | `@softwareseva/sync` |
 | React app styling and primitives | `kashi-ui-web` | `@softwareseva/ui` |
 | Directory or admin table screen in React | `react-data-table` | `@softwareseva/list` |
 | Calling the API from React | `api-client-react` | `@softwareseva/core`, `@softwareseva/auth` |

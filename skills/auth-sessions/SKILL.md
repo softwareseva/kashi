@@ -75,6 +75,10 @@ hooks: {
 | GET/POST | `/google/*`, `/apple/*` | see `auth-google`, `auth-apple` |
 | POST/GET/PATCH/DELETE | `/passkeys/*` | see `auth-passkeys` |
 
+## React clients
+
+`@softwareseva/auth/react`'s `AuthProvider`/`useAuth` and the sign-in mutation hooks (`usePasswordSignIn`, `useOtp`, `usePasskeySignIn`, ...) are backed by TanStack Query: session and provider config are queries, sign-in/out are mutations that write the query cache instead of local component state. `AuthProvider` must sit inside a `QueryClientProvider`. See the `api-client-react` skill for setup.
+
 ## Housekeeping
 
 Add a cron trigger that calls `new AuthStore(env.DB).prune()` daily to delete expired refresh sessions, codes and challenges (`templates/scheduled.ts`).

@@ -1,6 +1,6 @@
 /** Ready-made sign-in UI on @softwareseva/ui primitives. Compose these or use <SignIn /> for the default card. */
-import { useState, type FormEvent } from "react";
-import { Alert, Button, Card, CardContent, CardHeader, CardTitle, Field, Input } from "@softwareseva/ui";
+import { useState } from "react";
+import { Alert, Button, Card, CardContent, CardHeader, CardTitle, useAppForm } from "@softwareseva/ui";
 import { useAuth } from "./context";
 import { oauthErrorFromLocation, useOAuthUrl, useOtp, usePasskeySignIn, usePasswordSignIn } from "./hooks";
 
@@ -24,16 +24,15 @@ export function ErrorAlert({ code, message }: { code?: string | null; message?: 
 
 export function PasswordSignIn({ identifierLabel = "Email or phone", onSuccess }: { identifierLabel?: string; onSuccess?: () => void }) {
   const { run, pending, error } = usePasswordSignIn();
-  async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    if (await run(String(form.get("identifier")), String(form.get("password")))) onSuccess?.();
-  }
+  const form = useAppForm({
+    defaultValues: { identifier: "", password: "" },
+    onSubmit: async ({ value }) => { if (await run(value.identifier, value.password)) onSuccess?.(); },
+  });
   return (
-    <form className="grid gap-4" onSubmit={submit}>
+    <form className="grid gap-4" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); void form.handleSubmit(); }}>
       <ErrorAlert code={error?.code} message={error?.message} />
-      <Field id="identifier" label={identifierLabel}><Input name="identifier" autoComplete="username" required /></Field>
-      <Field id="password" label="Password"><Input name="password" type="password" autoComplete="current-password" required /></Field>
+      <form.AppField name="identifier">{(field) => <field.TextField label={identifierLabel} autoComplete="username" required />}</form.AppField>
+      <form.AppField name="password">{(field) => <field.TextField label="Password" type="password" autoComplete="current-password" required />}</form.AppField>
       <Button type="submit" disabled={pending}>{pending ? "Signing in…" : "Sign in"}</Button>
     </form>
   );
@@ -44,29 +43,30 @@ export function OtpSignIn({ channel = "phone", onSuccess }: { channel?: "phone" 
   const [destination, setDestination] = useState("");
   const [sent, setSent] = useState(false);
   const label = channel === "phone" ? "Phone number" : "Email";
-  async function send(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (await request.run(destination)) setSent(true);
-  }
-  async function confirm(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const code = String(new FormData(e.currentTarget).get("code"));
-    if (await verify.run(destination, code)) onSuccess?.();
-  }
+  const sendForm = useAppForm({
+    defaultValues: { destination: "" },
+    onSubmit: async ({ value }) => { setDestination(value.destination); if (await request.run(value.destination)) setSent(true); },
+  });
+  const confirmForm = useAppForm({
+    defaultValues: { code: "" },
+    onSubmit: async ({ value }) => { if (await verify.run(destination, value.code)) onSuccess?.(); },
+  });
   if (!sent) return (
-    <form className="grid gap-4" onSubmit={send}>
+    <form className="grid gap-4" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); void sendForm.handleSubmit(); }}>
       <ErrorAlert code={request.error?.code} message={request.error?.message} />
-      <Field id="destination" label={label} hint={channel === "phone" ? "We will send a one-time code on WhatsApp or SMS." : "We will email you a one-time code."}>
-        <Input name="destination" type={channel === "phone" ? "tel" : "email"} autoComplete={channel === "phone" ? "tel" : "email"} value={destination} onChange={(e) => setDestination(e.target.value)} required />
-      </Field>
+      <sendForm.AppField name="destination">
+        {(field) => <field.TextField label={label} hint={channel === "phone" ? "We will send a one-time code on WhatsApp or SMS." : "We will email you a one-time code."} type={channel === "phone" ? "tel" : "email"} autoComplete={channel === "phone" ? "tel" : "email"} required />}
+      </sendForm.AppField>
       <Button type="submit" disabled={request.pending}>{request.pending ? "Sending…" : "Send code"}</Button>
     </form>
   );
   return (
-    <form className="grid gap-4" onSubmit={confirm}>
+    <form className="grid gap-4" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); void confirmForm.handleSubmit(); }}>
       <ErrorAlert code={verify.error?.code} message={verify.error?.message} />
       <p className="text-body-sm text-muted-foreground">Enter the code sent to {destination}.</p>
-      <Field id="code" label="Code"><Input name="code" inputMode="numeric" autoComplete="one-time-code" pattern="\d{4,8}" required autoFocus /></Field>
+      <confirmForm.AppField name="code">
+        {(field) => <field.TextField label="Code" inputMode="numeric" autoComplete="one-time-code" pattern="\d{4,8}" required autoFocus />}
+      </confirmForm.AppField>
       <Button type="submit" disabled={verify.pending}>{verify.pending ? "Verifying…" : "Verify"}</Button>
       <Button type="button" variant="ghost" onClick={() => { setSent(false); verify.reset(); }}>Use a different {channel === "phone" ? "number" : "email"}</Button>
     </form>

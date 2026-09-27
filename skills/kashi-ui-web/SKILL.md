@@ -13,7 +13,7 @@ metadata:
 
 ## Install
 
-1. `pnpm add @softwareseva/ui` plus peers: `react react-dom tailwindcss @tailwindcss/vite lucide-react class-variance-authority clsx tailwind-merge @radix-ui/react-slot @radix-ui/react-select @radix-ui/react-dropdown-menu @radix-ui/react-radio-group @radix-ui/react-checkbox @radix-ui/react-switch`.
+1. `pnpm add @softwareseva/ui` plus peers: `react react-dom tailwindcss @tailwindcss/vite lucide-react class-variance-authority clsx tailwind-merge @radix-ui/react-slot @radix-ui/react-select @radix-ui/react-dropdown-menu @radix-ui/react-radio-group @radix-ui/react-checkbox @radix-ui/react-switch @tanstack/react-form`.
 2. Vite: add `@tailwindcss/vite` to plugins.
 3. `src/index.css` exactly in this order (`templates/index.css`):
 
@@ -37,7 +37,8 @@ Without the `@source` lines Tailwind never sees the classes used inside the pack
 - Saffron is a fill, not a text colour on light surfaces (contrast). Links and text emphasis use terracotta.
 - One primary Button per screen. `destructive` only for irreversible actions, with a confirmation.
 - Every IconButton has a `label` (it becomes `aria-label` and the tooltip).
-- Every input sits in a `Field` with a visible label; errors go in `Field error=` so they are announced.
+- Every input sits in a `Field` (uncontrolled) or one of `useAppForm`'s bound fields (`TextField`, `CheckboxField`, `SelectField`, `RadioGroupField`) with a visible label; errors are announced automatically via `aria-describedby`.
+- For any form with more than one field, use `useAppForm()` (from `@softwareseva/ui`, built on `@tanstack/react-form`) instead of raw `<form>` + `FormData`: `const form = useAppForm({ defaultValues, onSubmit })`, then `<form.AppField name="title">{(field) => <field.TextField label="Title" />}</form.AppField>`. Surface server field errors with `formApi.setFieldMeta(name, (m) => ({ ...m, errorMap: { onSubmit: message } }))` inside `onSubmit`'s catch.
 - Status is never colour alone: Alert and Badge variants pair colour with an icon or text.
 - Touch targets at least 40px (`md` buttons are 40px, `lg` 48px). Keep visible focus rings.
 
