@@ -1,8 +1,10 @@
 /** Accessible, token-styled data table with sortable headers, loading and empty states, and an optional card layout on small screens. Column and row model come from TanStack Table; sorting stays server-driven (manualSorting) since it goes through the D1 keyset cursor. */
 import type { ReactNode } from "react";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
-import { flexRender, getCoreRowModel, useReactTable, type ColumnDef, type SortingState } from "@tanstack/react-table";
+import { columnVisibilityFeature, flexRender, rowSortingFeature, tableFeatures, useTable, type ColumnDef, type SortingState } from "@tanstack/react-table";
 import { Button, cn } from "@softwareseva/ui";
+
+const features = tableFeatures({ rowSortingFeature, columnVisibilityFeature });
 
 export type DataColumn<T, K extends string = string> = {
   key: K;
@@ -18,9 +20,11 @@ export type DataColumn<T, K extends string = string> = {
 
 type ColumnMeta = { align?: "start" | "end"; className?: string; hideOnMobile?: boolean };
 
-function toColumnDefs<T extends { id: string }, K extends string>(columns: DataColumn<T, K>[]): ColumnDef<T, unknown>[] {
+function toColumnDefs<T extends { id: string }, K extends string>(columns: DataColumn<T, K>[]): ColumnDef<typeof features, T, unknown>[] {
   return columns.map((col) => ({
     id: col.key,
+    // No real accessor needed (cell renders from row.original directly); getCanSort() requires a truthy accessorFn.
+    accessorFn: () => col.key,
     header: col.label,
     cell: (ctx) => col.render(ctx.row.original),
     enableSorting: col.sortable ?? false,
@@ -48,13 +52,13 @@ export type DataTableProps<T extends { id: string }, K extends string> = {
 export function DataTable<T extends { id: string }, K extends string = string>({ rows, columns, sort, direction = "asc", onSort, loading, empty = "Nothing here yet.", caption, onRowClick, mobileRow, className }: DataTableProps<T, K>) {
   const firstLoad = loading && rows.length === 0;
   const sorting: SortingState = sort ? [{ id: sort, desc: direction === "desc" }] : [];
-  const table = useReactTable({
+  const table = useTable({
+    features,
     data: rows,
     columns: toColumnDefs(columns),
     state: { sorting },
     manualSorting: true,
     getRowId: (row) => row.id,
-    getCoreRowModel: getCoreRowModel(),
   });
   const sortableColumns = columns.filter((c) => c.sortable);
 
