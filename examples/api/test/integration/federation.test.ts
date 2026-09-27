@@ -73,6 +73,45 @@ describe("peer federation: issuer side", () => {
     expect(res.status).toBe(401);
     expect(res.body.code).toBe("INVALID_CLIENT");
   });
+
+  it("rotates a client's secret: the old one stops working immediately, the new one works", async () => {
+    const register = await call("/auth/federation/clients/register", { method: "POST", json: { siteName: "rotating.example.com", redirectUri: "https://rotating.example.com/v1/auth/peer/callback" } });
+    const registrationId = register.body.data.id as string;
+    const clientId = register.body.data.clientId as string;
+    const redirectUri = "https://rotating.example.com/v1/auth/peer/callback";
+
+    // A never-approved (pending) client can't be rotated.
+    const adminToken = await signInAs("usr_admin_rotate", true);
+    expect((await call(`/auth/federation/clients/${registrationId}/rotate`, { method: "POST", headers: { Authorization: `Bearer ${adminToken}` } })).status).toBe(404);
+
+    const approve = await call(`/auth/federation/clients/${registrationId}/approve`, { method: "POST", headers: { Authorization: `Bearer ${adminToken}` } });
+    const oldSecret = approve.body.data.clientSecret as string;
+
+    // Only an admin can rotate.
+    const plainToken = await signInAs("usr_plain_rotate");
+    expect((await call(`/auth/federation/clients/${registrationId}/rotate`, { method: "POST", headers: { Authorization: `Bearer ${plainToken}` } })).status).toBe(403);
+
+    const rotate = await call(`/auth/federation/clients/${registrationId}/rotate`, { method: "POST", headers: { Authorization: `Bearer ${adminToken}` } });
+    expect(rotate.status).toBe(200);
+    const newSecret = rotate.body.data.clientSecret as string;
+    expect(newSecret).not.toBe(oldSecret);
+
+    const userToken = await signInAs("usr_holder_rotate");
+    const mintCode = async () => {
+      const authorize = await call(`/auth/federation/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=xyz`, { headers: { Authorization: `Bearer ${userToken}` } });
+      return new URL(authorize.res.headers.get("Location")!).searchParams.get("code")!;
+    };
+
+    // The old secret is rejected immediately after rotation.
+    const withOldSecret = await call("/auth/federation/token", { method: "POST", json: { grant_type: "authorization_code", code: await mintCode(), clientId, clientSecret: oldSecret, redirectUri } });
+    expect(withOldSecret.status).toBe(401);
+    expect(withOldSecret.body.code).toBe("INVALID_CLIENT");
+
+    // The new secret works.
+    const withNewSecret = await call("/auth/federation/token", { method: "POST", json: { grant_type: "authorization_code", code: await mintCode(), clientId, clientSecret: newSecret, redirectUri } });
+    expect(withNewSecret.status).toBe(200);
+    expect(withNewSecret.body.data.idToken).toBeTruthy();
+  });
 });
 
 describe("peer federation: consumer side", () => {

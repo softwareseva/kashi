@@ -39,8 +39,8 @@ const peerTokenBody = z.object({ key: z.string().min(1), code: z.string().min(1)
  * - `POST /passkeys/authenticate/options` · `POST /passkeys/authenticate/verify`
  * - `POST /passkeys/signup/options` · `POST /passkeys/signup/verify` (contact-free: no sign-in required, account is created only once the passkey verifies)
  * - Peer issuer (this site lets other kashi sites sign their users in here): `POST /federation/clients/register` ·
- *   `GET /federation/clients` · `POST /federation/clients/:id/approve` (admin) · `GET /federation/authorize?client_id=&redirect_uri=&state=` ·
- *   `POST /federation/token` · `GET /federation/.well-known/jwks.json`
+ *   `GET /federation/clients` · `POST /federation/clients/:id/approve` (admin) · `POST /federation/clients/:id/rotate` (admin) ·
+ *   `GET /federation/authorize?client_id=&redirect_uri=&state=` · `POST /federation/token` · `GET /federation/.well-known/jwks.json`
  * - Peer consumer (this site trusts another kashi site's accounts): `GET /peer/:key/start?next=` · `GET /peer/callback` · `POST /peer/token`
  */
 export function authRouter(config: AuthConfig): Hono<Env> {
@@ -287,12 +287,21 @@ export function authRouter(config: AuthConfig): Hono<Env> {
     });
     app.get("/federation/clients", admin, async (c) => {
       const rows = (await new AuthStore(env(c).db).listFederationClients(c.req.query("status"))).results;
-      return ok(c, { items: rows.map((r) => ({ id: r.id, clientId: r.client_id, siteName: r.site_name, redirectUri: r.redirect_uri, status: r.status, createdAt: r.created_at, approvedAt: r.approved_at })) });
+      return ok(c, { items: rows.map((r) => ({ id: r.id, clientId: r.client_id, siteName: r.site_name, redirectUri: r.redirect_uri, status: r.status, createdAt: r.created_at, approvedAt: r.approved_at, secretRotatedAt: r.secret_rotated_at })) });
     });
     app.post("/federation/clients/:id/approve", admin, async (c) => {
       const secret = randomToken(32);
       const approved = await new AuthStore(env(c).db).approveFederationClient(c.req.param("id"), await sha256Hex(secret));
       if (!approved) throw new ApiError(404, "NOT_FOUND", "No pending registration with that id.");
+      return ok(c, { clientSecret: secret });
+    });
+    // Mints a new secret for an already-approved client; the old one stops working immediately.
+    // The consumer admin must copy it into their own providers.peer.trust config right after —
+    // same manual step as the initial approval, no automated push to the consumer.
+    app.post("/federation/clients/:id/rotate", admin, async (c) => {
+      const secret = randomToken(32);
+      const rotated = await new AuthStore(env(c).db).rotateFederationClientSecret(c.req.param("id"), await sha256Hex(secret));
+      if (!rotated) throw new ApiError(404, "NOT_FOUND", "No approved client with that id.");
       return ok(c, { clientSecret: secret });
     });
     app.get("/federation/authorize", auth, async (c) => {

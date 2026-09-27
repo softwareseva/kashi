@@ -6,6 +6,7 @@
     "@softwareseva/sync/sync_0001_ops_changes.sql": "0006_sync_0001_ops_changes.sql",
     "@softwareseva/auth/auth_0003_passkey_domain.sql": "0007_auth_0003_passkey_domain.sql",
     "@softwareseva/auth/auth_0004_federation_clients.sql": "0008_auth_0004_federation_clients.sql",
-    "@softwareseva/auth/auth_0005_federation_codes.sql": "0009_auth_0005_federation_codes.sql"
+    "@softwareseva/auth/auth_0005_federation_codes.sql": "0009_auth_0005_federation_codes.sql",
+    "@softwareseva/auth/auth_0006_federation_client_secret_rotated_at.sql": "0010_auth_0006_federation_client_secret_rotated_at.sql"
   }
 }
