@@ -1,5 +1,12 @@
 # @softwareseva/list
 
+## 1.1.0
+
+### Patch Changes
+
+- @softwareseva/core@1.1.0
+  - @softwareseva/ui@1.1.0
+
 ## 1.0.0
 
 ### Major Changes
