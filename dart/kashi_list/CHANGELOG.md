@@ -1,7 +1,3 @@
-## 1.6.0-test
-
-- No functional changes; version bump to stay in lockstep with the npm packages.
-
 ## 1.5.0
 
 - No functional changes; version bump to stay in lockstep with the npm packages (the 1.5.0 `@softwareseva/auth` identity-extensions release has no changes for this package either).
