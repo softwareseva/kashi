@@ -15,7 +15,7 @@ import { ExtensionStore } from "./store";
 import { requireRecent } from "./recovery";
 
 const peek = z.object({ channel: z.enum(["email", "phone"]).optional() });
-const input = z.object({ channel: z.enum(["email", "phone"]), destination: z.string().min(3).max(254), code: z.string().regex(/^\d{4,8}$/).optional() });
+const input = z.object({ channel: z.enum(["email", "phone"]), destination: z.string().min(3).max(254), code: z.string().regex(/^\d{4,8}$/).optional(), transport: z.enum(["cookie", "token"]).default("cookie"), deviceName: z.string().max(80).optional() });
 const purposes = ["sign-in", "link"] as const satisfies readonly OtpPurpose[];
 
 /**
@@ -84,7 +84,7 @@ export function multiOtpRouter(config: AuthConfig) {
         if (!existing && provider.allowSignUp === false) throw new ApiError(401, "INVALID_CODE", "Invalid or expired code.");
         const user = existing?.user ?? (await createUser(c, config, env, "otp", body.channel === "email" ? { name: destination, email: destination, emailVerified: true } : { name: destination, phone: destination, phoneVerified: true }));
         await auth.markVerified(user.id, body.channel);
-        return ok(c, await completeSignIn(c, config, env, (await auth.userById(user.id))!, `otp:${body.channel}`, "cookie"));
+        return ok(c, await completeSignIn(c, config, env, (await auth.userById(user.id))!, `otp:${body.channel}`, body.transport, body.deviceName));
       });
   }
   return app;

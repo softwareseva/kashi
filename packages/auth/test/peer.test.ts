@@ -94,4 +94,25 @@ describe("peer issuer", () => {
     await exchangePeerCode(trust, "code-2", "https://consumer.test/v1/auth/peer/callback", fetcher);
     expect(jwksFetchCount).toBe(1); // still cached, no refetch
   });
+
+  it("refetches the JWKS once when a cached set doesn't know the token's kid (issuer rotated within the cache window)", async () => {
+    const oldKeypair = await generateFederationKeypair();
+    const newKeypair = await generateFederationKeypair();
+    const authUrl = "https://issuer-rotate-cached.test/v1/auth";
+    const trust: PeerTrustConfig = { issuer: authUrl, clientId: "cid", clientSecret: "unused-here" };
+    let signer = oldKeypair; let published = [oldKeypair.publicJwk]; let jwksFetchCount = 0;
+    const fetcher = (async (input: RequestInfo | URL) => {
+      if (String(input).endsWith("/jwks.json")) { jwksFetchCount += 1; return new Response(JSON.stringify({ keys: published })); }
+      return new Response(JSON.stringify({ idToken: await signFederationIdToken({ ...baseEnv, authUrl, federationPrivateKey: JSON.stringify(signer.privateJwk) }, "cid", user) }));
+    }) as unknown as typeof fetch;
+    await exchangePeerCode(trust, "code-1", "https://consumer.test/v1/auth/peer/callback", fetcher);
+    signer = newKeypair; published = [newKeypair.publicJwk];
+    const profile = await exchangePeerCode(trust, "code-2", "https://consumer.test/v1/auth/peer/callback", fetcher);
+    expect(profile.subject).toBe(`${authUrl}|usr_1`);
+    expect(jwksFetchCount).toBe(2);
+    // Still unknown after the refetch: fail, and don't loop.
+    signer = await generateFederationKeypair();
+    await expect(exchangePeerCode(trust, "code-3", "https://consumer.test/v1/auth/peer/callback", fetcher)).rejects.toThrow(/peer_jwks_kid_unknown/);
+    expect(jwksFetchCount).toBe(3);
+  });
 });

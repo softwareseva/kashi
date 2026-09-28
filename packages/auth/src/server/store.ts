@@ -200,6 +200,10 @@ export class AuthStore {
       this.db.prepare("DELETE FROM auth_refresh_sessions WHERE expires_at < ? OR revoked_at < ?").bind(now, new Date(Date.now() - 7 * 86_400_000).toISOString()),
       this.db.prepare("DELETE FROM auth_otp_codes WHERE expires_at < ?").bind(now),
       this.db.prepare("DELETE FROM auth_challenges WHERE expires_at < ?").bind(now),
+      this.db.prepare("DELETE FROM auth_federation_codes WHERE expires_at < ?").bind(now),
     ]);
+    // auth_bound_otp ships in the opt-in auth_0007 migration, so only prune it where it exists.
+    const bound = await this.db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'auth_bound_otp'").first();
+    if (bound) await this.db.prepare("DELETE FROM auth_bound_otp WHERE expires_at < ?").bind(now).run();
   }
 }

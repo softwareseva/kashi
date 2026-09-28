@@ -22,7 +22,7 @@ otpChannels: {
 }
 ```
 
-- `POST /otp/request` / `POST /otp/verify` (sign-in, public) — these paths are **shared** with the legacy `providers.otp`: a request whose `channel` isn't configured in `otpChannels` falls through to it, so both can coexist during a migration.
+- `POST /otp/request` / `POST /otp/verify` (sign-in, public) — these paths are **shared** with the legacy `providers.otp`: a request whose `channel` isn't configured in `otpChannels` falls through to it, so both can coexist during a migration. `/otp/verify` takes the same optional `transport` (`"cookie"` default, `"token"` for native apps) and `deviceName` as the legacy route.
 - `POST /contacts/otp/request` / `POST /contacts/otp/verify` (authenticated, requires a recent session — see below) attach a verified email or phone to the signed-in account, rejecting with `409 ACCOUNT_MERGE_REQUIRED` if that contact already belongs to a different account.
 - The `send` callback is the same `OtpProviderConfig["send"]` as `providers.otp`: `(env, destination, code, c, { purpose, ttlSeconds })`, `purpose` being `"sign-in"` or `"link"`. Pipe it into `renderOtpEmail({ code, purpose, ttlSeconds })` for email (`auth-whatsapp-otp` covers WhatsApp/SMS senders).
 

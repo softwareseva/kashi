@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { ok, randomToken, ApiError, consumeRateLimit, clientIp, sha256 } from "@softwareseva/core/server";
 import { getCookie } from "hono/cookie";
-import { requireAuth, completeSignIn, verifyAccessToken } from "../session";
+import { requireAuth, completeSignIn, verifyAccessToken, bearer } from "../session";
 import { resolveEnv } from "../env";
 import { AuthStore } from "../store";
 import { ExtensionStore } from "./store";
@@ -17,8 +17,7 @@ import type { Context } from "hono";
  * flow that started this refresh-token family.
  */
 export async function requireRecent(c: Context, env: AuthEnv, config: AuthConfig) {
-  const header = c.req.header("Authorization");
-  const token = header?.startsWith("Bearer ") ? header.slice(7) : getCookie(c, config.cookieNames?.access ?? (env.secureCookies ? "__Host-access" : "access"));
+  const token = bearer(c) ?? getCookie(c, config.cookieNames?.access ?? (env.secureCookies ? "__Host-access" : "access"));
   const claims = token ? await verifyAccessToken(env, token) : null;
   const issued = claims?.sid ? await new ExtensionStore(env.db).familyIssued(claims.sub, claims.sid) : null;
   if (!issued?.created_at || Date.now() - Date.parse(issued.created_at) > 300_000)
