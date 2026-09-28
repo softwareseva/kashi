@@ -9,6 +9,9 @@
     "WEB_ORIGIN": "http://localhost:5173",
     "JWT_SECRET": "test-jwt-secret-that-is-long-enough",
     "OTP_PEPPER": "test-pepper",
+    // Only used to exercise Google linking end-to-end (see test/integration/identity-extensions.test.ts); the token exchange itself is stubbed, never a real call to Google.
+    "GOOGLE_CLIENT_ID": "test-google-client-id",
+    "GOOGLE_CLIENT_SECRET": "test-google-client-secret",
     "RP_ID": "localhost",
     "RP_NAME": "kashi test",
     // Only used to exercise the peer-federation loop end-to-end (see auth.ts); never reused for JWT_SECRET.

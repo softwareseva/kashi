@@ -40,6 +40,7 @@ Every package or CLI deploy module that needs a secret ships a `secrets.json` (m
 - [skills/auth-passkeys/SKILL.md](skills/auth-passkeys/SKILL.md): passkeys (WebAuthn) as the default anonymous sign-up method — contact-free creation, discoverable sign-in, credential management, RP ID/origin setup for web, iOS, and Android.
 - [skills/auth-whatsapp-otp/SKILL.md](skills/auth-whatsapp-otp/SKILL.md): phone/email OTP sign-in delivered over WhatsApp (AiSensy or Meta Cloud API), SMS, or email, with rate limiting.
 - [skills/auth-federation/SKILL.md](skills/auth-federation/SKILL.md): cross-site single sign-on between kashi sites, with each site's admin approving the relationship independently.
+- [skills/auth-identity-extensions/SKILL.md](skills/auth-identity-extensions/SKILL.md): opt-in identity extensions — multi-channel purpose-bound OTP, explicit account linking with collision handling, hashed recovery codes, session-family revocation, and federation hooks.
 - [skills/flutter-auth/SKILL.md](skills/flutter-auth/SKILL.md): sign-in for Flutter apps — Riverpod `AuthController`, `go_router` redirect, the `KSignIn` screen, provider adapters, biometric lock, platform setup.
 - [skills/d1-list-pagination/SKILL.md](skills/d1-list-pagination/SKILL.md): add a paginated, searchable, sortable list endpoint on D1, choosing between keyset cursors and page numbers.
 - [skills/react-data-table/SKILL.md](skills/react-data-table/SKILL.md): a directory/admin table in React with sortable headers, skeleton loading, empty state, mobile card layout, and URL-synced search/sort/paging.

@@ -105,6 +105,16 @@ export type AuthHooks = {
   onSignIn?: (user: AuthUser, provider: string, c: Context) => Promise<void> | void;
   /** Block sign-in (throw ApiError) or adjust roles before a session is issued. */
   beforeSession?: (user: AuthUser, provider: string, c: Context) => Promise<AuthUser | void> | AuthUser | void;
+  /**
+   * Called on every request that passes `requireAuth`, after the local session and (when
+   * `enforceSessionRevocation`) family checks succeed. Throw to reject a session that is only
+   * revocable centrally (e.g. a peer/consumer site checking a central session it doesn't own).
+   */
+  validateSession?: (user: AuthUser, familyId: string | undefined, c: Context, env: AuthEnv) => Promise<void>;
+  /** Add app-specific claims to a federation ID token minted for `clientId` at `/federation/token`. */
+  federationClaims?: (user: AuthUser, clientId: string, c: Context, env: AuthEnv) => Promise<Record<string, unknown>>;
+  /** Called once per peer sign-in (browser flow), before the local session is issued. Associate the peer identity with local state here, e.g. `ExtensionStore.linkPeer`. */
+  onFederationSession?: (user: AuthUser, claims: { subject: string; sessionId?: string }, familyId: string, c: Context, env: AuthEnv) => Promise<void>;
 };
 
 export type AuthConfig = {
@@ -115,6 +125,22 @@ export type AuthConfig = {
   cookieNames?: { access?: string; refresh?: string };
   /** Roles given to users created by providers. */
   defaultRoles?: string[];
+  /** Require the access token's session (family) id to still be active on every `requireAuth` request, not just on refresh. Off by default. */
+  enforceSessionRevocation?: boolean;
+  /** Mount `ExtensionStore`-backed routes: `/recovery/codes`, `/recovery/sign-in`, and (with `providers.google`) `/google/link/*`. Requires `auth_0007_identity_extensions.sql`. */
+  identityExtensions?: boolean;
+  /** Issue a set of recovery codes as part of contact-free passkey signup, returned once in the signup response. Requires `identityExtensions`. */
+  recoveryCodesOnSignup?: boolean;
+  /** Silently link a verified OAuth/federation email to an existing account by email match (default true). Set `false` to require the user sign in and link explicitly via `/google/link/*` instead. */
+  autoLinkVerifiedEmail?: boolean;
+  /** Relative path to redirect an unauthenticated `/federation/authorize` request to, with `?next=` set to resume there afterward. */
+  federationLoginPath?: string;
+  /**
+   * Purpose- and user-bound OTP over one or more channels at once (unlike `providers.otp`, which is
+   * a single channel). Mounts `/otp/{request,verify}` (sign-in, public) and
+   * `/contacts/otp/{request,verify}` (authenticated contact-link, requires a recent session).
+   */
+  otpChannels?: Partial<Record<"email" | "phone", OtpProviderConfig>>;
   providers: {
     password?: boolean;
     otp?: OtpProviderConfig;

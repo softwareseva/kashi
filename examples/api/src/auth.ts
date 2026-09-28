@@ -1,5 +1,6 @@
 /** Auth configuration for this app: providers, the OTP sender, and hooks. Shared by the router and route guards. */
 import type { AuthConfig, AuthEnv } from "@softwareseva/auth/server";
+import { ExtensionStore } from "@softwareseva/auth/server";
 import { nowIso } from "@softwareseva/core/server";
 import type { Context } from "hono";
 
@@ -16,6 +17,18 @@ async function sendCode(env: AuthEnv, destination: string, code: string, c: Cont
 
 export const authConfig: AuthConfig = {
   defaultRoles: ["user"],
+  // Identity extensions, exercised end-to-end in test/integration/identity-extensions.test.ts.
+  identityExtensions: true,
+  recoveryCodesOnSignup: true,
+  enforceSessionRevocation: true,
+  federationLoginPath: "/sign-in",
+  otpChannels: { email: { channel: "email", send: sendCode } },
+  hooks: {
+    federationClaims: async (_user, clientId) => ({ example: clientId }),
+    onFederationSession: async (user, claims, familyId, _c, env) => {
+      await new ExtensionStore(env.db).linkPeer(familyId, user.id, claims.subject, claims.sessionId ?? familyId);
+    },
+  },
   providers: {
     password: true,
     otp: { channel: "phone", send: sendCode, defaultCountry: "IN" },
