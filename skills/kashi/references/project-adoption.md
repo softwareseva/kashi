@@ -22,7 +22,7 @@ app.route("/v1/auth", authRouter({ providers: ["otp", "google"], /* ... */ }));
 ```
 
 4. Copy package migrations: each package ships `migrations/<pkg>_NNNN_name.sql`. Copy any file not yet present into the project's `migrations/` as the next number, keeping the original name after the number so provenance is visible (`0007_auth_0001_sessions.sql`).
-5. Secrets: read the package `secrets.json`. For each entry generate the value as described, then `wrangler secret put NAME` for production and add `NAME=` to `.dev.vars` for local development. Add the same names to CI secrets when deploys run there.
+5. Secrets: run `npx @softwareseva/cli secrets` for the checklist, or read the package `secrets.json` directly. Each entry's `docs` field points at a heading in that package's `SECRETS.md` with the actual step-by-step instructions (which console page, which button) — `secrets.json`'s own `generate` field is only a one-line summary. Once you have a value, `wrangler secret put NAME` for production and add `NAME=` to `.dev.vars` for local development; add the same names to CI secrets when deploys run there.
 
 ## New React app
 

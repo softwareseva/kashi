@@ -14,6 +14,7 @@
     "dist",
     "migrations",
     "secrets.json",
+    "SECRETS.md",
     "README.md"
   ],
   "exports": {

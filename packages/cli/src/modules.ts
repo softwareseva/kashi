@@ -16,6 +16,7 @@ const modulesDir = join(templatesDir, "modules");
 export const listModules = (): string[] => (existsSync(modulesDir) ? readdirSync(modulesDir).filter((n) => existsSync(join(modulesDir, n, "module.json"))) : []);
 export const loadModule = (name: string): ModuleSpec | null => readJson<ModuleSpec>(join(modulesDir, name, "module.json"));
 export const moduleSecrets = (name: string): SecretsManifest | null => readJson<SecretsManifest>(join(modulesDir, name, "secrets.json"));
+export const moduleDir = (name: string): string => join(modulesDir, name);
 
 export const sha = (text: string) => createHash("sha256").update(text).digest("hex").slice(0, 16);
 

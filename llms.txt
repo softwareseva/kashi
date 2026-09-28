@@ -19,6 +19,14 @@ Start with `skills/kashi/SKILL.md` — it is the index and holds the conventions
 - [packages/tokens/README.md](packages/tokens/README.md): shared design tokens, source of truth for `ui`'s CSS and Dart theme
 - [packages/cli/README.md](packages/cli/README.md): `@softwareseva/cli` — init, add, update, secrets, doctor
 
+## Secrets
+
+Step-by-step generation instructions for every secret a package or CLI deploy module needs (paired with the `secrets.json` each ships, which `npx @softwareseva/cli secrets` reads):
+
+- [packages/auth/SECRETS.md](packages/auth/SECRETS.md): sessions, WhatsApp/SMS/email OTP, Google, Apple, Facebook, passkeys, peer federation
+- [packages/cli/templates/modules/deploy-cloudflare/SECRETS.md](packages/cli/templates/modules/deploy-cloudflare/SECRETS.md): Cloudflare API token and account id for CI deploys
+- [packages/cli/templates/modules/deploy-fastlane/SECRETS.md](packages/cli/templates/modules/deploy-fastlane/SECRETS.md): App Store Connect API key, fastlane match, Android keystore, Play service account
+
 ## Skills
 
 - [skills/kashi/SKILL.md](skills/kashi/SKILL.md): index and conventions for the whole toolkit — read first

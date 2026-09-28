@@ -25,6 +25,15 @@ Copy the shape of the closest existing package under `packages/`:
 - `CHANGELOG.md`: start it with the standard changesets header (copy a sibling's top few lines) — don't hand-write entries; that's what `pnpm changeset` does going forward.
 - Register the package in `.changeset/config.json`'s `fixed` group if it should version in lockstep with the others (ask the user if unsure — most kashi packages do).
 
+## If the package needs any secrets
+
+Ask whether the feature needs an API key, OAuth client, signing key, or any other credential the app owner must obtain themselves. If yes, it needs both files below — not one or the other:
+
+- `secrets.json` (validate its shape against `packages/cli/secrets.schema.json`): one entry per secret with `name`, `usedBy`, `description`, a one-line `generate` summary, `store` (from `wrangler-secret`/`dev-vars`/`ci-secret`/`env`/`match`/`keychain`), and a `docs` field pointing at that secret's heading in `SECRETS.md`, e.g. `"docs": "SECRETS.md#google_client_id"`.
+- `SECRETS.md` next to it: one `##` section per provider (or per secret, for standalone ones), each with the actual click-by-click steps — which console URL, which menu, which button, what value lands in which field, and exactly what to paste into `wrangler secret put` / `.dev.vars` / `gh secret set`. Copy the structure of `packages/auth/SECRETS.md` (it covers Google, Apple, Facebook, and a self-generated keypair — one of those is likely the closest match to what you're adding). Every `###`/`##` heading must exactly match a `docs` anchor in `secrets.json` (GitHub's heading-to-anchor rule: lowercase, spaces to hyphens, punctuation other than `-`/`_` stripped) — check this by eye or by running `python3 <(cat <<'EOF' ... EOF)`-style anchor extraction; don't just assume it lines up.
+- Add `SECRETS.md` to the package's `package.json` `files` array alongside `secrets.json`, or it will not ship to npm and the CLI's printed `docs` path will point at a file that doesn't exist in the installed package.
+- If the package has no secrets (most don't), skip both files — don't create an empty `SECRETS.md`.
+
 ## Scaffolding a dart mirror (dart/kashi_<name>/)
 
 Only if step "Before scaffolding" #2 says yes. Copy the shape of the closest `dart/kashi_*` package: `pubspec.yaml` (version matching the npm group's current version exactly), `lib/`, `test/`, `README.md`, `CHANGELOG.md` with the same "lockstep bump" convention used at release time. Follow `flutter_lints`; add it to the root `pubspec.yaml` workspace list.
@@ -50,3 +59,4 @@ Every package needs a skill teaching how to use it (per `AGENTS.md` point 2). St
 - Never invent a file layout — always copy from the closest existing sibling package/skill rather than improvising conventions.
 - Never publish, tag, commit, or push. Scaffolding only.
 - Never skip `scripts/validate.sh` for a new skill — a name/directory mismatch or an over-length SKILL.md fails silently otherwise until someone else hits it.
+- Never ship a `secrets.json` entry without a matching `docs` anchor in `SECRETS.md`, and never ship `SECRETS.md` without adding it to `package.json`'s `files` array.

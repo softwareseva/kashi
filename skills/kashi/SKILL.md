@@ -44,7 +44,7 @@ Every skill above is available. `references/roadmap.md` records what shipped in 
 2. Add the `.gitignore` lines from `templates/gitignore` (secrets, build output).
 3. For npm packages: `pnpm add @softwareseva/<name>`. For Flutter: add `kashi_<name>: ^x.y.z` to `pubspec.yaml`.
 4. When a package ships SQL, copy its `migrations/*.sql` into the project's migrations directory with the next sequence number. Never edit an applied migration.
-5. Read each installed package's `secrets.json`, generate the secrets it lists, store them where it says (`wrangler secret put`, `.dev.vars`, CI secrets), and confirm they are gitignored.
+5. Run `npx @softwareseva/cli secrets` for the checklist of every secret installed packages need. For step-by-step generation instructions (which console, which button, what to paste), follow each entry's `docs` path into that package's `SECRETS.md` — `secrets.json` only has the one-line summary. Store each value where the checklist says (`wrangler secret put`, `.dev.vars`, CI secrets) and confirm it's gitignored.
 
 Full recipe with examples: `references/project-adoption.md`.
 
@@ -53,7 +53,8 @@ Full recipe with examples: `references/project-adoption.md`.
 - **Layers**: `web -> contracts <- routes -> services -> repositories -> D1`. Routes parse input and shape responses; services hold business rules; repositories hold all SQL. No SQL in routes or services.
 - **Envelope**: success is `{ data }`; failure is `{ code, message, requestId, fields? }`. Throw `ApiError` for expected failures; the composition root normalises everything else to a 500 with a `requestId`.
 - **Versioned API**: routes live under `/v1`. Protected mutations need the role check and, for cookie sessions, CSRF protection.
-- **Secrets**: store opaque tokens only as hashes, compare with constant-time helpers, never log credentials, codes or raw tokens.
+- **Secrets (runtime)**: store opaque tokens only as hashes, compare with constant-time helpers, never log credentials, codes or raw tokens.
+- **Secrets (authoring)**: a package or CLI template module that ships any secret ships a `SECRETS.md` alongside its `secrets.json`, with one `##`/`###` section per provider/secret giving the actual click-by-click steps to obtain it; every `secrets.json` entry gets a `docs` field pointing at its heading (`"docs": "SECRETS.md#name"`). See `packages/auth/SECRETS.md` for the pattern.
 - **Lists**: allowlisted sort keys and stable `(sort_value, id)` keyset cursors; clear the cursor when a filter, search, limit or sort changes; keep list state in the URL on the web.
 - **Migrations**: immutable, numbered, forward-safe for existing data, applied explicitly (never as a side effect of a code change).
 - **Files**: start with a one-line overview comment; stay under 400 lines; no raw hex colours outside the token file.

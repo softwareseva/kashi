@@ -19,6 +19,8 @@ pnpm add @softwareseva/auth hono zod
 - **`kashi_auth`** (pub.dev, Flutter): a Riverpod `AuthController`, go_router auth redirect, the `KSignIn` screen, and adapters for every provider above plus biometric lock. See the `flutter-auth` skill.
 - **Ships**: `migrations/` (copied by `npx @softwareseva/cli migrate`), `secrets.json` (read by `npx @softwareseva/cli secrets`), and typed contracts.
 
+Setting up a provider (Google, Apple, Facebook, passkeys, peer federation)? [`SECRETS.md`](SECRETS.md) has step-by-step instructions for generating every value in `secrets.json` — which console, which button, what to paste where.
+
 ## Example
 
 ```ts

@@ -19,6 +19,14 @@ Start with `skills/kashi/SKILL.md` — it is the index and holds the conventions
 - [packages/tokens/README.md](packages/tokens/README.md) — `@softwareseva/tokens` (private, unversioned): the single source of truth for design tokens (`tokens.json`), mirrored into `packages/ui/src/kashi.css` and `dart/kashi_ui/lib/src/tokens.dart`.
 - [packages/cli/README.md](packages/cli/README.md) — `@softwareseva/cli`: `init` (AGENTS.md, pointers, gitignore, renovate), `add <package>` (installs a package, mounts routes, copies migrations, prints the secrets checklist), `add deploy-cloudflare` / `add deploy-fastlane`, `secrets`, `update`, `doctor`.
 
+## Secrets
+
+Every package or CLI deploy module that needs a secret ships a `secrets.json` (machine-readable: name, description, one-line `generate` summary, where to store it, read by `npx @softwareseva/cli secrets`/`doctor`) alongside a `SECRETS.md` (human-readable: the actual click-by-click steps to obtain each value — which console, which button, what to paste where). Each `secrets.json` entry's `docs` field links the two.
+
+- [packages/auth/SECRETS.md](packages/auth/SECRETS.md): sessions (`JWT_SECRET`, `WEB_ORIGIN`), WhatsApp/SMS/email OTP (`OTP_PEPPER`), Google Cloud OAuth client setup, Apple Developer Services ID + signing key, Facebook Developer app, passkeys' `RP_ID` domain decision, and generating a peer-federation keypair.
+- [packages/cli/templates/modules/deploy-cloudflare/SECRETS.md](packages/cli/templates/modules/deploy-cloudflare/SECRETS.md): creating a scoped Cloudflare API token (Workers + D1 edit) and finding the account id, for the GitHub Actions deploy workflow.
+- [packages/cli/templates/modules/deploy-fastlane/SECRETS.md](packages/cli/templates/modules/deploy-fastlane/SECRETS.md): App Store Connect API key, fastlane match certificate repo, Android upload keystore generation, and a Google Play service account, for shipping to TestFlight and Play from CI.
+
 ## Skills
 
 - [skills/kashi/SKILL.md](skills/kashi/SKILL.md): index and conventions for the kashi toolkit. Use at the start of any project on this stack, or to decide which skill/package applies.
