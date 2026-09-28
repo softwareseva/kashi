@@ -33,7 +33,7 @@ Web job: build with `VITE_API_URL` from the GitHub environment variable, then `w
 1. Add `env.staging` and `env.production` to the API `wrangler.jsonc`, each with its own `vars` and `d1_databases` (`references/wrangler-envs.md`). Bindings are not inherited by environments, so repeat `d1_databases` in each.
 2. `wrangler d1 create <name>-staging` and `wrangler d1 create <name>-production`; paste the ids.
 3. Worker secrets per environment: `wrangler secret put JWT_SECRET --env staging` and again with `--env production` (`npx @softwareseva/cli secrets` lists them all).
-4. Repository secrets: `gh secret set CLOUDFLARE_API_TOKEN` and `gh secret set CLOUDFLARE_ACCOUNT_ID` (see `npx @softwareseva/cli secrets` for how to create the token with Workers and D1 edit rights).
+4. Repository secrets: `gh secret set CLOUDFLARE_API_TOKEN` and `gh secret set CLOUDFLARE_ACCOUNT_ID` — step-by-step instructions for both are in this module's `SECRETS.md` (`node_modules/@softwareseva/cli/templates/modules/deploy-cloudflare/SECRETS.md` once installed).
 5. GitHub > Settings > Environments: create `staging` and `production`; add required reviewers to `production`; set `VITE_API_URL` per environment for the web job.
 6. Custom domains: `routes: [{ "pattern": "api.example.com", "custom_domain": true }]` in the environment.
 

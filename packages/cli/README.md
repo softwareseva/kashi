@@ -1,5 +1,9 @@
 # @softwareseva/cli
 
+The install/update tool for the kashi packages: scaffolds project files, installs a package and its migrations, and keeps everything in sync as new versions ship. Run it with `npx` — no install needed.
+
+## Commands
+
 ```bash
 npx @softwareseva/cli init            # AGENTS.md, CLAUDE.md, GEMINI.md, .gitignore lines, renovate.json
 npx @softwareseva/cli add auth        # install @softwareseva/auth, copy its migrations, print its secrets checklist and mount snippet
@@ -17,3 +21,7 @@ Packages declare their secrets in `secrets.json` (schema: `secrets.schema.json`)
 ## Template modules
 
 Modules render templates with values detected from your project (`--var KEY=VALUE` overrides) and record a hash of each written file in `kashi.lock.json`. On `kashi update`, a file whose content still matches the recorded hash is replaced with the new template; a file you edited keeps your version and receives `<file>.kashi-new` to merge. Module secrets appear in `kashi secrets` and are checked by `kashi doctor` (including GitHub repository secrets via `gh`).
+
+## See also
+
+Start a new project with `kashi init`, then `kashi add <package>` for each feature. See the `kashi` skill for the full workflow.

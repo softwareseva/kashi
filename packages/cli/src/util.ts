@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 export const templatesDir = join(dirname(fileURLToPath(import.meta.url)), "..", "templates");
 
-export type SecretEntry = { name: string; usedBy?: string; description: string; generate: string; store: string[]; rotate?: string; optional?: boolean; when?: string; gitignore?: string[] };
+export type SecretEntry = { name: string; usedBy?: string; description: string; generate: string; store: string[]; rotate?: string; optional?: boolean; when?: string; gitignore?: string[]; docs?: string };
 export type SecretsManifest = { package: string; secrets: SecretEntry[] };
 export type InstalledPackage = { name: string; version: string; dir: string; migrations: string[]; secrets: SecretsManifest | null };
 
