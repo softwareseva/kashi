@@ -4,7 +4,7 @@ description: Build or extend a Hono API on Cloudflare Workers with a D1 database
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/core@0.1"
+  packages: "@softwareseva/core@1.2"
 ---
 
 # Hono API on Workers + D1

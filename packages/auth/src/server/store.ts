@@ -7,6 +7,10 @@ export type PasskeyRow = { id: string; user_id: string; credential_id: string; p
 export type FederationClientRow = { id: string; client_id: string; client_secret_hash: string | null; site_name: string; redirect_uri: string; status: "pending" | "approved" | "revoked"; created_at: string; approved_at: string | null; secret_rotated_at: string | null };
 
 const userColumns = "id, display_name, email, phone, roles, email_verified_at, phone_verified_at, password_hash, disabled_at";
+// Same columns, qualified with the `u` alias: needed wherever auth_users is joined against another
+// table that also has an `id` column (e.g. auth_identities), or SQLite rejects the bare column names
+// as ambiguous.
+const userColumnsQualified = userColumns.split(", ").map((c) => `u.${c}`).join(", ");
 const toUser = (r: UserRow): AuthUser => ({ id: r.id, name: r.display_name, email: r.email, phone: r.phone, roles: JSON.parse(r.roles || "[]") as string[], emailVerifiedAt: r.email_verified_at, phoneVerifiedAt: r.phone_verified_at });
 
 export class AuthStore {
@@ -45,7 +49,7 @@ export class AuthStore {
 
   // ----- external identities (google, apple) -----
   async userByIdentity(provider: string, subject: string) {
-    return this.rowToUser(await this.db.prepare(`SELECT ${userColumns} FROM auth_users u JOIN auth_identities i ON i.user_id = u.id WHERE i.provider = ? AND i.subject = ?`).bind(provider, subject).first<UserRow>());
+    return this.rowToUser(await this.db.prepare(`SELECT ${userColumnsQualified} FROM auth_users u JOIN auth_identities i ON i.user_id = u.id WHERE i.provider = ? AND i.subject = ?`).bind(provider, subject).first<UserRow>());
   }
   async linkIdentity(userId: string, provider: string, subject: string, email: string | null) {
     await this.db.prepare("INSERT INTO auth_identities(id, user_id, provider, subject, email, created_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(provider, subject) DO NOTHING").bind(newId("idn"), userId, provider, subject, email, nowIso()).run();
@@ -154,6 +158,11 @@ export class AuthStore {
   /** Mints a new secret for an already-approved client; the old one stops working immediately. */
   async rotateFederationClientSecret(id: string, clientSecretHash: string): Promise<boolean> {
     const r = await this.db.prepare("UPDATE auth_federation_clients SET client_secret_hash = ?, secret_rotated_at = ? WHERE id = ? AND status = 'approved'").bind(clientSecretHash, nowIso(), id).run();
+    return r.meta.changes === 1;
+  }
+  /** Revokes trust in a previously approved client; /federation/authorize and /federation/token both gate on status = 'approved', so this immediately stops both new authorizations and token exchanges. */
+  async revokeFederationClient(id: string): Promise<boolean> {
+    const r = await this.db.prepare("UPDATE auth_federation_clients SET status = 'revoked' WHERE id = ? AND status = 'approved'").bind(id).run();
     return r.meta.changes === 1;
   }
   listFederationClients(status?: string) {

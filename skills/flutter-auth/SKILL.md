@@ -4,7 +4,7 @@ description: Sign-in for Flutter apps on @softwareseva/auth with kashi_auth and 
 license: MIT
 metadata:
   version: "0.2.0"
-  packages: "kashi_auth@0.2 kashi_core@0.1 google_sign_in@7 sign_in_with_apple@8 flutter_facebook_auth@7 passkeys@2 local_auth@3"
+  packages: "kashi_auth@1.2 kashi_core@1.2 google_sign_in@7 sign_in_with_apple@8 flutter_facebook_auth@7 passkeys@2 local_auth@3"
 ---
 
 # Flutter sign-in

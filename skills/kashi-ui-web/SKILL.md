@@ -4,7 +4,7 @@ description: Style a React app with @softwareseva/ui on Tailwind v4, covering in
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/ui@0.1"
+  packages: "@softwareseva/ui@1.2"
 ---
 
 # kashi UI on the web

@@ -53,4 +53,51 @@ describe("peer issuer", () => {
     expect(url.searchParams.get("client_id")).toBe("cid");
     expect(url.searchParams.get("state")).toBe("st");
   });
+
+  it("verifies against the JWKS key matching the token's kid, even when it is not the first key published (key rotation)", async () => {
+    const oldKeypair = await generateFederationKeypair();
+    const newKeypair = await generateFederationKeypair();
+    const env: AuthEnv = { ...baseEnv, authUrl: "https://issuer-rotate.test/v1/auth", federationPrivateKey: JSON.stringify(newKeypair.privateJwk) };
+    const idToken = await signFederationIdToken(env, "cid", user);
+    const trust: PeerTrustConfig = { issuer: env.authUrl, clientId: "cid", clientSecret: "unused-here" };
+    // The published JWKS lists the old key first, as an issuer mid-rotation would while the old key is still valid for tokens already in flight.
+    const jwks = { keys: [oldKeypair.publicJwk, newKeypair.publicJwk] };
+    const fetcher = (async (input: RequestInfo | URL) =>
+      String(input).endsWith("/jwks.json") ? new Response(JSON.stringify(jwks)) : new Response(JSON.stringify({ idToken }))) as unknown as typeof fetch;
+    const profile = await exchangePeerCode(trust, "code", "https://consumer.test/v1/auth/peer/callback", fetcher);
+    expect(profile.subject).toBe(`${env.authUrl}|usr_1`);
+  });
+
+  it("rejects an ID token whose kid does not match any published key, rather than silently trying a different one", async () => {
+    const signingKeypair = await generateFederationKeypair();
+    const otherKeypair = await generateFederationKeypair();
+    const env: AuthEnv = { ...baseEnv, authUrl: "https://issuer-unknown-kid.test/v1/auth", federationPrivateKey: JSON.stringify(signingKeypair.privateJwk) };
+    const idToken = await signFederationIdToken(env, "cid", user);
+    const trust: PeerTrustConfig = { issuer: env.authUrl, clientId: "cid", clientSecret: "unused-here" };
+    // The JWKS the consumer fetches does not contain the key that actually signed the token.
+    const jwks = { keys: [otherKeypair.publicJwk] };
+    const fetcher = (async (input: RequestInfo | URL) =>
+      String(input).endsWith("/jwks.json") ? new Response(JSON.stringify(jwks)) : new Response(JSON.stringify({ idToken }))) as unknown as typeof fetch;
+    await expect(exchangePeerCode(trust, "code", "https://consumer.test/v1/auth/peer/callback", fetcher)).rejects.toThrow(/peer_jwks_kid_unknown/);
+  });
+
+  it("reuses the cached JWKS within the cache window instead of refetching on a second exchange", async () => {
+    const { privateJwk } = await generateFederationKeypair();
+    const env: AuthEnv = { ...baseEnv, authUrl: "https://issuer-cache.test/v1/auth", federationPrivateKey: JSON.stringify(privateJwk) };
+    const trust: PeerTrustConfig = { issuer: env.authUrl, clientId: "cid", clientSecret: "unused-here" };
+    const jwks = federationJwks(env);
+    let jwksFetchCount = 0;
+    const fetcher = (async (input: RequestInfo | URL) => {
+      if (String(input).endsWith("/jwks.json")) {
+        jwksFetchCount += 1;
+        return new Response(JSON.stringify(jwks));
+      }
+      const idToken = await signFederationIdToken(env, "cid", user);
+      return new Response(JSON.stringify({ idToken }));
+    }) as unknown as typeof fetch;
+    await exchangePeerCode(trust, "code-1", "https://consumer.test/v1/auth/peer/callback", fetcher);
+    expect(jwksFetchCount).toBe(1);
+    await exchangePeerCode(trust, "code-2", "https://consumer.test/v1/auth/peer/callback", fetcher);
+    expect(jwksFetchCount).toBe(1); // still cached, no refetch
+  });
 });

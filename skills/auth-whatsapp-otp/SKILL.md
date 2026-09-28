@@ -4,7 +4,7 @@ description: Phone or email sign-in with one-time codes using @softwareseva/auth
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/auth@0.1"
+  packages: "@softwareseva/auth@1.2"
 ---
 
 # One-time codes (WhatsApp, SMS, email)

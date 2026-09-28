@@ -4,7 +4,7 @@ description: Build a directory or admin table screen in React with @softwareseva
 license: MIT
 metadata:
   version: "0.2.0"
-  packages: "@softwareseva/list@0.2 @softwareseva/ui@0.1"
+  packages: "@softwareseva/list@1.2 @softwareseva/ui@1.2"
 ---
 
 # Directory screens

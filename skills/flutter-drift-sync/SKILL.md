@@ -4,7 +4,7 @@ description: Offline-first data in Flutter with Drift and kashi_sync, covering l
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "kashi_sync@0.1 kashi_core@0.1 drift@2.35 drift_flutter@0.3"
+  packages: "kashi_sync@1.2 kashi_core@1.2 drift@2.35 drift_flutter@0.3"
 ---
 
 # Offline-first with Drift

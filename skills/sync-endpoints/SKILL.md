@@ -4,7 +4,7 @@ description: Server side of offline-first sync on Cloudflare Workers + D1 with @
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/sync@0.1 @softwareseva/auth@0.1"
+  packages: "@softwareseva/sync@1.2 @softwareseva/auth@1.2"
 ---
 
 # Sync endpoints

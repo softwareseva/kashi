@@ -4,7 +4,7 @@ description: Facebook Login for web and mobile with @softwareseva/auth, with no 
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/auth@0.2"
+  packages: "@softwareseva/auth@1.2"
 ---
 
 # Facebook sign-in

@@ -4,7 +4,7 @@ description: Add a paginated, searchable, sortable list endpoint on Cloudflare D
 license: MIT
 metadata:
   version: "0.1.0"
-  packages: "@softwareseva/list@0.1 @softwareseva/core@0.1"
+  packages: "@softwareseva/list@1.2 @softwareseva/core@1.2"
 ---
 
 # Lists on D1

@@ -27,7 +27,10 @@ async function issuerJwks(issuer: string, fetcher: typeof fetch): Promise<Jwk[]>
   if (cached && Date.now() - cached.fetchedAt < 3600_000) return cached.keys;
   const res = await fetcher(`${issuer}/federation/.well-known/jwks.json`);
   if (!res.ok) throw new Error("peer_jwks_unavailable");
-  const keys = ((await res.json()) as { keys: Jwk[] }).keys;
+  // The real endpoint wraps its response in the standard { data } envelope (see ok() in
+  // @softwareseva/core/server); unwrap it here rather than expecting a flat body.
+  const body = (await res.json()) as { data?: { keys?: Jwk[] }; keys?: Jwk[] };
+  const keys = body.data?.keys ?? body.keys ?? [];
   jwksCache.set(issuer, { keys, fetchedAt: Date.now() });
   return keys;
 }
@@ -48,7 +51,10 @@ export async function exchangePeerCode(trust: PeerTrustConfig, code: string, red
     body: JSON.stringify({ grant_type: "authorization_code", code, clientId: trust.clientId, clientSecret: trust.clientSecret, redirectUri }),
   });
   if (!res.ok) throw new Error("peer_token_exchange_failed");
-  const { idToken } = (await res.json()) as { idToken?: string };
+  // The real /federation/token endpoint wraps its response in the standard { data } envelope
+  // (see ok() in @softwareseva/core/server); unwrap it here rather than expecting a flat body.
+  const body = (await res.json()) as { data?: { idToken?: string }; idToken?: string };
+  const idToken = body.data?.idToken ?? body.idToken;
   if (!idToken) throw new Error("peer_token_exchange_failed");
   return verifyPeerIdToken(trust, idToken, fetcher);
 }
@@ -58,7 +64,7 @@ async function verifyPeerIdToken(trust: PeerTrustConfig, idToken: string, fetche
   const header = JSON.parse(new TextDecoder().decode(base64UrlToBytes(headerB64 ?? ""))) as { kid?: string; alg?: string };
   if (header.alg !== "RS256") throw new Error("peer_id_token_invalid");
   const keys = await issuerJwks(trust.issuer, fetcher);
-  const jwk = (header.kid ? keys.find((k) => k.kid === header.kid) : keys[0]) ?? keys[0];
+  const jwk = header.kid ? keys.find((k) => k.kid === header.kid) : keys[0];
   if (!jwk) throw new Error("peer_jwks_kid_unknown");
   const payload = await verify(idToken, jwk, "RS256").catch(() => { throw new Error("peer_id_token_invalid"); });
   if (payload.iss !== trust.issuer || payload.aud !== trust.clientId) throw new Error("peer_id_token_wrong_audience");
