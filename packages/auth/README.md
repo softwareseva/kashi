@@ -11,7 +11,7 @@ pnpm add @softwareseva/auth hono zod
 ## What's inside
 
 - **Sessions**: HS256 access tokens (15 min) plus rotating refresh tokens grouped in families with reuse detection. Browsers use `__Host-` cookies with an origin check on mutations; native apps use a bearer token pair. The two transports never cross.
-- **Providers**: password; one-time codes over WhatsApp/SMS/email (you supply the `send` function); Google (web code flow + native ID token); Sign in with Apple (web `form_post` + native identity token); Facebook Login (web code flow + native access token); passkeys (`@simplewebauthn/server`, discoverable sign-in, and a contact-free sign-up that creates the account only once a new passkey verifies); peer sign-in with another kashi site (`providers.peer`, see the `auth-federation` skill) — this site can act as an OIDC-style issuer for other kashi deployments, a consumer of theirs, or both.
+- **Providers**: password; one-time codes over WhatsApp/SMS/email (you supply the `send` function — `renderOtpEmail()` gives you a ready-made subject/text/html for the email channel); Google (web code flow + native ID token); Sign in with Apple (web `form_post` + native identity token); Facebook Login (web code flow + native access token); passkeys (`@simplewebauthn/server`, discoverable sign-in, and a contact-free sign-up that creates the account only once a new passkey verifies); peer sign-in with another kashi site (`providers.peer`, see the `auth-federation` skill) — this site can act as an OIDC-style issuer for other kashi deployments, a consumer of theirs, or both.
 - **Anonymous by default**: passkey sign-up needs no email, phone, or OAuth grant — `POST /passkeys/signup/*` verifies the passkey first and only then creates the account. Nothing in the router requires a "valid id"; gate the handful of actions that do with `requireVerified`, which passes once the user has an OTP-verified email/phone or a linked Google/Apple/Facebook identity.
 - **`@softwareseva/auth/server`**: `authRouter()`, `requireAuth()`, `requireRole()`, `requireVerified()`.
 - **`@softwareseva/auth/react`**: `AuthProvider` + `useAuth`; sign-in hooks `usePasswordSignIn`, `useOtp`, `usePasskeySignIn`, `usePasskeyRegister`, `useOAuthUrl`, `usePeerUrl`; ready-made components `SignIn`, `PasswordSignIn`, `OtpSignIn`, `PasskeyButton`, `OAuthButton`, `PeerSignInButton`, `ErrorAlert`.
@@ -32,6 +32,27 @@ app.get("/v1/admin/stats", requireRole(auth, "admin"), (c) => ok(c, { user: c.ge
 // An action that needs a reachable identity, not just a signed-in device:
 app.post("/v1/payouts", requireVerified(auth), (c) => ok(c, { queued: true }));
 ```
+
+## Email one-time codes
+
+`renderOtpEmail()` builds the subject, plain-text and HTML for an OTP email — no remote images, inline styles only. Wire it into your `send` function:
+
+```ts
+import { renderOtpEmail } from "@softwareseva/auth/server";
+
+providers: {
+  otp: {
+    channel: "email",
+    ttlSeconds: 600,
+    send: async (env, destination, code, c, { purpose, ttlSeconds }) => {
+      const { subject, text, html } = renderOtpEmail({ code, purpose, ttlSeconds, brand: { name: "Acme" } });
+      await sendEmail(env, { to: destination, subject, text, html });
+    },
+  },
+}
+```
+
+The fifth `send` argument (`{ purpose, ttlSeconds }`) is optional to consume — existing four-argument senders keep working unchanged. `purpose` is `"sign-in"` today; `"link"` is supported by the renderer for a future email-link flow.
 
 ## Configuration
 

@@ -28,8 +28,9 @@ export async function requestOtp(c: Context, config: AuthConfig, env: AuthEnv, r
     if (!existing || existing.disabled) return;
   }
   const code = randomDigits(otp.codeLength ?? 6);
-  await store.createOtp(destination, await hmac(`${destination}:${code}`, pepper(env)), futureIso(otp.ttlSeconds ?? 300));
-  await otp.send(env, destination, code, c);
+  const ttlSeconds = otp.ttlSeconds ?? 300;
+  await store.createOtp(destination, await hmac(`${destination}:${code}`, pepper(env)), futureIso(ttlSeconds));
+  await otp.send(env, destination, code, c, { purpose: "sign-in", ttlSeconds });
 }
 
 /** Verify a code; creates the account when allowed. Returns the user for the session step. */

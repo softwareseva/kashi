@@ -45,11 +45,18 @@ export type AuthEnv = {
   federationPrivateKey?: string;
 };
 
+/** What a code was issued for. Passed to `send` so the message can be worded accordingly. */
+export type OtpPurpose = "sign-in" | "link";
+
 export type OtpProviderConfig = {
   /** Where codes go. Phone destinations are normalised to E.164, emails lowercased. */
   channel: "phone" | "email";
-  /** Deliver the code. Throw to fail the request; the code is never logged. */
-  send: (env: AuthEnv, destination: string, code: string, c: Context) => Promise<void>;
+  /**
+   * Deliver the code. Throw to fail the request; the code is never logged.
+   * The fifth argument carries `purpose` and the configured `ttlSeconds` (default 300);
+   * existing four-argument implementations remain valid — JS ignores the extra argument.
+   */
+  send: (env: AuthEnv, destination: string, code: string, c: Context, meta: { purpose: OtpPurpose; ttlSeconds: number }) => Promise<void>;
   /** Create an account for unknown destinations (default true). */
   allowSignUp?: boolean;
   codeLength?: number;
