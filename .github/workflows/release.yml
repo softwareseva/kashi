@@ -13,10 +13,22 @@ jobs:
         with: { node-version: 22, cache: pnpm, registry-url: https://registry.npmjs.org }
       - run: npm install -g npm@latest
       - run: pnpm install --frozen-lockfile
-      - uses: changesets/action@v1
+      - id: changesets
+        uses: changesets/action@v1
         with:
           publish: pnpm run release
           title: "chore: release"
           commit: "chore: release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # After an npm release actually publishes (not just the "Version Packages" PR being
+      # opened/updated), bump every dart/kashi_* package to match and publish those too — the
+      # dart equivalent of `changesets/action`'s publish step, since dart packages don't go
+      # through changesets. See scripts/sync-dart-versions.sh.
+      - name: Sync dart/kashi_* package versions
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          version=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '(map(select(.name == "@softwareseva/core")) | .[0].version) // .[0].version')
+          scripts/sync-dart-versions.sh "$version"
