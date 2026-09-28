@@ -66,6 +66,9 @@ export class AuthStore {
     const r = await this.db.prepare("UPDATE auth_refresh_sessions SET rotated_at = ? WHERE id = ? AND rotated_at IS NULL").bind(nowIso(), id).run();
     return r.meta.changes === 1;
   }
+  async activeFamily(userId: string, familyId: string): Promise<boolean> {
+    return Boolean(await this.db.prepare("SELECT 1 FROM auth_refresh_sessions WHERE user_id = ? AND family_id = ? AND revoked_at IS NULL AND rotated_at IS NULL AND expires_at > ? LIMIT 1").bind(userId, familyId, nowIso()).first());
+  }
   async revokeFamily(familyId: string) { await this.db.prepare("UPDATE auth_refresh_sessions SET revoked_at = ? WHERE family_id = ? AND revoked_at IS NULL").bind(nowIso(), familyId).run(); }
   async revokeByToken(rawToken: string) { await this.db.prepare("UPDATE auth_refresh_sessions SET revoked_at = ? WHERE token_hash = ? AND revoked_at IS NULL").bind(nowIso(), await sha256(rawToken)).run(); }
   async revokeAllForUser(userId: string) { await this.db.prepare("UPDATE auth_refresh_sessions SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL").bind(nowIso(), userId).run(); }

@@ -67,6 +67,8 @@ describe("peer federation: issuer side", () => {
     const payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString());
     expect(payload).toMatchObject({ aud: clientId, sub: "usr_holder_fed" });
     expect(payload.iss).toBe("http://example.com/v1/auth");
+    // hooks.federationClaims (see src/auth.ts) merges app-specific claims into the ID token.
+    expect(payload.example).toBe(clientId);
 
     // 6. A stolen or reused code is rejected.
     expect((await call("/auth/federation/token", { method: "POST", json: { grant_type: "authorization_code", code, clientId, clientSecret, redirectUri } })).body.code).toBe("INVALID_GRANT");
@@ -217,6 +219,11 @@ describe("peer federation: consumer side", () => {
     const identity = await env.DB.prepare("SELECT user_id FROM auth_identities WHERE provider = 'kashi' AND subject = ?")
       .bind("http://example.com/v1/auth|usr_selffed_identity").first<{ user_id: string }>();
     expect(identity).toBeTruthy();
+
+    // hooks.onFederationSession (see src/auth.ts) associates the peer identity with the new local
+    // session's family via ExtensionStore.linkPeer, recorded in auth_peer_sessions.
+    const peerSession = await env.DB.prepare("SELECT user_id, subject FROM auth_peer_sessions WHERE user_id = ?").bind(identity!.user_id).first<{ user_id: string; subject: string }>();
+    expect(peerSession).toMatchObject({ user_id: identity!.user_id, subject: "http://example.com/v1/auth|usr_selffed_identity" });
 
     // Signing in again through the same peer with the same underlying identity must not create a second local user.
     const second = await mintPeerCodeAndState("0", "fedcli_test", issuerSideToken);

@@ -14,6 +14,10 @@ import { exchangePeerCode, peerAuthorizeUrl, signPeerState, verifyPeerState } fr
 import { clearSessionCookies, completeSignIn, issueSession, readRefreshCookie, requireAuth, requireRole, rotateRefreshToken } from "./session";
 import { AuthStore } from "./store";
 import { userForIdentity } from "./users";
+import { ExtensionStore } from "./extensions/store";
+import { multiOtpRouter } from "./extensions/otp";
+import { recoveryRouter } from "./extensions/recovery";
+import { linkingRouter } from "./extensions/linking";
 import type { AuthConfig, AuthEnv, AuthVariables, PeerTrustConfig } from "./types";
 
 type Env = { Bindings: Record<string, unknown>; Variables: AuthVariables & { requestId?: string } };
@@ -43,6 +47,14 @@ const peerTokenBody = z.object({ key: z.string().min(1), code: z.string().min(1)
  *   `POST /federation/clients/:id/revoke` (admin) · `GET /federation/authorize?client_id=&redirect_uri=&state=` ·
  *   `POST /federation/token` · `GET /federation/.well-known/jwks.json`
  * - Peer consumer (this site trusts another kashi site's accounts): `GET /peer/:key/start?next=` · `GET /peer/callback` · `POST /peer/token`
+ *
+ * With `otpChannels` set: `POST /otp/request` · `POST /otp/verify` (sign-in, public) and
+ * `POST /contacts/otp/request` · `POST /contacts/otp/verify` (authenticated contact-link, requires a
+ * recent session) — purpose- and destination-bound, independent of `providers.otp`.
+ *
+ * With `identityExtensions` set: `POST /recovery/codes` (requires a recent session) ·
+ * `POST /recovery/sign-in`, plus (with `providers.google`) `GET /google/link/start?next=` ·
+ * `GET /google/link/callback` for authenticated account linking.
  */
 export function authRouter(config: AuthConfig): Hono<Env> {
   const app = new Hono<Env>();
@@ -50,10 +62,14 @@ export function authRouter(config: AuthConfig): Hono<Env> {
   const auth = requireAuth(config);
   const p = config.providers;
 
+  if (config.otpChannels) app.route("/", multiOtpRouter(config));
+  if (config.identityExtensions) app.route("/", recoveryRouter(config));
+  if (p.google && config.identityExtensions) app.route("/", linkingRouter(config));
+
   app.get("/config", (c) => {
     const e = env(c);
     const peers = (p.peer?.trust ?? []).map((t, i) => ({ key: String(i), label: t.label ?? new URL(t.issuer).host }));
-    return ok(c, { providers: { password: Boolean(p.password), otp: p.otp ? { channel: p.otp.channel } : null, google: Boolean(p.google) && googleConfigured(e), apple: Boolean(p.apple) && appleConfigured(e), facebook: Boolean(p.facebook) && facebookConfigured(e), passkeys: Boolean(p.passkeys), passkeySignUp: Boolean(p.passkeys) && p.passkeys?.allowSignUp !== false, peer: peers } });
+    return ok(c, { providers: { password: Boolean(p.password), otp: p.otp ? { channel: p.otp.channel } : null, otpChannels: Object.keys(config.otpChannels ?? {}), google: Boolean(p.google) && googleConfigured(e), apple: Boolean(p.apple) && appleConfigured(e), facebook: Boolean(p.facebook) && facebookConfigured(e), passkeys: Boolean(p.passkeys), passkeySignUp: Boolean(p.passkeys) && p.passkeys?.allowSignUp !== false, peer: peers } });
   });
   app.get("/me", auth, (c) => ok(c, { user: c.get("user") }));
 
@@ -250,8 +266,14 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       return ok(c, { updated: true });
     });
     app.delete("/passkeys/:id", auth, async (c) => {
-      const store = new AuthStore(env(c).db);
-      const removed = await store.removePasskey(c.req.param("id"), c.get("user").id);
+      const e = env(c);
+      const user = c.get("user");
+      if (config.identityExtensions) {
+        const methods = await new ExtensionStore(e.db).methods(user.id);
+        if (methods && methods.passkeys <= 1 && !methods.recovery && !methods.identities && !methods.email_verified_at && !methods.phone_verified_at)
+          throw new ApiError(409, "LAST_AUTH_METHOD", "Add another authentication method first.");
+      }
+      const removed = await new AuthStore(e.db).removePasskey(c.req.param("id"), user.id);
       if (!removed) throw new ApiError(404, "NOT_FOUND", "Passkey not found.");
       return ok(c, { removed: true });
     });
@@ -272,7 +294,10 @@ export function authRouter(config: AuthConfig): Hono<Env> {
         const e = env(c);
         const input = passkeySignupVerifySchema.parse(await c.req.json());
         const user = await verifyAnonymousRegistration(c, config, e, input);
-        return ok(c, await completeSignIn(c, config, e, user, "passkey", input.transport, input.deviceName), 201);
+        const session = await completeSignIn(c, config, e, user, "passkey", input.transport, input.deviceName);
+        const recoveryCodes = config.identityExtensions && config.recoveryCodesOnSignup ? Array.from({ length: 10 }, () => randomToken(18)) : null;
+        if (recoveryCodes) await new ExtensionStore(e.db).replaceRecovery(user.id, recoveryCodes);
+        return ok(c, { ...session, ...(recoveryCodes ? { recoveryCodes } : {}) }, 201);
       });
     }
   }
@@ -313,18 +338,33 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       if (!revoked) throw new ApiError(404, "NOT_FOUND", "No approved client with that id.");
       return ok(c, { status: "revoked" });
     });
-    app.get("/federation/authorize", auth, async (c) => {
-      const e = env(c);
-      const clientId = c.req.query("client_id") ?? "";
-      const redirectUri = c.req.query("redirect_uri") ?? "";
-      const client = await new AuthStore(e.db).federationClientByClientId(clientId);
-      if (!client || client.status !== "approved" || client.redirect_uri !== redirectUri) throw new ApiError(400, "INVALID_CLIENT", "This client is not registered and approved for that redirect URI.");
-      const code = await new AuthStore(e.db).createFederationCode(clientId, c.get("user").id, redirectUri);
-      const url = new URL(redirectUri);
-      url.searchParams.set("code", code);
-      if (c.req.query("state")) url.searchParams.set("state", c.req.query("state")!);
-      return c.redirect(url.toString());
-    });
+    app.get(
+      "/federation/authorize",
+      async (c, next) => {
+        try {
+          await auth(c as never, async () => {});
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 401 && config.federationLoginPath) {
+            const resume = c.req.path + new URL(c.req.url).search;
+            return c.redirect(`${config.federationLoginPath}?next=${encodeURIComponent(resume)}`);
+          }
+          throw error;
+        }
+        await next();
+      },
+      async (c) => {
+        const e = env(c);
+        const clientId = c.req.query("client_id") ?? "";
+        const redirectUri = c.req.query("redirect_uri") ?? "";
+        const client = await new AuthStore(e.db).federationClientByClientId(clientId);
+        if (!client || client.status !== "approved" || client.redirect_uri !== redirectUri) throw new ApiError(400, "INVALID_CLIENT", "This client is not registered and approved for that redirect URI.");
+        const code = await new AuthStore(e.db).createFederationCode(clientId, c.get("user").id, redirectUri);
+        const url = new URL(redirectUri);
+        url.searchParams.set("code", code);
+        if (c.req.query("state")) url.searchParams.set("state", c.req.query("state")!);
+        return c.redirect(url.toString());
+      },
+    );
     app.post("/federation/token", async (c) => {
       const e = env(c);
       if (!peerIssuerConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "This site is not configured as a federation issuer.");
@@ -336,7 +376,8 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       if (!grant || grant.clientId !== input.clientId || grant.redirectUri !== input.redirectUri) throw new ApiError(400, "INVALID_GRANT", "This authorization code is invalid or has expired.");
       const user = await store.userById(grant.userId);
       if (!user) throw new ApiError(401, "UNAUTHORIZED", "This account is no longer active.");
-      return ok(c, { idToken: await signFederationIdToken(e, input.clientId, user) });
+      const extraClaims = (await config.hooks?.federationClaims?.(user, input.clientId, c, e)) ?? {};
+      return ok(c, { idToken: await signFederationIdToken(e, input.clientId, user, extraClaims) });
     });
     app.get("/federation/.well-known/jwks.json", (c) => {
       const e = env(c);
@@ -369,7 +410,11 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       try {
         const profile = await exchangePeerCode(trust, code, redirectUri(e));
         const user = await userForIdentity(c, config, e, "kashi", profile, trust.allowSignUp !== false);
-        await completeSignIn(c, config, e, user, "kashi", "cookie");
+        const familyId = crypto.randomUUID();
+        const adjusted = (await config.hooks?.beforeSession?.(user, "kashi", c)) ?? user;
+        await config.hooks?.onFederationSession?.(adjusted, { subject: profile.subject }, familyId, c, e);
+        await config.hooks?.onSignIn?.(adjusted, "kashi", c);
+        await issueSession(c, config, e, adjusted, "cookie", familyId);
         return c.redirect(`${e.appOrigin}${state.next}`);
       } catch {
         return fail("OAUTH_FAILED");

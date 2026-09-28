@@ -2,6 +2,7 @@
 import type { Context } from "hono";
 import { ApiError } from "@softwareseva/core/server";
 import { AuthStore } from "./store";
+import { ExtensionStore } from "./extensions/store";
 import type { AuthConfig, AuthEnv, AuthUser } from "./types";
 
 const disabled = () => new ApiError(403, "ACCOUNT_DISABLED", "This account is disabled.");
@@ -12,20 +13,30 @@ export async function createUser(c: Context, config: AuthConfig, env: AuthEnv, p
   return user;
 }
 
-/** Resolve a verified external profile (google/apple) to a user: by identity, then by verified email, else create. */
+/**
+ * Resolve a verified external profile (google/apple/facebook/peer) to a user: by identity, then
+ * by verified email, else create. `config.autoLinkVerifiedEmail` (default true) controls the
+ * middle step: when explicitly `false`, a verified-email match is treated as a collision the
+ * user must resolve by signing in and linking explicitly, instead of being linked silently.
+ */
 export async function userForIdentity(c: Context, config: AuthConfig, env: AuthEnv, provider: string, profile: { subject: string; email: string | null; emailVerified: boolean; name: string | null }, allowSignUp: boolean): Promise<AuthUser> {
   const store = new AuthStore(env.db);
   const byIdentity = await store.userByIdentity(provider, profile.subject);
   if (byIdentity) { if (byIdentity.disabled) throw disabled(); return byIdentity.user; }
-  if (profile.email && profile.emailVerified) {
+  if (config.autoLinkVerifiedEmail !== false && profile.email && profile.emailVerified) {
     const byEmail = await store.userByEmail(profile.email);
     if (byEmail) {
       if (byEmail.disabled) throw disabled();
       await store.linkIdentity(byEmail.user.id, provider, profile.subject, profile.email);
       await store.markVerified(byEmail.user.id, "email");
       if (profile.name) await store.setName(byEmail.user.id, profile.name);
+      if (config.identityExtensions) await new ExtensionStore(env.db).recordAlias("email", profile.email, byEmail.user.id);
       return (await store.userById(byEmail.user.id)) ?? byEmail.user;
     }
+  }
+  if (config.autoLinkVerifiedEmail === false && profile.email && profile.emailVerified) {
+    const collision = (await store.userByEmail(profile.email)) || (config.identityExtensions ? Boolean(await new ExtensionStore(env.db).contactOwner("email", profile.email)) : false);
+    if (collision) throw new ApiError(409, "ACCOUNT_MERGE_REQUIRED", "Sign in to your existing account and explicitly link this identity.");
   }
   if (!allowSignUp) throw new ApiError(403, "SIGN_UP_DISABLED", "No account exists for this identity.");
   const user = await createUser(c, config, env, provider, { name: profile.name ?? profile.email ?? "User", email: profile.emailVerified ? profile.email : null, emailVerified: profile.emailVerified });

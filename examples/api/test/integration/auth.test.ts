@@ -18,7 +18,7 @@ const lastCode = async (destination: string) => (await env.DB.prepare("SELECT bo
 describe("auth config", () => {
   it("reports providers; unconfigured OAuth is reported as disabled", async () => {
     const { body } = await call("/auth/config");
-    expect(body.data.providers).toMatchObject({ password: true, otp: { channel: "phone" }, google: false, apple: false, facebook: false, passkeys: true, passkeySignUp: true });
+    expect(body.data.providers).toMatchObject({ password: true, otp: { channel: "phone" }, otpChannels: ["email"], google: true, apple: false, facebook: false, passkeys: true, passkeySignUp: true });
   });
 });
 
@@ -133,9 +133,13 @@ describe("requireVerified", () => {
     await env.DB.batch([
       env.DB.prepare("INSERT INTO auth_users(id, display_name, roles, created_at, updated_at) VALUES ('usr_anon', 'Anon', '[\"user\"]', '2026-01-01', '2026-01-01')"),
       env.DB.prepare("INSERT INTO auth_passkeys(id, user_id, credential_id, public_key, counter, device_name, rp_id, created_at) VALUES ('pk_anon', 'usr_anon', 'cred_anon', 'pub', 0, 'This device', 'localhost', '2026-01-01')"),
+      // `enforceSessionRevocation` (on in this example's authConfig) requires the access token's
+      // family (`sid`) to still be an active, unrevoked refresh session — seed one directly since
+      // this token is hand-signed rather than issued through a real sign-in flow.
+      env.DB.prepare("INSERT INTO auth_refresh_sessions(id, user_id, family_id, token_hash, expires_at, created_at) VALUES ('rs_anon', 'usr_anon', 'fam_anon', 'unused', '2099-01-01', '2026-01-01')"),
     ]);
     const e = resolveEnv(authConfig, env as unknown as Record<string, unknown>);
-    const anonToken = await signAccessToken(authConfig, e, { id: "usr_anon", name: "Anon", email: null, phone: null, roles: ["user"], emailVerifiedAt: null, phoneVerifiedAt: null });
+    const anonToken = await signAccessToken(authConfig, e, { id: "usr_anon", name: "Anon", email: null, phone: null, roles: ["user"], emailVerifiedAt: null, phoneVerifiedAt: null }, "fam_anon");
     const anonAttempt = await call("/account/payout-details", { headers: { Authorization: `Bearer ${anonToken}` } });
     expect(anonAttempt.status).toBe(403);
     expect(anonAttempt.body.code).toBe("IDENTITY_REQUIRED");

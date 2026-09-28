@@ -10,7 +10,7 @@ import type { AuthConfig, AuthEnv, AuthUser, AuthVariables, SessionPair, Transpo
 export const DEFAULT_ACCESS_TTL = 15 * 60;
 export const DEFAULT_REFRESH_TTL = 30 * 24 * 3600;
 
-export type AccessClaims = { sub: string; name: string; roles: string[]; iss: string; aud: string; iat: number; exp: number };
+export type AccessClaims = { sub: string; name: string; roles: string[]; iss: string; aud: string; iat: number; exp: number; sid?: string };
 
 const cookieNames = (config: AuthConfig, env: AuthEnv) => ({
   access: config.cookieNames?.access ?? (env.secureCookies ? "__Host-access" : "access"),
@@ -18,9 +18,10 @@ const cookieNames = (config: AuthConfig, env: AuthEnv) => ({
 });
 const cookieOptions = (env: AuthEnv) => ({ httpOnly: true, secure: env.secureCookies, sameSite: "Lax" as const, path: "/" });
 
-export async function signAccessToken(config: AuthConfig, env: AuthEnv, user: AuthUser): Promise<string> {
+export async function signAccessToken(config: AuthConfig, env: AuthEnv, user: AuthUser, familyId?: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const claims: AccessClaims = { sub: user.id, name: user.name, roles: user.roles, iss: env.issuer, aud: env.audience, iat: now, exp: now + (config.accessTtlSeconds ?? DEFAULT_ACCESS_TTL) };
+  if (familyId) claims.sid = familyId;
   return sign(claims, env.jwtSecret, "HS256");
 }
 
@@ -35,7 +36,7 @@ export async function verifyAccessToken(env: AuthEnv, token: string): Promise<Ac
 
 /** Mint an access token and persist a refresh session. Transport-agnostic. */
 export async function issueTokenPair(config: AuthConfig, env: AuthEnv, user: AuthUser, familyId: string = crypto.randomUUID(), deviceName: string | null = null): Promise<SessionPair> {
-  const accessToken = await signAccessToken(config, env, user);
+  const accessToken = await signAccessToken(config, env, user, familyId);
   const refreshToken = randomToken(48);
   await new AuthStore(env.db).createRefresh(user.id, familyId, refreshToken, futureIso(config.refreshTtlSeconds ?? DEFAULT_REFRESH_TTL), deviceName);
   return { accessToken, refreshToken, expiresIn: config.accessTtlSeconds ?? DEFAULT_ACCESS_TTL, familyId };
@@ -80,7 +81,7 @@ export const readRefreshCookie = (c: Context, config: AuthConfig, env: AuthEnv) 
 const bearer = (c: Context) => { const h = c.req.header("Authorization"); return h?.toLowerCase().startsWith("bearer ") ? h.slice(7).trim() : null; };
 
 /** Origin check for cookie-authenticated state-changing requests (CSRF). */
-function assertSameOrigin(c: Context, env: AuthEnv) {
+export function assertSameOrigin(c: Context, env: AuthEnv) {
   if (["GET", "HEAD", "OPTIONS"].includes(c.req.method)) return;
   const origin = c.req.header("Origin") ?? (c.req.header("Referer") ? new URL(c.req.header("Referer")!).origin : null);
   const fetchSite = c.req.header("Sec-Fetch-Site");
@@ -102,6 +103,9 @@ export function requireAuth(config: AuthConfig): MiddlewareHandler<{ Variables: 
     if (transport === "cookie") assertSameOrigin(c, env);
     const user = await new AuthStore(env.db).userById(claims.sub);
     if (!user) throw new ApiError(401, "UNAUTHORIZED", "Your account is no longer active.");
+    if (config.enforceSessionRevocation && (!claims.sid || !(await new AuthStore(env.db).activeFamily(user.id, claims.sid))))
+      throw new ApiError(401, "UNAUTHORIZED", "Session revoked.");
+    await config.hooks?.validateSession?.(user, claims.sid, c, env);
     c.set("user", user);
     c.set("sessionTransport", transport);
     await next();
