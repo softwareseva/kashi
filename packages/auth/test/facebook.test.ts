@@ -1,15 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { facebookAuthorizeUrl, signOAuthState, verifyFacebookAccessToken, verifyOAuthState } from "../src/server/providers/facebook";
+import { facebookAuthorizeUrl, verifyFacebookAccessToken } from "../src/server/providers/facebook";
 import type { AuthEnv } from "../src/server/types";
 
 const env: AuthEnv = { db: null as never, jwtSecret: "secret", issuer: "i", audience: "a", origins: ["https://app.test"], appOrigin: "https://app.test", authUrl: "https://api.test/v1/auth", secureCookies: true, facebookClientId: "cid", facebookClientSecret: "cs" };
 
 describe("facebook", () => {
-  it("round-trips signed state and rejects tampering", async () => {
-    const token = await signOAuthState(env, { next: "/dash", transport: "cookie" });
-    expect(await verifyOAuthState(env, token)).toEqual({ next: "/dash", transport: "cookie" });
-    expect(await verifyOAuthState({ ...env, jwtSecret: "other" }, token)).toBeNull();
-  });
   it("builds the authorize url", () => {
     const url = new URL(facebookAuthorizeUrl(env, "https://api.test/v1/auth/facebook/callback", "st"));
     expect(url.searchParams.get("client_id")).toBe("cid");

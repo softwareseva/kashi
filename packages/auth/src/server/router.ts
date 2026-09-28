@@ -5,16 +5,17 @@ import { ApiError, newId, ok, randomToken, rateLimit, safeEqual, sha256Hex } fro
 import { resolveEnv } from "./env";
 import { changePassword, passwordChangeSchema, passwordSignInSchema, authenticatePassword, normalizeIdentifier } from "./providers/password";
 import { otpRequestSchema, otpVerifySchema, requestOtp, verifyOtp } from "./providers/otp";
-import { exchangeGoogleCode, googleAuthorizeUrl, googleConfigured, safeNext, signOAuthState, verifyGoogleIdToken, verifyOAuthState } from "./providers/google";
+import { exchangeGoogleCode, googleAuthorizeUrl, googleConfigured, safeNext, verifyGoogleIdToken } from "./providers/google";
 import { appleAuthorizeUrl, appleConfigured, appleNameFromUserJson, exchangeAppleCode, verifyAppleIdToken } from "./providers/apple";
-import { exchangeFacebookCode, facebookAuthorizeUrl, facebookConfigured, verifyFacebookAccessToken, signOAuthState as signFacebookState, verifyOAuthState as verifyFacebookState } from "./providers/facebook";
+import { exchangeFacebookCode, facebookAuthorizeUrl, facebookConfigured, verifyFacebookAccessToken } from "./providers/facebook";
 import { anonymousRegistrationOptions, authenticationOptions, passkeySignupVerifySchema, passkeyAuthVerifySchema, passkeyRegisterVerifySchema, passkeyRenameSchema, registrationOptions, verifyAnonymousRegistration, verifyAuthentication, verifyRegistration } from "./providers/passkeys";
 import { federationJwks, peerIssuerConfigured, signFederationIdToken } from "./providers/peer-issuer";
-import { exchangePeerCode, peerAuthorizeUrl, signPeerState, verifyPeerState } from "./providers/peer-consumer";
+import { exchangePeerCode, peerAuthorizeUrl } from "./providers/peer-consumer";
 import { clearSessionCookies, completeSignIn, issueSession, readRefreshCookie, requireAuth, requireRole, rotateRefreshToken } from "./session";
 import { AuthStore } from "./store";
 import { userForIdentity } from "./users";
 import { ExtensionStore } from "./extensions/store";
+import { boundState, consumeBoundState } from "./extensions/browser-state";
 import { multiOtpRouter } from "./extensions/otp";
 import { recoveryRouter } from "./extensions/recovery";
 import { linkingRouter } from "./extensions/linking";
@@ -146,13 +147,13 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       const e = env(c);
       if (!googleConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "Google sign-in is not configured.");
       if (!e.authUrl) throw new Error("@softwareseva/auth: AUTH_URL must be the public URL of this router, e.g. https://api.example.com/v1/auth");
-      const state = await signOAuthState(e, { next: safeNext(c.req.query("next")), transport: "cookie" });
+      const state = await boundState(c, e, "google-signin", { next: safeNext(c.req.query("next")) });
       return c.redirect(googleAuthorizeUrl(e, redirectUri(e), state));
     });
     app.get("/google/callback", async (c) => {
       const e = env(c);
       const fail = (code: string) => c.redirect(`${e.appOrigin}/sign-in?error=${code}`);
-      const state = await verifyOAuthState(e, c.req.query("state") ?? "");
+      const state = await consumeBoundState<{ next: string }>(c, e, "google-signin", c.req.query("state") ?? "");
       if (!state) return fail("OAUTH_STATE_INVALID");
       if (c.req.query("error")) return fail("OAUTH_CANCELLED");
       const code = c.req.query("code");
@@ -182,15 +183,17 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       const e = env(c);
       if (!appleConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "Sign in with Apple is not configured.");
       if (!e.authUrl) throw new Error("@softwareseva/auth: AUTH_URL must be the public URL of this router.");
-      const state = await signOAuthState(e, { next: safeNext(c.req.query("next")), transport: "cookie" });
+      const state = await boundState(c, e, "apple-signin", { next: safeNext(c.req.query("next")) }, { crossSite: true });
       return c.redirect(appleAuthorizeUrl(e, redirectUri(e), state));
     });
-    // Apple posts a form (response_mode=form_post); the browser lands here cross-site, so the session cookie must be SameSite=Lax and set on this response.
+    // Apple posts a form (response_mode=form_post); the browser lands here cross-site, so the
+    // state-binding cookie must be SameSite=None; Secure or it never arrives on this request.
+    // The session cookie set after sign-in stays SameSite=Lax (issueSession/completeSignIn).
     app.post("/apple/callback", async (c) => {
       const e = env(c);
       const fail = (code: string) => c.redirect(`${e.appOrigin}/sign-in?error=${code}`);
       const form = await c.req.parseBody();
-      const state = await verifyOAuthState(e, String(form.state ?? ""));
+      const state = await consumeBoundState<{ next: string }>(c, e, "apple-signin", String(form.state ?? ""), { crossSite: true });
       if (!state) return fail("OAUTH_STATE_INVALID");
       if (form.error) return fail("OAUTH_CANCELLED");
       const code = typeof form.code === "string" ? form.code : null;
@@ -223,13 +226,13 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       const e = env(c);
       if (!facebookConfigured(e)) throw new ApiError(503, "PROVIDER_DISABLED", "Facebook sign-in is not configured.");
       if (!e.authUrl) throw new Error("@softwareseva/auth: AUTH_URL must be the public URL of this router, e.g. https://api.example.com/v1/auth");
-      const state = await signFacebookState(e, { next: safeNext(c.req.query("next")), transport: "cookie" });
+      const state = await boundState(c, e, "facebook-signin", { next: safeNext(c.req.query("next")) });
       return c.redirect(facebookAuthorizeUrl(e, redirectUri(e), state));
     });
     app.get("/facebook/callback", async (c) => {
       const e = env(c);
       const fail = (code: string) => c.redirect(`${e.appOrigin}/sign-in?error=${code}`);
-      const state = await verifyFacebookState(e, c.req.query("state") ?? "");
+      const state = await consumeBoundState<{ next: string }>(c, e, "facebook-signin", c.req.query("state") ?? "");
       if (!state) return fail("OAUTH_STATE_INVALID");
       if (c.req.query("error")) return fail("OAUTH_CANCELLED");
       const code = c.req.query("code");
@@ -396,13 +399,13 @@ export function authRouter(config: AuthConfig): Hono<Env> {
       const trust = trustByKey(key);
       if (!trust) throw new ApiError(404, "NOT_FOUND", "Unknown peer.");
       if (!e.authUrl) throw new Error("@softwareseva/auth: AUTH_URL must be the public URL of this router, e.g. https://api.example.com/v1/auth");
-      const state = await signPeerState(e, { key, next: safeNext(c.req.query("next")) });
+      const state = await boundState(c, e, "peer-signin", { key, next: safeNext(c.req.query("next")) });
       return c.redirect(peerAuthorizeUrl(trust, redirectUri(e), state));
     });
     app.get("/peer/callback", async (c) => {
       const e = env(c);
       const fail = (code: string) => c.redirect(`${e.appOrigin}/sign-in?error=${code}`);
-      const state = await verifyPeerState(e, c.req.query("state") ?? "");
+      const state = await consumeBoundState<{ key: string; next: string }>(c, e, "peer-signin", c.req.query("state") ?? "");
       if (!state) return fail("OAUTH_STATE_INVALID");
       const trust = trustByKey(state.key);
       const code = c.req.query("code");

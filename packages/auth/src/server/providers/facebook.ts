@@ -1,25 +1,10 @@
-/** Facebook Login: web authorization-code flow with a signed state, and native access-token verification via the Graph API. */
-import { sign, verify } from "hono/jwt";
+/** Facebook Login: web authorization-code flow with browser-bound state, and native access-token verification via the Graph API. */
 import type { AuthEnv } from "../types";
 
-const STATE_TYP = "facebook_oauth_state";
 const GRAPH_VERSION = "v21.0";
-export type OAuthState = { next: string; transport: "cookie" };
 export type FacebookProfile = { subject: string; email: string | null; emailVerified: boolean; name: string | null };
 
 export function facebookConfigured(env: AuthEnv) { return Boolean(env.facebookClientId && env.facebookClientSecret); }
-
-export async function signOAuthState(env: AuthEnv, state: OAuthState): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  return sign({ typ: STATE_TYP, ...state, iss: env.issuer, aud: env.audience, iat: now, exp: now + 600 }, env.jwtSecret, "HS256");
-}
-
-export async function verifyOAuthState(env: AuthEnv, token: string): Promise<OAuthState | null> {
-  try {
-    const p = await verify(token, env.jwtSecret, { alg: "HS256", iss: env.issuer, aud: env.audience });
-    return p.typ === STATE_TYP && typeof p.next === "string" ? { next: p.next, transport: "cookie" } : null;
-  } catch { return null; }
-}
 
 export function facebookAuthorizeUrl(env: AuthEnv, redirectUri: string, state: string): string {
   const url = new URL(`https://www.facebook.com/${GRAPH_VERSION}/dialog/oauth`);

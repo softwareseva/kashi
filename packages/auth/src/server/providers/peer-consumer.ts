@@ -1,24 +1,10 @@
 /** Consuming another kashi site's identities: authorize redirect, code→ID-token exchange, JWKS verification. No SDK, no shared secret with any other provider. */
-import { sign, verify } from "hono/jwt";
+import { verify } from "hono/jwt";
 import { base64UrlToBytes } from "@softwareseva/core/server";
-import type { AuthEnv, PeerTrustConfig } from "../types";
+import type { PeerTrustConfig } from "../types";
 
-const STATE_TYP = "peer_oauth_state";
-export type PeerState = { key: string; next: string };
 export type FederationProfile = { subject: string; email: string | null; emailVerified: boolean; name: string | null };
 type Jwk = JsonWebKey & { kid?: string };
-
-export async function signPeerState(env: AuthEnv, state: PeerState): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  return sign({ typ: STATE_TYP, ...state, iss: env.issuer, aud: env.audience, iat: now, exp: now + 600 }, env.jwtSecret, "HS256");
-}
-
-export async function verifyPeerState(env: AuthEnv, token: string): Promise<PeerState | null> {
-  try {
-    const p = await verify(token, env.jwtSecret, { alg: "HS256", iss: env.issuer, aud: env.audience });
-    return p.typ === STATE_TYP && typeof p.key === "string" && typeof p.next === "string" ? { key: p.key, next: p.next } : null;
-  } catch { return null; }
-}
 
 const jwksCache = new Map<string, { keys: Jwk[]; fetchedAt: number }>();
 
