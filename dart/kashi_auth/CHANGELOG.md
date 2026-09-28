@@ -1,3 +1,7 @@
+## 1.5.0
+
+- No functional changes; version bump to stay in lockstep with the npm packages. `@softwareseva/auth` 1.5.0's opt-in identity extensions (multi-channel OTP, account linking, recovery codes, session revocation, federation hooks) are all server-side config and new HTTP routes — none of it touches this client.
+
 ## 1.4.0
 
 - No functional changes; version bump to stay in lockstep with the npm packages (jumping straight from 1.2.0 to 1.4.0 — the intervening `@softwareseva/auth` 1.3.0 peer-federation fixes and 1.4.0 `renderOtpEmail()` addition are both server-only and don't touch this client).

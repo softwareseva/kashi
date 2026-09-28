@@ -1,3 +1,7 @@
+## 1.5.0
+
+- No functional changes; version bump to stay in lockstep with the npm packages (the 1.5.0 `@softwareseva/auth` identity-extensions release has no changes for this package either).
+
 ## 1.4.0
 
 - No functional changes; version bump to stay in lockstep with the npm packages (jumping straight from 1.2.0 to 1.4.0 — the intervening npm releases had no changes for this package either).
