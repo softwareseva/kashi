@@ -1,3 +1,7 @@
+## 1.4.0
+
+- No functional changes; version bump to stay in lockstep with the npm packages (jumping straight from 1.2.0 to 1.4.0 — the intervening npm releases had no changes for this package either).
+
 ## 1.2.0
 
 - No functional changes; version aligned with the fixed npm release group and the other kashi_* packages.
