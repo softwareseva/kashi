@@ -8,9 +8,10 @@ type Jwk = JsonWebKey & { kid?: string };
 
 const jwksCache = new Map<string, { keys: Jwk[]; fetchedAt: number }>();
 
-async function issuerJwks(issuer: string, fetcher: typeof fetch): Promise<Jwk[]> {
+/** `force` skips the hour-long cache, for a kid the cached set doesn't know (the issuer rotated keys). */
+async function issuerJwks(issuer: string, fetcher: typeof fetch, force = false): Promise<Jwk[]> {
   const cached = jwksCache.get(issuer);
-  if (cached && Date.now() - cached.fetchedAt < 3600_000) return cached.keys;
+  if (cached && !force && Date.now() - cached.fetchedAt < 3600_000) return cached.keys;
   const res = await fetcher(`${issuer}/federation/.well-known/jwks.json`);
   if (!res.ok) throw new Error("peer_jwks_unavailable");
   // The real endpoint wraps its response in the standard { data } envelope (see ok() in
@@ -49,8 +50,10 @@ async function verifyPeerIdToken(trust: PeerTrustConfig, idToken: string, fetche
   const [headerB64] = idToken.split(".");
   const header = JSON.parse(new TextDecoder().decode(base64UrlToBytes(headerB64 ?? ""))) as { kid?: string; alg?: string };
   if (header.alg !== "RS256") throw new Error("peer_id_token_invalid");
-  const keys = await issuerJwks(trust.issuer, fetcher);
-  const jwk = header.kid ? keys.find((k) => k.kid === header.kid) : keys[0];
+  const pick = (keys: Jwk[]) => (header.kid ? keys.find((k) => k.kid === header.kid) : keys[0]);
+  let jwk = pick(await issuerJwks(trust.issuer, fetcher));
+  // The issuer may have rotated keys since we cached them: refetch once before giving up.
+  if (!jwk && header.kid) jwk = pick(await issuerJwks(trust.issuer, fetcher, true));
   if (!jwk) throw new Error("peer_jwks_kid_unknown");
   const payload = await verify(idToken, jwk, "RS256").catch(() => { throw new Error("peer_id_token_invalid"); });
   if (payload.iss !== trust.issuer || payload.aud !== trust.clientId) throw new Error("peer_id_token_wrong_audience");

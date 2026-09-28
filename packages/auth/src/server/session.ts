@@ -86,7 +86,8 @@ export function clearSessionCookies(c: Context, config: AuthConfig, env: AuthEnv
 
 export const readRefreshCookie = (c: Context, config: AuthConfig, env: AuthEnv) => getCookie(c, cookieNames(config, env).refresh);
 
-const bearer = (c: Context) => { const h = c.req.header("Authorization"); return h?.toLowerCase().startsWith("bearer ") ? h.slice(7).trim() : null; };
+/** The bearer token from `Authorization`, matching the scheme case-insensitively (RFC 7235). */
+export const bearer = (c: Context) => { const h = c.req.header("Authorization"); return h?.toLowerCase().startsWith("bearer ") ? h.slice(7).trim() : null; };
 
 /** Origin check for cookie-authenticated state-changing requests (CSRF). */
 export function assertSameOrigin(c: Context, env: AuthEnv) {

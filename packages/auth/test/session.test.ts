@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { verify } from "hono/jwt";
-import { signAccessToken } from "../src/server/session";
+import { Hono } from "hono";
+import { bearer, signAccessToken } from "../src/server/session";
 import type { AuthConfig, AuthEnv, AuthUser } from "../src/server/types";
 
 const env: AuthEnv = { db: null as never, jwtSecret: "secret", issuer: "i", audience: "a", origins: [], appOrigin: "https://app.test", authUrl: "https://app.test/v1/auth", secureCookies: true };
@@ -18,5 +19,14 @@ describe("signAccessToken", () => {
     const token = await signAccessToken(config, env, user);
     const claims = await verify(token, env.jwtSecret, { alg: "HS256", iss: env.issuer, aud: env.audience });
     expect(claims.sid).toBeUndefined();
+  });
+});
+
+describe("bearer", () => {
+  it("matches the Authorization scheme case-insensitively, as requireAuth and requireRecent both rely on", async () => {
+    const app = new Hono().get("/", (c) => c.json({ token: bearer(c) }));
+    for (const scheme of ["Bearer", "bearer", "BEARER"])
+      expect(await (await app.request("/", { headers: { Authorization: `${scheme} tok_1` } })).json()).toEqual({ token: "tok_1" });
+    expect(await (await app.request("/", { headers: { Authorization: "Basic abc" } })).json()).toEqual({ token: null });
   });
 });
