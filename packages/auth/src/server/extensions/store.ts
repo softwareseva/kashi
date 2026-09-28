@@ -13,14 +13,30 @@ export class ExtensionStore {
       this.db.prepare("INSERT INTO auth_bound_otp(id,channel,purpose,destination,user_id,code_hash,expires_at,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(newId("otp"), channel, purpose, destination, userId, hash, expires, nowIso()),
     ]);
   }
-  otp(channel: string, purpose: string, destination: string, userId: string) {
-    return this.db.prepare("SELECT id,code_hash,attempts,expires_at FROM auth_bound_otp WHERE channel=? AND purpose=? AND destination=? AND user_id=? AND consumed_at IS NULL ORDER BY created_at DESC LIMIT 1").bind(channel, purpose, destination, userId).first<BoundOtp>();
+  /**
+   * Atomically claims one verification attempt against the latest unconsumed, unexpired code for
+   * this (channel, purpose, destination, user): increments `attempts` and returns the hash to
+   * compare against, but only when `attempts < maxAttempts`. A single UPDATE (the row is picked by
+   * the subquery, then the WHERE guard applies to that same row) so concurrent guesses can't all
+   * read "attempts still under the limit" and all slip through before any of them lands its
+   * increment.
+   */
+  async claimOtpAttempt(channel: string, purpose: string, destination: string, userId: string, maxAttempts: number): Promise<Pick<BoundOtp, "id" | "code_hash"> | null> {
+    return (
+      await this.db
+        .prepare(
+          `UPDATE auth_bound_otp SET attempts=attempts+1
+           WHERE id=(SELECT id FROM auth_bound_otp WHERE channel=? AND purpose=? AND destination=? AND user_id=? AND consumed_at IS NULL ORDER BY created_at DESC LIMIT 1)
+             AND attempts<? AND expires_at>?
+           RETURNING id,code_hash`,
+        )
+        .bind(channel, purpose, destination, userId, maxAttempts, nowIso())
+        .first<Pick<BoundOtp, "id" | "code_hash">>()
+    ) ?? null;
   }
-  async failOtp(id: string) {
-    await this.db.prepare("UPDATE auth_bound_otp SET attempts=attempts+1 WHERE id=? AND consumed_at IS NULL").bind(id).run();
-  }
-  async consumeOtp(id: string, maxAttempts: number) {
-    return (await this.db.prepare("UPDATE auth_bound_otp SET consumed_at=? WHERE id=? AND consumed_at IS NULL AND attempts<? AND expires_at>?").bind(nowIso(), id, maxAttempts, nowIso()).run()).meta.changes === 1;
+  /** Consumes exactly once; returns false when already consumed (e.g. raced by a concurrent verify), so callers must reject the request rather than complete it twice. */
+  async consumeOtp(id: string) {
+    return (await this.db.prepare("UPDATE auth_bound_otp SET consumed_at=? WHERE id=? AND consumed_at IS NULL").bind(nowIso(), id).run()).meta.changes === 1;
   }
 
   // ----- contact aliases (populated by attachContact / linkGoogle / recordAlias so contactOwner sees them) -----

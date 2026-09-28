@@ -5,7 +5,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { ApiError, consumeRateLimit, clientIp, sha256, normalizeEmail, normalizePhone, randomDigits, hmac, safeEqual, futureIso, nowIso, ok } from "@softwareseva/core/server";
+import { ApiError, consumeRateLimit, clientIp, sha256, normalizeEmail, normalizePhone, randomDigits, hmac, safeEqual, futureIso, ok } from "@softwareseva/core/server";
 import { resolveEnv } from "../env";
 import { AuthStore } from "../store";
 import { createUser } from "../users";
@@ -61,14 +61,12 @@ export function multiOtpRouter(config: AuthConfig) {
           await provider.send(env, destination, code, c, { purpose, ttlSeconds });
           return ok(c, { sent: true });
         }
-        const row = await store.otp(body.channel, purpose, destination, userId);
-        if (!row || !body.code || row.attempts >= maxAttempts || row.expires_at <= nowIso())
-          throw new ApiError(401, "INVALID_CODE", "Invalid or expired code.");
+        const row = await store.claimOtpAttempt(body.channel, purpose, destination, userId, maxAttempts);
+        if (!row || !body.code) throw new ApiError(401, "INVALID_CODE", "Invalid or expired code.");
         if (!safeEqual(row.code_hash, await hmac(`${binding}:${body.code}`, env.otpPepper))) {
-          await store.failOtp(row.id);
           throw new ApiError(401, "INVALID_CODE", "Invalid or expired code.");
         }
-        if (!(await store.consumeOtp(row.id, maxAttempts))) throw new ApiError(401, "INVALID_CODE", "Invalid or expired code.");
+        if (!(await store.consumeOtp(row.id))) throw new ApiError(401, "INVALID_CODE", "Invalid or expired code.");
         const aliasId = await store.contactOwner(body.channel, destination);
         const aliasUser = aliasId ? await auth.userById(aliasId) : null;
         if (aliasId && !aliasUser) throw new ApiError(403, "ACCOUNT_DISABLED", "Account disabled.");

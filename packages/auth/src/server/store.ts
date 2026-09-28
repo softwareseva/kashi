@@ -81,11 +81,30 @@ export class AuthStore {
       this.db.prepare("INSERT INTO auth_otp_codes(id, destination, code_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?)").bind(newId("otp"), destination, codeHash, expiresAt, now),
     ]);
   }
-  async latestOtp(destination: string) {
-    return this.db.prepare("SELECT id, code_hash, attempts, expires_at FROM auth_otp_codes WHERE destination = ? AND consumed_at IS NULL ORDER BY created_at DESC LIMIT 1").bind(destination).first<{ id: string; code_hash: string; attempts: number; expires_at: string }>();
+  /**
+   * Atomically claims one verification attempt against the destination's latest unconsumed,
+   * unexpired code: increments `attempts` and returns the hash to compare against, but only when
+   * `attempts < maxAttempts`. A single UPDATE (the row is picked by the subquery, then the WHERE
+   * guard applies to that same row) so concurrent guesses can't all read "attempts still under the
+   * limit" and all slip through before any of them lands its increment.
+   */
+  async claimOtpAttempt(destination: string, maxAttempts: number): Promise<{ id: string; code_hash: string } | null> {
+    return (
+      await this.db
+        .prepare(
+          `UPDATE auth_otp_codes SET attempts = attempts + 1
+           WHERE id = (SELECT id FROM auth_otp_codes WHERE destination = ? AND consumed_at IS NULL ORDER BY created_at DESC LIMIT 1)
+             AND attempts < ? AND expires_at > ?
+           RETURNING id, code_hash`,
+        )
+        .bind(destination, maxAttempts, nowIso())
+        .first<{ id: string; code_hash: string }>()
+    ) ?? null;
   }
-  async failOtp(id: string) { await this.db.prepare("UPDATE auth_otp_codes SET attempts = attempts + 1 WHERE id = ?").bind(id).run(); }
-  async consumeOtp(id: string) { await this.db.prepare("UPDATE auth_otp_codes SET consumed_at = ? WHERE id = ?").bind(nowIso(), id).run(); }
+  /** Consumes exactly once; returns false when already consumed (e.g. raced by a concurrent verify), so callers must reject the request rather than complete it twice. */
+  async consumeOtp(id: string): Promise<boolean> {
+    return (await this.db.prepare("UPDATE auth_otp_codes SET consumed_at = ? WHERE id = ? AND consumed_at IS NULL").bind(nowIso(), id).run()).meta.changes === 1;
+  }
 
   // ----- passkeys -----
   listPasskeys(userId: string) {

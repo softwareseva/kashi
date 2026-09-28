@@ -1,7 +1,7 @@
 /** One-time codes over WhatsApp, SMS or email. Codes are stored as peppered HMACs; responses never reveal whether an account exists. */
 import type { Context } from "hono";
 import { z } from "zod";
-import { ApiError, clientIp, consumeRateLimit, futureIso, hmac, normalizeEmail, normalizePhone, nowIso, randomDigits, safeEqual, sha256 } from "@softwareseva/core/server";
+import { ApiError, clientIp, consumeRateLimit, futureIso, hmac, normalizeEmail, normalizePhone, randomDigits, safeEqual, sha256 } from "@softwareseva/core/server";
 import { AuthStore } from "../store";
 import { createUser } from "../users";
 import type { AuthConfig, AuthEnv, AuthUser, OtpProviderConfig } from "../types";
@@ -41,11 +41,11 @@ export async function verifyOtp(c: Context, config: AuthConfig, env: AuthEnv, in
   const destination = normalizeDestination(input.destination, otp);
   if (!destination) throw invalid();
   const store = new AuthStore(env.db);
-  const record = await store.latestOtp(destination);
-  if (!record || record.attempts >= (otp.maxAttempts ?? 5) || record.expires_at <= nowIso()) throw invalid();
+  const record = await store.claimOtpAttempt(destination, otp.maxAttempts ?? 5);
+  if (!record) throw invalid();
   const expected = await hmac(`${destination}:${input.code}`, pepper(env));
-  if (!safeEqual(record.code_hash, expected)) { await store.failOtp(record.id); throw invalid(); }
-  await store.consumeOtp(record.id);
+  if (!safeEqual(record.code_hash, expected)) throw invalid();
+  if (!(await store.consumeOtp(record.id))) throw invalid();
   const existing = otp.channel === "phone" ? await store.userByPhone(destination) : await store.userByEmail(destination);
   if (existing) {
     if (existing.disabled) throw new ApiError(403, "ACCOUNT_DISABLED", "This account is disabled.");

@@ -17,16 +17,23 @@ export type RateLimitOptions = {
   message?: string;
 };
 
-/** Counts one hit; throws ApiError 429 `RATE_LIMITED` when the window is exhausted. Usable from services. */
+/**
+ * Counts one hit; throws ApiError 429 `RATE_LIMITED` when the window is exhausted. Usable from services.
+ *
+ * The read-and-increment happens in a single UPSERT with RETURNING so concurrent callers for the
+ * same key can't both read a count below the limit and both be admitted (nor both reset an expired
+ * window and land two separate "first hit" counters).
+ */
 export async function consumeRateLimit(db: D1Database, key: string, limit: number, windowSeconds: number, message = "Too many attempts. Please try again later."): Promise<void> {
   const now = Math.floor(Date.now() / 1000);
-  const row = await db.prepare("SELECT count, window_started_at FROM rate_limits WHERE key = ?").bind(key).first<{ count: number; window_started_at: number }>();
-  if (!row || now - row.window_started_at >= windowSeconds) {
-    await db.prepare("INSERT INTO rate_limits(key, count, window_started_at) VALUES (?, 1, ?) ON CONFLICT(key) DO UPDATE SET count = 1, window_started_at = excluded.window_started_at").bind(key, now).run();
-    return;
-  }
-  if (row.count >= limit) throw new ApiError(429, "RATE_LIMITED", message);
-  await db.prepare("UPDATE rate_limits SET count = count + 1 WHERE key = ?").bind(key).run();
+  const row = await db.prepare(
+    `INSERT INTO rate_limits(key, count, window_started_at) VALUES (?, 1, ?)
+     ON CONFLICT(key) DO UPDATE SET
+       count = CASE WHEN ? - window_started_at >= ? THEN 1 ELSE count + 1 END,
+       window_started_at = CASE WHEN ? - window_started_at >= ? THEN ? ELSE window_started_at END
+     RETURNING count`,
+  ).bind(key, now, now, windowSeconds, now, windowSeconds, now).first<{ count: number }>();
+  if (!row || row.count > limit) throw new ApiError(429, "RATE_LIMITED", message);
 }
 
 /** Hono middleware form: `app.post("/otp", rateLimit({ scope: "otp", limit: 5, windowSeconds: 900 }), handler)`. */
