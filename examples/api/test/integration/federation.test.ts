@@ -172,7 +172,11 @@ async function seedApprovedSelfTrustClient(clientId: string, clientSecret: strin
   ).bind(`fed_${clientId}`, clientId, await sha256Hex(clientSecret), clientId, "http://example.com/v1/auth/peer/callback").run();
 }
 
-/** Drives /peer/:key/start -> (self) /federation/authorize as the given issuer-side user -> returns the {code, state} the consumer's callback/token endpoints would receive. */
+/** The state-binding cookie /peer/:key/start sets, pulled from its Set-Cookie so it can be sent back
+ * on /peer/callback the way a real browser would (state is now bound to this cookie, not self-contained). */
+const stateCookie = (res: Response) => res.headers.get("Set-Cookie")!.split(";")[0]!;
+
+/** Drives /peer/:key/start -> (self) /federation/authorize as the given issuer-side user -> returns the {code, state, cookie} the consumer's callback/token endpoints would receive. */
 async function mintPeerCodeAndState(key: string, clientId: string, issuerSideToken: string) {
   const start = await call(`/auth/peer/${key}/start?next=/dashboard`);
   const startLocation = new URL(start.res.headers.get("Location")!);
@@ -183,7 +187,7 @@ async function mintPeerCodeAndState(key: string, clientId: string, issuerSideTok
     { headers: { Authorization: `Bearer ${issuerSideToken}` } }
   );
   const authorizeLocation = new URL(authorize.res.headers.get("Location")!);
-  return { code: authorizeLocation.searchParams.get("code")!, state };
+  return { code: authorizeLocation.searchParams.get("code")!, state, cookie: stateCookie(start.res) };
 }
 
 describe("peer federation: consumer side", () => {
@@ -210,7 +214,7 @@ describe("peer federation: consumer side", () => {
     const issuerSideToken = await signInAs("usr_selffed_identity");
 
     const first = await mintPeerCodeAndState("0", "fedcli_test", issuerSideToken);
-    const firstCallback = await call(`/auth/peer/callback?code=${first.code}&state=${first.state}`);
+    const firstCallback = await call(`/auth/peer/callback?code=${first.code}&state=${first.state}`, { headers: { Cookie: first.cookie } });
     expect(firstCallback.status).toBe(302);
     expect(firstCallback.res.headers.get("Location")).toBe("http://localhost:5173/dashboard");
     const firstSessionCookie = firstCallback.res.headers.get("Set-Cookie");
@@ -227,7 +231,7 @@ describe("peer federation: consumer side", () => {
 
     // Signing in again through the same peer with the same underlying identity must not create a second local user.
     const second = await mintPeerCodeAndState("0", "fedcli_test", issuerSideToken);
-    const secondCallback = await call(`/auth/peer/callback?code=${second.code}&state=${second.state}`);
+    const secondCallback = await call(`/auth/peer/callback?code=${second.code}&state=${second.state}`, { headers: { Cookie: second.cookie } });
     expect(secondCallback.status).toBe(302);
     const identityAgain = await env.DB.prepare("SELECT user_id FROM auth_identities WHERE provider = 'kashi' AND subject = ?")
       .bind("http://example.com/v1/auth|usr_selffed_identity").first<{ user_id: string }>();
@@ -247,7 +251,7 @@ describe("peer federation: consumer side", () => {
 
     const start = await call("/auth/peer/0/start?next=/dashboard");
     const state = new URL(start.res.headers.get("Location")!).searchParams.get("state")!;
-    const badCode = await call(`/auth/peer/callback?code=this-code-was-never-issued&state=${state}`);
+    const badCode = await call(`/auth/peer/callback?code=this-code-was-never-issued&state=${state}`, { headers: { Cookie: stateCookie(start.res) } });
     expect(badCode.status).toBe(302);
     expect(badCode.res.headers.get("Location")).toBe("http://localhost:5173/sign-in?error=OAUTH_FAILED");
   });
@@ -256,8 +260,8 @@ describe("peer federation: consumer side", () => {
     await seedApprovedSelfTrustClient("fedcli_test_nosignup", "test-secret-value-2");
     const issuerSideToken = await signInAs("usr_selffed_nosignup");
 
-    const { code, state } = await mintPeerCodeAndState("1", "fedcli_test_nosignup", issuerSideToken);
-    const callback = await call(`/auth/peer/callback?code=${code}&state=${state}`);
+    const { code, state, cookie } = await mintPeerCodeAndState("1", "fedcli_test_nosignup", issuerSideToken);
+    const callback = await call(`/auth/peer/callback?code=${code}&state=${state}`, { headers: { Cookie: cookie } });
     // userForIdentity throws SIGN_UP_DISABLED for a subject with no existing account; the callback
     // route catches every exchange/provisioning failure and reports it uniformly as OAUTH_FAILED.
     expect(callback.status).toBe(302);
