@@ -13,6 +13,8 @@ const call = async (path: string, init: RequestInit & { json?: unknown } = {}) =
   return { res, status: res.status, body: (await res.json().catch(() => ({}))) as Json };
 };
 const cookiesFrom = (res: Response) => res.headers.getSetCookie().map((c) => c.split(";")[0]).join("; ");
+// Push every rotated refresh token outside the reuse grace window, as if the reuse came much later.
+const expireReuseGrace = () => env.DB.prepare("UPDATE auth_refresh_sessions SET rotated_at = '2000-01-01T00:00:00.000Z' WHERE rotated_at IS NOT NULL").run();
 const lastCode = async (destination: string) => (await env.DB.prepare("SELECT body FROM dev_outbox WHERE destination = ? ORDER BY id DESC LIMIT 1").bind(destination).first<{ body: string }>())?.body;
 
 describe("auth config", () => {
@@ -66,6 +68,10 @@ describe("password + cookie sessions", () => {
 
     const refreshed = await call("/auth/refresh", { method: "POST", headers: { Cookie: cookie, Origin: ORIGIN } });
     expect(refreshed.status).toBe(200);
+    // A second tab refreshing with the same cookie moments later is tolerated (grace window).
+    const secondTab = await call("/auth/refresh", { method: "POST", headers: { Cookie: cookie, Origin: ORIGIN } });
+    expect(secondTab.status).toBe(200);
+    await expireReuseGrace();
     const reused = await call("/auth/refresh", { method: "POST", headers: { Cookie: cookie, Origin: ORIGIN } });
     expect(reused.body.code).toBe("TOKEN_REUSE");
     const afterReuse = await call("/auth/refresh", { method: "POST", headers: { Cookie: cookiesFrom(refreshed.res), Origin: ORIGIN } });
@@ -90,8 +96,13 @@ describe("token transport", () => {
     expect(second.status).toBe(200);
     const r2 = second.body.data.refreshToken as string;
     expect(r2).not.toBe(r1);
+    const concurrent = await call("/auth/token/refresh", { method: "POST", json: { refreshToken: r1 } });
+    expect(concurrent.status).toBe(200);
+    expect(concurrent.body.data.refreshToken).not.toBe(r2);
+    await expireReuseGrace();
     expect((await call("/auth/token/refresh", { method: "POST", json: { refreshToken: r1 } })).body.code).toBe("TOKEN_REUSE");
     expect((await call("/auth/token/refresh", { method: "POST", json: { refreshToken: r2 } })).status).toBe(401);
+    expect((await call("/auth/token/refresh", { method: "POST", json: { refreshToken: concurrent.body.data.refreshToken } })).status).toBe(401);
   });
 });
 
@@ -125,6 +136,31 @@ describe("passkeys", () => {
     expect(bogus.body.code).toBe("PASSKEY_REJECTED");
     const after = (await env.DB.prepare("SELECT count(*) AS n FROM auth_users").first<{ n: number }>())?.n;
     expect(after).toBe(before);
+  });
+
+  it("rate limits anonymous sign-up per IP across options and verify", async () => {
+    const headers = { "CF-Connecting-IP": "203.0.113.7" };
+    const statuses: number[] = [];
+    for (let i = 0; i < 21; i++) statuses.push((await call("/auth/passkeys/signup/options", { method: "POST", json: {}, headers })).status);
+    expect(statuses.slice(0, 20).every((s) => s === 200)).toBe(true);
+    expect(statuses[20]).toBe(429);
+    const verify = await call("/auth/passkeys/signup/verify", { method: "POST", json: { challengeId: "ch_x", response: { id: "nope", rawId: "nope", type: "public-key", response: {} } }, headers });
+    expect(verify.body.code).toBe("RATE_LIMITED");
+    expect((await call("/auth/passkeys/signup/options", { method: "POST", json: {}, headers: { "CF-Connecting-IP": "203.0.113.8" } })).status).toBe(200);
+  });
+});
+
+describe("identity extension tables", () => {
+  it("cascade-delete with their user", async () => {
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO auth_users(id, display_name, roles, created_at, updated_at) VALUES ('usr_gone', 'Gone', '[\"user\"]', '2026-01-01', '2026-01-01')"),
+      env.DB.prepare("INSERT INTO auth_recovery_codes(code_hash, user_id, created_at) VALUES ('h1', 'usr_gone', '2026-01-01')"),
+      env.DB.prepare("INSERT INTO auth_peer_sessions(family_id, user_id, subject, central_session_id) VALUES ('fam_gone', 'usr_gone', 'sub', 'central')"),
+      env.DB.prepare("INSERT INTO auth_contact_aliases(channel, destination, user_id) VALUES ('email', 'gone@example.com', 'usr_gone')"),
+    ]);
+    await env.DB.prepare("DELETE FROM auth_users WHERE id = 'usr_gone'").run();
+    for (const table of ["auth_recovery_codes", "auth_peer_sessions", "auth_contact_aliases"])
+      expect((await env.DB.prepare(`SELECT count(*) AS n FROM ${table} WHERE user_id = 'usr_gone'`).first<{ n: number }>())?.n).toBe(0);
   });
 });
 

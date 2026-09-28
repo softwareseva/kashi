@@ -1,6 +1,6 @@
 /** @softwareseva/auth/server — mountable authentication for Hono on Workers + D1. */
 export { authRouter } from "./router";
-export { requireAuth, optionalAuth, requireRole, requireVerified, isVerifiedIdentity, issueSession, issueTokenPair, rotateRefreshToken, signAccessToken, verifyAccessToken, clearSessionCookies, completeSignIn, assertSameOrigin, DEFAULT_ACCESS_TTL, DEFAULT_REFRESH_TTL, type AccessClaims } from "./session";
+export { requireAuth, optionalAuth, requireRole, requireVerified, isVerifiedIdentity, issueSession, issueTokenPair, rotateRefreshToken, signAccessToken, verifyAccessToken, clearSessionCookies, completeSignIn, assertSameOrigin, DEFAULT_ACCESS_TTL, DEFAULT_REFRESH_TTL, DEFAULT_REFRESH_REUSE_GRACE, type AccessClaims } from "./session";
 export { resolveEnv } from "./env";
 export { AuthStore } from "./store";
 export { createUser, userForIdentity } from "./users";

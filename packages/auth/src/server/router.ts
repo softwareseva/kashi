@@ -80,7 +80,7 @@ export function authRouter(config: AuthConfig): Hono<Env> {
     const raw = readRefreshCookie(c, config, e);
     if (!raw) throw new ApiError(401, "UNAUTHORIZED", "No session to refresh.");
     try {
-      const { user, familyId } = await rotateRefreshToken(e, raw);
+      const { user, familyId } = await rotateRefreshToken(config, e, raw);
       return ok(c, await issueSession(c, config, e, user, "cookie", familyId));
     } catch (error) {
       if (error instanceof ApiError && error.code === "TOKEN_REUSE") clearSessionCookies(c, config, e);
@@ -103,7 +103,7 @@ export function authRouter(config: AuthConfig): Hono<Env> {
   app.post("/token/refresh", async (c) => {
     const e = env(c);
     const { refreshToken } = refreshBody.parse(await c.req.json());
-    const { user, familyId } = await rotateRefreshToken(e, refreshToken);
+    const { user, familyId } = await rotateRefreshToken(config, e, refreshToken);
     return ok(c, await issueSession(c, config, e, user, "token", familyId));
   });
   app.post("/token/revoke", async (c) => {
@@ -292,7 +292,7 @@ export function authRouter(config: AuthConfig): Hono<Env> {
     // once the new passkey has verified. This is the default sign-up path; gate with
     // `providers.passkeys.allowSignUp = false` to require OTP/OAuth sign-up instead.
     if (p.passkeys.allowSignUp !== false) {
-      app.post("/passkeys/signup/options", async (c) => ok(c, await anonymousRegistrationOptions(config, env(c))));
+      app.post("/passkeys/signup/options", async (c) => ok(c, await anonymousRegistrationOptions(c, config, env(c))));
       app.post("/passkeys/signup/verify", async (c) => {
         const e = env(c);
         const input = passkeySignupVerifySchema.parse(await c.req.json());

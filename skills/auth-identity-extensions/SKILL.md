@@ -9,7 +9,7 @@ metadata:
 
 # Identity extensions
 
-Everything here is opt-in and additive on top of `auth-sessions`/`auth-whatsapp-otp`/`auth-google`/`auth-federation`: a config that sets none of these keys keeps its exact pre-1.5 behavior. Apply `auth_0007_identity_extensions.sql` before enabling any of it (adds `auth_bound_otp`, `auth_recovery_codes`, `auth_peer_sessions`, `auth_contact_aliases`).
+Everything here is opt-in and additive on top of `auth-sessions`/`auth-whatsapp-otp`/`auth-google`/`auth-federation`: a config that sets none of these keys keeps its exact pre-1.5 behavior. Apply `auth_0007_identity_extensions.sql` and `auth_0008_identity_extensions_cascade.sql` before enabling any of it (adds `auth_bound_otp`, `auth_recovery_codes`, `auth_peer_sessions`, `auth_contact_aliases`; 0008 rebuilds the last three with `ON DELETE CASCADE`).
 
 ## Multi-channel OTP (`otpChannels`)
 

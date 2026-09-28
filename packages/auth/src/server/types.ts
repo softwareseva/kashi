@@ -122,12 +122,14 @@ export type AuthConfig = {
   env?: (bindings: Record<string, unknown>) => Partial<AuthEnv>;
   accessTtlSeconds?: number;
   refreshTtlSeconds?: number;
+  /** Seconds after rotation during which the old refresh token is still accepted (concurrent tabs, retries) instead of revoking the family. Default 30; 0 disables. */
+  refreshReuseGraceSeconds?: number;
   cookieNames?: { access?: string; refresh?: string };
   /** Roles given to users created by providers. */
   defaultRoles?: string[];
   /** Require the access token's session (family) id to still be active on every `requireAuth` request, not just on refresh. Off by default. */
   enforceSessionRevocation?: boolean;
-  /** Mount `ExtensionStore`-backed routes: `/recovery/codes`, `/recovery/sign-in`, and (with `providers.google`) `/google/link/*`. Requires `auth_0007_identity_extensions.sql`. */
+  /** Mount `ExtensionStore`-backed routes: `/recovery/codes`, `/recovery/sign-in`, and (with `providers.google`) `/google/link/*`. Requires `auth_0007_identity_extensions.sql` and `auth_0008_identity_extensions_cascade.sql`. */
   identityExtensions?: boolean;
   /** Issue a set of recovery codes as part of contact-free passkey signup, returned once in the signup response. Requires `identityExtensions`. */
   recoveryCodesOnSignup?: boolean;
