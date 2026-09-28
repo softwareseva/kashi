@@ -1,6 +1,6 @@
 name: kashi_list
 description: Searchable, sortable, infinitely scrolling lists for kashi keyset APIs, with a directory controller and a Cupertino KDataList widget with pull-to-refresh and a sort sheet.
-version: 1.5.0
+version: 1.6.0-test
 repository: https://github.com/softwareseva/kashi
 issue_tracker: https://github.com/softwareseva/kashi/issues
 resolution: workspace

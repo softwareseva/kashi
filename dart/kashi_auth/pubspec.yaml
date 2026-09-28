@@ -1,6 +1,6 @@
 name: kashi_auth
 description: Flutter sign-in for kashi APIs, with default passkeys (contact-free sign-up), codes, password, Google/Apple/Facebook, a sign-in screen, passkey settings and biometric lock.
-version: 1.5.0
+version: 1.6.0-test
 repository: https://github.com/softwareseva/kashi
 issue_tracker: https://github.com/softwareseva/kashi/issues
 resolution: workspace
