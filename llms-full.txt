@@ -1,0 +1,50 @@
+# kashi
+
+> Reusable, updatable building blocks for apps on Cloudflare Workers + D1 (Hono), React + Tailwind v4, and Flutter, plus the Agent Skills that teach AI coding agents (Claude Code, Codex/ChatGPT, Antigravity, and any other skills-compatible agent) how to use them. Each feature ships as a package that bundles every layer, so one version bump updates the API routes and the UI together.
+
+Start with `skills/kashi/SKILL.md` — it is the index and holds the conventions every package follows. `AGENTS.md` is the canonical guide for working in this repository; `CLAUDE.md` and `GEMINI.md` both point to it.
+
+## Docs
+
+- [AGENTS.md](AGENTS.md): layering rules (`web -> contracts <- routes -> services -> repositories -> D1`), lockstep versioning across every published package, design-token editing order, testing conventions, and what to run before handoff (`pnpm run check`, `flutter analyze dart`).
+- [README.md](README.md): project overview, the full package/skill table, `scripts/install.sh` (symlinks skills into agent skill directories), and the `@softwareseva/cli` commands for consuming the packages.
+
+## Packages
+
+- [packages/core/README.md](packages/core/README.md) — `@softwareseva/core` / `kashi_core`: the foundation every kashi app shares — `createApp()` with request ids, security headers, CORS, and the error envelope; `ApiError`; WebCrypto helpers; PBKDF2 passwords; `newId()`; `normalizePhone()`; D1-backed `rateLimit()`; `parseEnv()`.
+- [packages/auth/README.md](packages/auth/README.md) — `@softwareseva/auth` / `kashi_auth`: sign-in for the whole stack — HS256 access tokens with rotating refresh-token families and reuse detection, WhatsApp/SMS/email OTP, Google, Apple, Facebook, and passkeys, with matching server, React, and Flutter halves.
+- [packages/list/README.md](packages/list/README.md) — `@softwareseva/list` / `kashi_list`: server-side lists on D1 with search, sort, and paging that stay fast at any table size — `listKeyset()`, `keyset()` + `finishPage()`, and `listOffset()` for small admin lists.
+- [packages/sync/README.md](packages/sync/README.md) — `@softwareseva/sync` / `kashi_sync`: server half of offline-first sync — idempotent batched push (`POST /push`) keyed by `(user, opId)` so retries replay instead of double-applying, paired with `kashi_sync` in Flutter.
+- [packages/ui/README.md](packages/ui/README.md) — `@softwareseva/ui` / `kashi_ui`: accessible React primitives on Tailwind v4, themed by CSS variables, shipping the default **kaushik** theme (warm paper surfaces, saffron brand) with light and dark modes.
+- [packages/tokens/README.md](packages/tokens/README.md) — `@softwareseva/tokens` (private, unversioned): the single source of truth for design tokens (`tokens.json`), mirrored into `packages/ui/src/kashi.css` and `dart/kashi_ui/lib/src/tokens.dart`.
+- [packages/cli/README.md](packages/cli/README.md) — `@softwareseva/cli`: `init` (AGENTS.md, pointers, gitignore, renovate), `add <package>` (installs a package, mounts routes, copies migrations, prints the secrets checklist), `add deploy-cloudflare` / `add deploy-fastlane`, `secrets`, `update`, `doctor`.
+
+## Skills
+
+- [skills/kashi/SKILL.md](skills/kashi/SKILL.md): index and conventions for the kashi toolkit. Use at the start of any project on this stack, or to decide which skill/package applies.
+- [skills/hono-d1-api/SKILL.md](skills/hono-d1-api/SKILL.md): build or extend a Hono API on Workers + D1 — routes, services, repositories, migrations, rate limiting, env validation, Vitest integration tests.
+- [skills/api-client-react/SKILL.md](skills/api-client-react/SKILL.md): call a kashi API from React with a fetch client that unwraps the envelope, throws typed `ApiError`, refreshes sessions on 401, plus `AuthProvider`/`useAuth` and TanStack Query hooks.
+- [skills/flutter-api-client/SKILL.md](skills/flutter-api-client/SKILL.md): call a kashi API from Flutter with `KashiApiClient` on Dio, typed `KashiFailure`, single-flight token refresh, Riverpod providers, and `KPage` keyset pages.
+- [skills/auth-sessions/SKILL.md](skills/auth-sessions/SKILL.md): add sign-in and sessions to a Hono API — cookie vs. bearer-token sessions, roles, refresh, sign-out. Start here before any provider-specific auth skill.
+- [skills/auth-google/SKILL.md](skills/auth-google/SKILL.md): Google sign-in for web and mobile, no Google SDK on the server, verifying Flutter `google_sign_in` ID tokens.
+- [skills/auth-apple/SKILL.md](skills/auth-apple/SKILL.md): Sign in with Apple — ES256 client secret, `form_post` callback, ID-token verification, private relay emails.
+- [skills/auth-facebook/SKILL.md](skills/auth-facebook/SKILL.md): Facebook Login for web and mobile with no Facebook SDK on the server.
+- [skills/auth-passkeys/SKILL.md](skills/auth-passkeys/SKILL.md): passkeys (WebAuthn) as the default anonymous sign-up method — contact-free creation, discoverable sign-in, credential management, RP ID/origin setup for web, iOS, and Android.
+- [skills/auth-whatsapp-otp/SKILL.md](skills/auth-whatsapp-otp/SKILL.md): phone/email OTP sign-in delivered over WhatsApp (AiSensy or Meta Cloud API), SMS, or email, with rate limiting.
+- [skills/auth-federation/SKILL.md](skills/auth-federation/SKILL.md): cross-site single sign-on between kashi sites, with each site's admin approving the relationship independently.
+- [skills/flutter-auth/SKILL.md](skills/flutter-auth/SKILL.md): sign-in for Flutter apps — Riverpod `AuthController`, `go_router` redirect, the `KSignIn` screen, provider adapters, biometric lock, platform setup.
+- [skills/d1-list-pagination/SKILL.md](skills/d1-list-pagination/SKILL.md): add a paginated, searchable, sortable list endpoint on D1, choosing between keyset cursors and page numbers.
+- [skills/react-data-table/SKILL.md](skills/react-data-table/SKILL.md): a directory/admin table in React with sortable headers, skeleton loading, empty state, mobile card layout, and URL-synced search/sort/paging.
+- [skills/sync-endpoints/SKILL.md](skills/sync-endpoints/SKILL.md): server side of offline-first sync — idempotent batched push with replay, a change log with a monotonic cursor for pull, per-user/org scopes, soft deletes.
+- [skills/flutter-drift-sync/SKILL.md](skills/flutter-drift-sync/SKILL.md): offline-first data in Flutter with Drift — transactional outbox, batched push with retries, cursor pull that never overwrites unsent edits.
+- [skills/react-offline-sync/SKILL.md](skills/react-offline-sync/SKILL.md): the React counterpart of `flutter-drift-sync` — offline-first data with RxDB and TanStack DB.
+- [skills/kashi-ui-web/SKILL.md](skills/kashi-ui-web/SKILL.md): style a React app with `@softwareseva/ui` on Tailwind v4 — install, CSS import order, theming by CSS variable, and the component primitives.
+- [skills/kashi-ui-flutter/SKILL.md](skills/kashi-ui-flutter/SKILL.md): style a Flutter (Cupertino) app with `kashi_ui` — theme tokens, widgets, and `KDataList` for server-driven lists.
+- [skills/deploy-cloudflare/SKILL.md](skills/deploy-cloudflare/SKILL.md): deploy a Hono Worker (and optionally a Vite web app) to Cloudflare from GitHub Actions — staging/production D1 databases, migrations before deploy, per-environment secrets.
+- [skills/deploy-flutter-fastlane/SKILL.md](skills/deploy-flutter-fastlane/SKILL.md): ship a Flutter app to TestFlight, the App Store, and Google Play with fastlane — match certificates, App Store Connect API key, Play service account.
+
+## Optional
+
+- [CONTRIBUTING.md](CONTRIBUTING.md): contribution workflow.
+- [skills/kashi/references/roadmap.md](skills/kashi/references/roadmap.md): build roadmap and status.
+- [llms.txt](llms.txt): the short version of this index, without inline descriptions.

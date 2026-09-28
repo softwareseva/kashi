@@ -1,0 +1,50 @@
+# kashi
+
+> Reusable, updatable building blocks for apps on Cloudflare Workers + D1 (Hono), React + Tailwind v4, and Flutter, plus the Agent Skills that teach AI coding agents how to use them. Each feature ships as one package bundling every layer (server, web, Flutter), so a single version bump updates the API routes and the UI together.
+
+Start with `skills/kashi/SKILL.md` — it is the index and holds the conventions every package follows. `AGENTS.md` is the canonical guide for working in this repository.
+
+## Docs
+
+- [AGENTS.md](AGENTS.md): canonical guide for extending packages, layering rules, versioning, and testing conventions
+- [README.md](README.md): project overview, package/skill table, install and usage commands
+
+## Packages
+
+- [packages/core/README.md](packages/core/README.md): request envelope, errors, crypto, ids, rate limits, API client (`@softwareseva/core` / `kashi_core`)
+- [packages/auth/README.md](packages/auth/README.md): sessions, WhatsApp OTP, Google, Apple, passkeys (`@softwareseva/auth` / `kashi_auth`)
+- [packages/list/README.md](packages/list/README.md): keyset pagination, search, sort, DataTable (`@softwareseva/list` / `kashi_list`)
+- [packages/sync/README.md](packages/sync/README.md): offline sync outbox and push/pull (`@softwareseva/sync` / `kashi_sync`)
+- [packages/ui/README.md](packages/ui/README.md): design tokens and themed primitives (`@softwareseva/ui` / `kashi_ui`)
+- [packages/tokens/README.md](packages/tokens/README.md): shared design tokens, source of truth for `ui`'s CSS and Dart theme
+- [packages/cli/README.md](packages/cli/README.md): `@softwareseva/cli` — init, add, update, secrets, doctor
+
+## Skills
+
+- [skills/kashi/SKILL.md](skills/kashi/SKILL.md): index and conventions for the whole toolkit — read first
+- [skills/hono-d1-api/SKILL.md](skills/hono-d1-api/SKILL.md): build or extend a Hono API on Workers + D1
+- [skills/api-client-react/SKILL.md](skills/api-client-react/SKILL.md): call a kashi API from React
+- [skills/flutter-api-client/SKILL.md](skills/flutter-api-client/SKILL.md): call a kashi API from Flutter
+- [skills/auth-sessions/SKILL.md](skills/auth-sessions/SKILL.md): sign-in and sessions on a Hono API — start here before provider-specific auth skills
+- [skills/auth-google/SKILL.md](skills/auth-google/SKILL.md): Google sign-in for web and mobile
+- [skills/auth-apple/SKILL.md](skills/auth-apple/SKILL.md): Sign in with Apple for web and iOS
+- [skills/auth-facebook/SKILL.md](skills/auth-facebook/SKILL.md): Facebook Login for web and mobile
+- [skills/auth-passkeys/SKILL.md](skills/auth-passkeys/SKILL.md): passkey sign-in and sign-up
+- [skills/auth-whatsapp-otp/SKILL.md](skills/auth-whatsapp-otp/SKILL.md): phone/email OTP sign-in over WhatsApp, SMS, or email
+- [skills/auth-federation/SKILL.md](skills/auth-federation/SKILL.md): cross-site single sign-on between kashi sites
+- [skills/flutter-auth/SKILL.md](skills/flutter-auth/SKILL.md): sign-in for Flutter apps
+- [skills/d1-list-pagination/SKILL.md](skills/d1-list-pagination/SKILL.md): paginated, searchable, sortable list endpoints on D1
+- [skills/react-data-table/SKILL.md](skills/react-data-table/SKILL.md): directory/admin table screens in React
+- [skills/sync-endpoints/SKILL.md](skills/sync-endpoints/SKILL.md): server side of offline-first sync
+- [skills/flutter-drift-sync/SKILL.md](skills/flutter-drift-sync/SKILL.md): offline-first data in Flutter with Drift
+- [skills/react-offline-sync/SKILL.md](skills/react-offline-sync/SKILL.md): offline-first data in React with RxDB
+- [skills/kashi-ui-web/SKILL.md](skills/kashi-ui-web/SKILL.md): style a React app with the kashi design system
+- [skills/kashi-ui-flutter/SKILL.md](skills/kashi-ui-flutter/SKILL.md): style a Flutter app with the kashi design system
+- [skills/deploy-cloudflare/SKILL.md](skills/deploy-cloudflare/SKILL.md): deploy a Hono Worker (and web app) to Cloudflare from GitHub Actions
+- [skills/deploy-flutter-fastlane/SKILL.md](skills/deploy-flutter-fastlane/SKILL.md): ship a Flutter app to TestFlight and Google Play
+
+## Optional
+
+- [CONTRIBUTING.md](CONTRIBUTING.md): contribution workflow
+- [skills/kashi/references/roadmap.md](skills/kashi/references/roadmap.md): build roadmap and status
+- [llms-full.txt](llms-full.txt): this index with fuller inline descriptions for every package and skill
