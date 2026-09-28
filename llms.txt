@@ -40,6 +40,7 @@ Step-by-step generation instructions for every secret a package or CLI deploy mo
 - [skills/auth-passkeys/SKILL.md](skills/auth-passkeys/SKILL.md): passkey sign-in and sign-up
 - [skills/auth-whatsapp-otp/SKILL.md](skills/auth-whatsapp-otp/SKILL.md): phone/email OTP sign-in over WhatsApp, SMS, or email
 - [skills/auth-federation/SKILL.md](skills/auth-federation/SKILL.md): cross-site single sign-on between kashi sites
+- [skills/auth-identity-extensions/SKILL.md](skills/auth-identity-extensions/SKILL.md): multi-channel OTP, account linking, recovery codes, session revocation
 - [skills/flutter-auth/SKILL.md](skills/flutter-auth/SKILL.md): sign-in for Flutter apps
 - [skills/d1-list-pagination/SKILL.md](skills/d1-list-pagination/SKILL.md): paginated, searchable, sortable list endpoints on D1
 - [skills/react-data-table/SKILL.md](skills/react-data-table/SKILL.md): directory/admin table screens in React

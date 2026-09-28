@@ -77,4 +77,4 @@ Bindings read by default: `DB`, `JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE`, `WEB
 
 ## See also
 
-`auth-sessions` skill (start here), plus `auth-google`, `auth-apple`, `auth-facebook`, `auth-passkeys`, `auth-whatsapp-otp`, `auth-federation`, and `flutter-auth` for `kashi_auth`.
+`auth-sessions` skill (start here), plus `auth-google`, `auth-apple`, `auth-facebook`, `auth-passkeys`, `auth-whatsapp-otp`, `auth-federation`, `auth-identity-extensions`, and `flutter-auth` for `kashi_auth`.

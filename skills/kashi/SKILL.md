@@ -23,6 +23,7 @@ kashi is a set of packages that each bundle a whole feature (API routes, React c
 | Facebook Login (web and mobile) | `auth-facebook` | `@softwareseva/auth` |
 | Passkeys / WebAuthn, the default anonymous sign-in | `auth-passkeys` | `@softwareseva/auth` |
 | Cross-site SSO: sign in with another kashi site's account | `auth-federation` | `@softwareseva/auth` |
+| Multi-channel OTP, account linking, recovery codes, session revocation | `auth-identity-extensions` | `@softwareseva/auth` |
 | List endpoint with search, sort, paging on D1 | `d1-list-pagination` | `@softwareseva/list` |
 | Offline-first sync endpoints | `sync-endpoints` | `@softwareseva/sync` |
 | Offline-first data in React with RxDB | `react-offline-sync` | `@softwareseva/sync` |
