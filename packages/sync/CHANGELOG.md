@@ -1,5 +1,11 @@
 # @softwareseva/sync
 
+## 1.3.0
+
+### Patch Changes
+
+- @softwareseva/core@1.3.0
+
 ## 1.2.0
 
 ### Patch Changes
