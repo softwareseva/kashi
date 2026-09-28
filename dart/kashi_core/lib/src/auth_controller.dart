@@ -111,7 +111,8 @@ class AuthController extends Notifier<AuthState> {
     return const AuthState();
   }
 
-  /// On launch: refresh with the stored token. Offline with a stored user means signed in (offline).
+  /// On launch: refresh with the stored token. Offline, a server error (5xx) or a rate limit with a
+  /// stored user means signed in (offline): the session is still valid, the server just can't say so.
   Future<void> restore() async {
     final stored = await _tokens.read();
     if (stored.refreshToken == null) return _signedOut(notify: false);
@@ -119,19 +120,22 @@ class AuthController extends Notifier<AuthState> {
       final session = await _api.refresh();
       await _enter(session.user);
     } on NetworkFailure {
-      if (stored.user != null) {
-        state = AuthState(
-          status: AuthStatus.signedIn,
-          user: stored.user,
-          offline: true,
-        );
-        await ref.read(authLifecycleProvider).onSignedIn?.call(stored.user!);
+      await _enterOffline(stored.user);
+    } on ApiFailure catch (f) {
+      if (f.status >= 500 || f.isRateLimited) {
+        await _enterOffline(stored.user);
       } else {
-        _signedOut(notify: false);
+        await _signedOut(notify: false);
       }
     } on KashiFailure {
       _signedOut(notify: false);
     }
+  }
+
+  Future<void> _enterOffline(AuthUser? user) async {
+    if (user == null) return _signedOut(notify: false);
+    state = AuthState(status: AuthStatus.signedIn, user: user, offline: true);
+    await ref.read(authLifecycleProvider).onSignedIn?.call(user);
   }
 
   /// Run any sign-in call that returns a token-transport session JSON and store the result.

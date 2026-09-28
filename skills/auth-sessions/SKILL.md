@@ -62,7 +62,7 @@ Never convert one into the other: a cookie session cannot mint a bearer pair. Th
 
 ## Refresh rotation
 
-Refresh tokens are random, stored only as SHA-256 hashes, and grouped by `family_id`. Each refresh marks the old token rotated and issues a new one in the same family. Presenting a rotated token again means it was stolen or replayed: the whole family is revoked and the response is `401 TOKEN_REUSE`. Clients must refresh once at a time: `@softwareseva/core/client` and `kashi_core` share one in-flight refresh across concurrent 401s. Details: `references/threat-model.md`.
+Refresh tokens are random, stored only as SHA-256 hashes, and grouped by `family_id`. Each refresh marks the old token rotated and issues a new one in the same family. Presenting a rotated token again more than `refreshReuseGraceSeconds` (default 30) after it was rotated means it was stolen or replayed: the whole family is revoked and the response is `401 TOKEN_REUSE`. Within the window the old token is accepted and a sibling pair is issued on the same family, so two browser tabs (which share cookies but not in-flight state) or a retried request can refresh at once without signing the user out. `@softwareseva/core/client` and `kashi_core` still share one in-flight refresh per tab/process. Details: `references/threat-model.md`.
 
 ## Hooks
 

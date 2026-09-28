@@ -10,7 +10,7 @@ pnpm add @softwareseva/auth hono zod
 
 ## What's inside
 
-- **Sessions**: HS256 access tokens (15 min) plus rotating refresh tokens grouped in families with reuse detection. Browsers use `__Host-` cookies with an origin check on mutations; native apps use a bearer token pair. The two transports never cross.
+- **Sessions**: HS256 access tokens (15 min) plus rotating refresh tokens grouped in families with reuse detection (a 30-second grace window after rotation tolerates concurrent refreshes from several tabs). Browsers use `__Host-` cookies with an origin check on mutations; native apps use a bearer token pair. The two transports never cross.
 - **Providers**: password; one-time codes over WhatsApp/SMS/email (you supply the `send` function — `renderOtpEmail()` gives you a ready-made subject/text/html for the email channel); Google (web code flow + native ID token); Sign in with Apple (web `form_post` + native identity token); Facebook Login (web code flow + native access token); passkeys (`@simplewebauthn/server`, discoverable sign-in, and a contact-free sign-up that creates the account only once a new passkey verifies); peer sign-in with another kashi site (`providers.peer`, see the `auth-federation` skill) — this site can act as an OIDC-style issuer for other kashi deployments, a consumer of theirs, or both.
 - **Anonymous by default**: passkey sign-up needs no email, phone, or OAuth grant — `POST /passkeys/signup/*` verifies the passkey first and only then creates the account. Nothing in the router requires a "valid id"; gate the handful of actions that do with `requireVerified`, which passes once the user has an OTP-verified email/phone or a linked Google/Apple/Facebook identity.
 - **Identity extensions** (opt-in, see below): purpose-bound OTP over one or more channels at once (`otpChannels`), explicit account linking with collision handling (`identityExtensions`, `autoLinkVerifiedEmail`), hashed single-use recovery codes, and session-family revocation checks (`enforceSessionRevocation`).
@@ -57,7 +57,7 @@ The fifth `send` argument (`{ purpose, ttlSeconds }`) is optional to consume —
 
 ## Identity extensions
 
-Everything here is opt-in and additive: a consumer that sets none of these keys gets exactly 1.4.0's behavior. Apply `auth_0007_identity_extensions.sql` before enabling any of it.
+Everything here is opt-in and additive: a consumer that sets none of these keys gets exactly 1.4.0's behavior. Apply `auth_0007_identity_extensions.sql` and `auth_0008_identity_extensions_cascade.sql` (adds `ON DELETE CASCADE` to their user references) before enabling any of it.
 
 - **`otpChannels`**: purpose- and destination-bound OTP over one or more channels at once (unlike `providers.otp`, which is a single channel). Mounts `POST /otp/{request,verify}` (sign-in — shared with `providers.otp`'s same paths; a `channel` not present in `otpChannels` falls through to it) and, when signed in, `POST /contacts/otp/{request,verify}` (attach a verified email or phone to the current account).
   ```ts

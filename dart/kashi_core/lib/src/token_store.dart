@@ -15,8 +15,10 @@ class TokenStore {
           storage ??
           const FlutterSecureStorage(
             // Readable after the first unlock following a reboot, so background sync works.
+            // `this_device` keeps the refresh token out of backups: restoring it onto a second
+            // device would present a rotated token and revoke the whole session family.
             iOptions: IOSOptions(
-              accessibility: KeychainAccessibility.first_unlock,
+              accessibility: KeychainAccessibility.first_unlock_this_device,
             ),
           ),
       _refreshKey = '$namespace.refresh_token',

@@ -9,6 +9,7 @@ import type { AuthConfig, AuthEnv, AuthUser, AuthVariables, SessionPair, Transpo
 
 export const DEFAULT_ACCESS_TTL = 15 * 60;
 export const DEFAULT_REFRESH_TTL = 30 * 24 * 3600;
+export const DEFAULT_REFRESH_REUSE_GRACE = 30;
 
 export type AccessClaims = { sub: string; name: string; roles: string[]; iss: string; aud: string; iat: number; exp: number; sid?: string };
 
@@ -44,16 +45,23 @@ export async function issueTokenPair(config: AuthConfig, env: AuthEnv, user: Aut
 
 /**
  * Validate a raw refresh token, mark it rotated, and revoke the whole family on reuse.
+ * A token rotated within the last `refreshReuseGraceSeconds` (default 30) is accepted again without
+ * revoking, so two tabs or a retried request refreshing at once don't sign the user out; the caller
+ * then issues a sibling pair on the same family. Reuse after the window is treated as theft.
  * Returns the user and family so the caller can issue the next pair on the same family.
  */
-export async function rotateRefreshToken(env: AuthEnv, raw: string): Promise<{ user: AuthUser; familyId: string }> {
+export async function rotateRefreshToken(config: AuthConfig, env: AuthEnv, raw: string): Promise<{ user: AuthUser; familyId: string }> {
   const store = new AuthStore(env.db);
   const session = await store.findRefresh(raw);
   const invalid = () => new ApiError(401, "UNAUTHORIZED", "Your session has expired. Please sign in again.");
   if (!session || session.revoked_at || session.expires_at <= nowIso()) throw invalid();
   if (session.rotated_at || !(await store.markRotated(session.id))) {
-    await store.revokeFamily(session.family_id);
-    throw new ApiError(401, "TOKEN_REUSE", "Session reuse was detected; please sign in again.");
+    const rotatedAt = session.rotated_at ?? (await store.findRefresh(raw))?.rotated_at;
+    const graceMs = (config.refreshReuseGraceSeconds ?? DEFAULT_REFRESH_REUSE_GRACE) * 1000;
+    if (!rotatedAt || Date.now() - Date.parse(rotatedAt) > graceMs) {
+      await store.revokeFamily(session.family_id);
+      throw new ApiError(401, "TOKEN_REUSE", "Session reuse was detected; please sign in again.");
+    }
   }
   const user = await store.userById(session.user_id);
   if (!user) throw invalid();

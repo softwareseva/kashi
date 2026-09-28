@@ -50,12 +50,16 @@ export async function verifyRegistration(config: AuthConfig, env: AuthEnv, user:
   return { id: cred.id, deviceName: input.deviceName };
 }
 
+/** Anonymous signup creates accounts and challenge rows, so options and verify share one per-IP bucket (~10 signups / 10 min). */
+const signupRateLimit = async (c: Context, env: AuthEnv) => consumeRateLimit(env.db, `auth-pk-signup:ip:${await sha256(clientIp(c))}`, 20, 600);
+
 /**
  * Contact-free signup: options for a brand-new, anonymous account. No user exists yet, so the
  * WebAuthn ceremony gets a throwaway user handle — it is never stored, only the resulting
  * credential is, once {@link verifyAnonymousRegistration} confirms it.
  */
-export async function anonymousRegistrationOptions(config: AuthConfig, env: AuthEnv) {
+export async function anonymousRegistrationOptions(c: Context, config: AuthConfig, env: AuthEnv) {
+  await signupRateLimit(c, env);
   const { generateRegistrationOptions } = await lib();
   const { rpID, rpName } = rp(env, config);
   const anonId = crypto.randomUUID();
@@ -77,6 +81,7 @@ export async function anonymousRegistrationOptions(config: AuthConfig, env: Auth
  * or abandoned registration — there is no account to clean up.
  */
 export async function verifyAnonymousRegistration(c: Context, config: AuthConfig, env: AuthEnv, input: z.infer<typeof passkeySignupVerifySchema>): Promise<AuthUser> {
+  await signupRateLimit(c, env);
   const { verifyRegistrationResponse } = await lib();
   const store = new AuthStore(env.db);
   const challenge = await store.consumeChallenge(input.challengeId, "signup", null);

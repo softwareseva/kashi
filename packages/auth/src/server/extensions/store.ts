@@ -1,4 +1,4 @@
-/** SQL for the opt-in identity extensions (`auth_0007_identity_extensions.sql`). */
+/** SQL for the opt-in identity extensions (`auth_0007_identity_extensions.sql`, `auth_0008_identity_extensions_cascade.sql`). */
 import { nowIso, newId, sha256 } from "@softwareseva/core/server";
 
 export type BoundOtp = { id: string; code_hash: string; attempts: number; expires_at: string };
