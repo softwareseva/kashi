@@ -11,6 +11,18 @@ This repository is the source of both the `@softwareseva/*` / `kashi_*` packages
 5. Run `pnpm run check` and `flutter analyze dart` before handoff. Never publish from a working tree; releases run in CI.
 6. **Versioning is lockstep across every published package, npm and dart alike.** `@softwareseva/core`, `auth`, `ui`, `list`, `sync`, `cli` are one fixed group in `.changeset/config.json` — any changeset bumps all of them together to the same version. The `kashi_*` dart packages don't go through changesets, so when the npm group's version moves, bump every `dart/kashi_*/pubspec.yaml` and `CHANGELOG.md` by hand to the same number (even packages with no functional change — note that in the changelog) before running `scripts/release-dart.sh` for each. `@softwareseva/tokens` is exempt (private, internal-only, stays unversioned at `0.0.0`).
 
+## Extending an existing package
+
+Adding a route, component, or method to a package that already exists (not a new package — see `skills/kashi/SKILL.md`'s scaffolding conventions for that):
+
+1. Find the matching skill first (`skills/kashi/SKILL.md`'s "Pick the skill" table) and read it before writing code — it documents the layer boundaries and recipe for that package.
+2. Follow the existing layering: `web -> contracts <- routes -> services -> repositories -> D1`. No SQL in routes or services.
+3. Add the test under `test/`, mirroring the new/changed `src/` module name — don't create a parallel test structure.
+4. If the change alters documented behavior (a new param, a changed response shape, a new recipe step), update the skill's `SKILL.md` or its `templates/`/`references/` in the same change — skills drift out of sync silently otherwise.
+5. If it touches design tokens, edit `packages/tokens/tokens.json` first, mirror into `packages/ui/src/kashi.css` and `dart/kashi_ui/lib/src/tokens.dart`, then `pnpm run check:tokens`.
+6. Run `pnpm run check` (and `flutter analyze dart` for a dart-side change) before handoff.
+7. Add a changeset (`pnpm changeset`) for any published package change — remember it bumps the whole fixed group per point 6 above, not just this package.
+
 ## Layout
 
 - `packages/<name>/` npm package with `src/`, built by `tsc` to `dist/`, subpath exports declared in `package.json`.
