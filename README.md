@@ -13,7 +13,7 @@ Each feature ships as a package that bundles every layer, so one version bump up
 | Design system: tokens, primitives (light + dark) | `@softwareseva/ui` | `kashi_ui` | `kashi-ui-web`, `kashi-ui-flutter` |
 | Deploy: fastlane (iOS/Android), Cloudflare | `@softwareseva/cli` templates | | `deploy-flutter-fastlane`, `deploy-cloudflare` |
 
-Status: all six build phases are done (18 skills, 6 npm packages, 5 Flutter packages, example API, web and Flutter apps). Not yet published to npm or pub.dev. Roadmap in `skills/kashi/references/roadmap.md`.
+Status: all six build phases are done (21 skills, 6 npm packages, 5 Flutter packages, example API, web and Flutter apps). Published to npm and pub.dev at `1.3.0`. Roadmap in `skills/kashi/references/roadmap.md`.
 
 ## Use the skills
 
