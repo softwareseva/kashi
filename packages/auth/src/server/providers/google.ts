@@ -1,24 +1,9 @@
-/** Google sign-in with no SDK: web authorization-code flow with a signed state, and native ID-token verification. */
-import { sign, verify } from "hono/jwt";
+/** Google sign-in with no SDK: web authorization-code flow with browser-bound state, and native ID-token verification. */
 import type { AuthEnv } from "../types";
 
-const STATE_TYP = "google_oauth_state";
-export type OAuthState = { next: string; transport: "cookie" };
 export type GoogleProfile = { subject: string; email: string | null; emailVerified: boolean; name: string | null };
 
 export function googleConfigured(env: AuthEnv) { return Boolean(env.googleClientId && env.googleClientSecret); }
-
-export async function signOAuthState(env: AuthEnv, state: OAuthState): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  return sign({ typ: STATE_TYP, ...state, iss: env.issuer, aud: env.audience, iat: now, exp: now + 600 }, env.jwtSecret, "HS256");
-}
-
-export async function verifyOAuthState(env: AuthEnv, token: string): Promise<OAuthState | null> {
-  try {
-    const p = await verify(token, env.jwtSecret, { alg: "HS256", iss: env.issuer, aud: env.audience });
-    return p.typ === STATE_TYP && typeof p.next === "string" ? { next: p.next, transport: "cookie" } : null;
-  } catch { return null; }
-}
 
 /** Only relative paths without a scheme or `//` are accepted as post-login destinations. */
 export const safeNext = (value: string | undefined, fallback = "/") => (value && /^\/(?!\/)[A-Za-z0-9/_\-.?=&%]{0,300}$/.test(value) ? value : fallback);

@@ -1,15 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { googleAuthorizeUrl, safeNext, signOAuthState, verifyGoogleIdToken, verifyOAuthState } from "../src/server/providers/google";
+import { googleAuthorizeUrl, safeNext, verifyGoogleIdToken } from "../src/server/providers/google";
 import type { AuthEnv } from "../src/server/types";
 
 const env: AuthEnv = { db: null as never, jwtSecret: "secret", issuer: "i", audience: "a", origins: ["https://app.test"], appOrigin: "https://app.test", authUrl: "https://api.test/v1/auth", secureCookies: true, googleClientId: "cid", googleClientSecret: "cs" };
 
 describe("google", () => {
-  it("round-trips signed state and rejects tampering", async () => {
-    const token = await signOAuthState(env, { next: "/dash", transport: "cookie" });
-    expect(await verifyOAuthState(env, token)).toEqual({ next: "/dash", transport: "cookie" });
-    expect(await verifyOAuthState({ ...env, jwtSecret: "other" }, token)).toBeNull();
-  });
   it("only allows relative next paths", () => {
     expect(safeNext("/a/b?x=1")).toBe("/a/b?x=1");
     expect(safeNext("//evil.com")).toBe("/");

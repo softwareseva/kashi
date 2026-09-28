@@ -1,19 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { generateFederationKeypair } from "../src/server/federation/keys";
 import { federationJwks, signFederationIdToken } from "../src/server/providers/peer-issuer";
-import { exchangePeerCode, peerAuthorizeUrl, signPeerState, verifyPeerState } from "../src/server/providers/peer-consumer";
+import { exchangePeerCode, peerAuthorizeUrl } from "../src/server/providers/peer-consumer";
 import type { AuthEnv, AuthUser, PeerTrustConfig } from "../src/server/types";
 
 const baseEnv: AuthEnv = { db: null as never, jwtSecret: "secret", issuer: "i", audience: "a", origins: ["https://app.test"], appOrigin: "https://app.test", authUrl: "https://issuer.test/v1/auth", secureCookies: true };
 const user: AuthUser = { id: "usr_1", name: "Asha", email: "asha@example.com", phone: null, roles: ["user"], emailVerifiedAt: "2026-01-01", phoneVerifiedAt: null };
 
 describe("peer issuer", () => {
-  it("round-trips a signed peer state and rejects tampering", async () => {
-    const state = await signPeerState(baseEnv, { key: "0", next: "/dash" });
-    expect(await verifyPeerState(baseEnv, state)).toEqual({ key: "0", next: "/dash" });
-    expect(await verifyPeerState({ ...baseEnv, jwtSecret: "other" }, state)).toBeNull();
-  });
-
   it("signs an ID token verifiable with its own JWKS, scoped to the client and never using JWT_SECRET", async () => {
     const { privateJwk } = await generateFederationKeypair();
     const env: AuthEnv = { ...baseEnv, authUrl: "https://issuer-a.test/v1/auth", federationPrivateKey: JSON.stringify(privateJwk) };
