@@ -1,6 +1,6 @@
 {
   "name": "@softwareseva/sync",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Offline-first sync for Hono on Cloudflare Workers + D1: idempotent batched push of client operations with replay, and a change log with a monotonic cursor for pulling upserts and deletes per scope. Pairs with the kashi_sync Flutter package.",
   "license": "MIT",
   "repository": {

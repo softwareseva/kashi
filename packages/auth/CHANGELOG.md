@@ -1,5 +1,33 @@
 # @softwareseva/auth
 
+## 1.6.0
+
+### Minor Changes
+
+- 7d94880: `hooks.onFederationSession` now receives the issuer's verified `sid` claim as `claims.sessionId` (when the issuer adds it via `federationClaims`), so consumer sites can enforce central session revocation.
+  
+  The native `POST /peer/token` route now also calls `onFederationSession` (same order as the browser callback: `beforeSession`, hook, `onSignIn`, session), issues the session under the same family id it hands the hook, fails closed if the hook throws, and is rate limited (`peer-token`, 20 per 10 minutes per IP).
+  
+  `usePasskeySignUp` is now exported from `@softwareseva/auth/react`.
+
+### Patch Changes
+
+- ce9c4e7: `AuthStore.prune()` now also deletes expired `auth_federation_codes`, and expired `auth_bound_otp` rows when the opt-in `auth_0007` migration is applied.
+  
+  Multi-channel OTP sign-in (`otpChannels`, `POST /otp/verify`) accepts `transport` and `deviceName` like the legacy route, so native apps can get a token pair instead of cookies.
+  
+  Peer (federation) sign-in refetches the issuer's JWKS once when an ID token's `kid` isn't in the cached set, so issuer key rotation no longer fails sign-ins for up to an hour.
+  
+  `requireRecent` matches the `Authorization: Bearer` scheme case-insensitively, the same as `requireAuth`.
+- 4cb3d17: Refresh-token reuse now has a grace window: a token rotated within the last `refreshReuseGraceSeconds` (default 30) is accepted again and gets a sibling pair on the same family, so two browser tabs refreshing at once no longer revoke the session everywhere. Reuse after the window still revokes the family with `TOKEN_REUSE`. `rotateRefreshToken` now takes `(config, env, raw)`.
+  
+  Anonymous passkey sign-up (`/passkeys/signup/options` and `/verify`) is rate limited per IP (20 calls per 10 minutes, shared across both).
+  
+  New migration `auth_0008_identity_extensions_cascade.sql` rebuilds `auth_recovery_codes`, `auth_peer_sessions` and `auth_contact_aliases` with `ON DELETE CASCADE` to `auth_users`, so deleting a user no longer fails on those rows. Run `npx @softwareseva/cli migrate` and apply it.
+- 155de42: Fix two sign-in security issues: OAuth/peer sign-in `state` is now bound to a single-use, browser-scoped cookie (like the existing Google account-linking flow) instead of a bare signed JWT, closing a login-CSRF window where an attacker could hand a victim a callback URL carrying the attacker's own code and get them signed into the attacker's account; Apple's `form_post` callback cookie is now `SameSite=None; Secure` so it survives the cross-site POST. Automatic account linking by email now only trusts the `emailVerified` claim from Google and Apple — Facebook (which only reports whether an email exists, not that it verified it) and peer kashi sites now get `ACCOUNT_MERGE_REQUIRED` on a matching email instead of being silently linked to an existing local account.
+- @softwareseva/core@1.6.0
+  - @softwareseva/ui@1.6.0
+
 ## 1.5.0
 
 ### Minor Changes

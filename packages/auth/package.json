@@ -1,6 +1,6 @@
 {
   "name": "@softwareseva/auth",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Drop-in authentication for Hono on Cloudflare Workers + D1 and React: JWT access tokens with rotating refresh-token families, cookie or bearer transport, password, WhatsApp/SMS/email one-time codes, Google, Sign in with Apple, and passkeys (WebAuthn). Ships its migrations, a secrets manifest, and React sign-in components.",
   "license": "MIT",
   "repository": {
