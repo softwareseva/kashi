@@ -113,7 +113,7 @@ export type AuthHooks = {
   validateSession?: (user: AuthUser, familyId: string | undefined, c: Context, env: AuthEnv) => Promise<void>;
   /** Add app-specific claims to a federation ID token minted for `clientId` at `/federation/token`. */
   federationClaims?: (user: AuthUser, clientId: string, c: Context, env: AuthEnv) => Promise<Record<string, unknown>>;
-  /** Called once per peer sign-in (browser flow), before the local session is issued. Associate the peer identity with local state here, e.g. `ExtensionStore.linkPeer`. */
+  /** Called once per peer sign-in (browser flow), before the local session is issued. Associate the peer identity with local state here, e.g. `ExtensionStore.linkPeer`. `claims.sessionId` is the issuer's verified `sid` claim (add it on the issuer via `federationClaims`); absent when the issuer sends none. */
   onFederationSession?: (user: AuthUser, claims: { subject: string; sessionId?: string }, familyId: string, c: Context, env: AuthEnv) => Promise<void>;
 };
 

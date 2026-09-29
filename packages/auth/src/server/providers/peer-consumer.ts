@@ -3,7 +3,7 @@ import { verify } from "hono/jwt";
 import { base64UrlToBytes } from "@softwareseva/core/server";
 import type { PeerTrustConfig } from "../types";
 
-export type FederationProfile = { subject: string; email: string | null; emailVerified: boolean; name: string | null };
+export type FederationProfile = { subject: string; email: string | null; emailVerified: boolean; name: string | null; sessionId: string | null };
 type Jwk = JsonWebKey & { kid?: string };
 
 const jwksCache = new Map<string, { keys: Jwk[]; fetchedAt: number }>();
@@ -59,5 +59,7 @@ async function verifyPeerIdToken(trust: PeerTrustConfig, idToken: string, fetche
   if (payload.iss !== trust.issuer || payload.aud !== trust.clientId) throw new Error("peer_id_token_wrong_audience");
   if (typeof payload.sub !== "string") throw new Error("peer_id_token_invalid");
   const email = typeof payload.email === "string" ? payload.email.toLowerCase() : null;
-  return { subject: `${trust.issuer}|${payload.sub}`, email, emailVerified: payload.email_verified === true, name: typeof payload.name === "string" ? payload.name : null };
+  return { subject: `${trust.issuer}|${payload.sub}`, email, emailVerified: payload.email_verified === true, name: typeof payload.name === "string" ? payload.name : null,
+    // The issuer's central session id, present only when its `federationClaims` hook adds `sid`; taken from the verified payload.
+    sessionId: typeof payload.sid === "string" && payload.sid ? payload.sid : null };
 }

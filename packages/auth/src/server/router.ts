@@ -415,7 +415,7 @@ export function authRouter(config: AuthConfig): Hono<Env> {
         const user = await userForIdentity(c, config, e, "kashi", profile, trust.allowSignUp !== false);
         const familyId = crypto.randomUUID();
         const adjusted = (await config.hooks?.beforeSession?.(user, "kashi", c)) ?? user;
-        await config.hooks?.onFederationSession?.(adjusted, { subject: profile.subject }, familyId, c, e);
+        await config.hooks?.onFederationSession?.(adjusted, { subject: profile.subject, sessionId: profile.sessionId ?? undefined }, familyId, c, e);
         await config.hooks?.onSignIn?.(adjusted, "kashi", c);
         await issueSession(c, config, e, adjusted, "cookie", familyId);
         return c.redirect(`${e.appOrigin}${state.next}`);
@@ -426,14 +426,25 @@ export function authRouter(config: AuthConfig): Hono<Env> {
     // For native apps: the app opens `/peer/:key/start` in a system browser and catches the final
     // redirect itself (e.g. via a universal link on this same AUTH_URL host), then posts the code
     // here to complete the exchange — the client_secret never leaves this backend.
-    app.post("/peer/token", async (c) => {
+    app.post("/peer/token", rateLimit({ scope: "peer-token", limit: 20, windowSeconds: 600 }), async (c) => {
       const e = env(c);
       const input = peerTokenBody.parse(await c.req.json());
       const trust = trustByKey(input.key);
       if (!trust) throw new ApiError(404, "NOT_FOUND", "Unknown peer.");
       const profile = await exchangePeerCode(trust, input.code, redirectUri(e)).catch(() => { throw new ApiError(401, "OAUTH_FAILED", "Peer sign-in could not be verified."); });
       const user = await userForIdentity(c, config, e, "kashi", profile, trust.allowSignUp !== false);
-      return ok(c, await completeSignIn(c, config, e, user, "kashi", input.transport, input.deviceName));
+      // Same order as the browser callback: beforeSession, then onFederationSession, then the session.
+      // The hook gets the family id the session is issued under, and a throw aborts before any token exists (fail closed).
+      const familyId = crypto.randomUUID();
+      const adjusted = (await config.hooks?.beforeSession?.(user, "kashi", c)) ?? user;
+      try {
+        await config.hooks?.onFederationSession?.(adjusted, { subject: profile.subject, sessionId: profile.sessionId ?? undefined }, familyId, c, e);
+      } catch (error) {
+        if (error instanceof ApiError) throw error;
+        throw new ApiError(401, "OAUTH_FAILED", "Peer sign-in could not be completed.");
+      }
+      await config.hooks?.onSignIn?.(adjusted, "kashi", c);
+      return ok(c, await issueSession(c, config, e, adjusted, input.transport, familyId, input.deviceName));
     });
   }
 

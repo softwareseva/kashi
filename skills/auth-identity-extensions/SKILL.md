@@ -49,7 +49,7 @@ Three hooks on `config.hooks`, layered on top of the ones in `auth-sessions`:
 
 - `validateSession(user, familyId, c, env)` — called on every `requireAuth` request, after the local/family checks. Throw to reject a session your app considers invalid for reasons the package doesn't know about (e.g. checking a centrally-tracked session in a consumer app).
 - `federationClaims(user, clientId, c, env)` — called from `/federation/token` (see `auth-federation`); return extra claims to merge into the signed ID token. The package's own claims (`sub`, `aud`, `iss`, ...) always win over anything returned here.
-- `onFederationSession(user, claims, familyId, c, env)` — called once per peer sign-in (browser flow, `/peer/callback`), before the local session is issued. Use it to associate the peer identity with local state, typically `ExtensionStore.linkPeer(familyId, user.id, claims.subject, claims.sessionId ?? familyId)`.
+- `onFederationSession(user, claims, familyId, c, env)` — called once per peer sign-in (browser `/peer/callback` and native `/peer/token`), before the local session is issued. Use it to associate the peer identity with local state, typically `ExtensionStore.linkPeer(familyId, user.id, claims.subject, claims.sessionId ?? familyId)`. `claims.sessionId` is the issuer's signed `sid` claim; the issuer must add it through `federationClaims` (e.g. `{ sid: familyId }`), otherwise it is undefined.
 
 ## Public building blocks
 

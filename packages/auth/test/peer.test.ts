@@ -26,7 +26,7 @@ describe("peer issuer", () => {
       return fetcher(input as never);
     }) as unknown as typeof fetch;
     const profile = await exchangePeerCode(trust, "code", "https://consumer.test/v1/auth/peer/callback", combinedFetcher);
-    expect(profile).toEqual({ subject: `${env.authUrl}|usr_1`, email: "asha@example.com", emailVerified: true, name: "Asha" });
+    expect(profile).toEqual({ subject: `${env.authUrl}|usr_1`, email: "asha@example.com", emailVerified: true, name: "Asha", sessionId: null });
     expect(call).toBe(2);
   });
 
@@ -38,6 +38,20 @@ describe("peer issuer", () => {
     const fetcher = (async (input: RequestInfo | URL) =>
       String(input).endsWith("/jwks.json") ? new Response(JSON.stringify({ keys: [publicJwk] })) : new Response(JSON.stringify({ idToken }))) as unknown as typeof fetch;
     await expect(exchangePeerCode(trust, "code", "https://consumer.test/v1/auth/peer/callback", fetcher)).rejects.toThrow(/audience/);
+  });
+
+  it("surfaces the signed sid claim as sessionId, and ignores a non-string sid", async () => {
+    const { privateJwk, publicJwk } = await generateFederationKeypair();
+    const env: AuthEnv = { ...baseEnv, authUrl: "https://issuer-sid.test/v1/auth", federationPrivateKey: JSON.stringify(privateJwk) };
+    const trust: PeerTrustConfig = { issuer: env.authUrl, clientId: "cid", clientSecret: "unused-here" };
+    const run = async (extra: Record<string, unknown>) => {
+      const idToken = await signFederationIdToken(env, "cid", user, extra);
+      const fetcher = (async (input: RequestInfo | URL) =>
+        String(input).endsWith("/jwks.json") ? new Response(JSON.stringify({ keys: [publicJwk] })) : new Response(JSON.stringify({ idToken }))) as unknown as typeof fetch;
+      return exchangePeerCode(trust, "code", "https://consumer.test/v1/auth/peer/callback", fetcher);
+    };
+    expect((await run({ sid: "fam_123" })).sessionId).toBe("fam_123");
+    expect((await run({ sid: 42 })).sessionId).toBeNull();
   });
 
   it("builds the authorize url with the trusted client's id", () => {
